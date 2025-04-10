@@ -1,0 +1,21 @@
+solved:	true
+solution_length:	27
+upper_bound:	27
+solution_runtime:	4.30136
+heuristic_solution_length:	27
+heuristic_solution_runtime:	0.00191156
+heuristic_runtime:	0.0284713
+solving_forward:	false
+reduction_is_complete:	false
+reduction_quality:	0.513619
+reduction_upper_bound:	31
+reduction_runtime:	0.0163412
+mdd_memory_consumption [MB]:	0
+main_process_memory_consumption [MB]:	0
+match_ilp_solution_length:	27
+match_ilp_upper_bound:	27
+match_ilp_runtime:	4.25655
+mdd_ilp_solution_length:	27
+mdd_ilp_upper_bound:	27
+mdd_ilp_runtime:	0.272014
+solution:	[14, 10, 20, 13, 27, 8, 31, 25, 2, 28, 12, 21, 9, 7, 4, 3, 6, 11, 16, 24, 18, 22, 30, 17, 23, 29, 5, ]

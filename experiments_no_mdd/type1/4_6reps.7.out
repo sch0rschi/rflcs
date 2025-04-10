@@ -1,0 +1,21 @@
+solved:	true
+solution_length:	3
+upper_bound:	3
+solution_runtime:	0.000175836
+heuristic_solution_length:	3
+heuristic_solution_runtime:	0.000128064
+heuristic_runtime:	0.000153837
+solving_forward:	true
+reduction_is_complete:	true
+reduction_quality:	1
+reduction_upper_bound:	3
+reduction_runtime:	2.1839e-05
+mdd_memory_consumption [MB]:	0
+main_process_memory_consumption [MB]:	0
+match_ilp_solution_length:	3
+match_ilp_upper_bound:	3
+match_ilp_runtime:	1.6e-07
+mdd_ilp_solution_length:	3
+mdd_ilp_upper_bound:	3
+mdd_ilp_runtime:	6.7e-08
+solution:	[2, 1, 0, ]
