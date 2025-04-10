@@ -1,0 +1,21 @@
+solved:	true
+solution_length:	34
+upper_bound:	34
+solution_runtime:	0.00795093
+heuristic_solution_length:	34
+heuristic_solution_runtime:	0.00320535
+heuristic_runtime:	0.00750803
+solving_forward:	true
+reduction_is_complete:	true
+reduction_quality:	1
+reduction_upper_bound:	34
+reduction_runtime:	0.000442778
+mdd_memory_consumption [MB]:	0
+main_process_memory_consumption [MB]:	0
+match_ilp_solution_length:	34
+match_ilp_upper_bound:	34
+match_ilp_runtime:	1.26e-07
+mdd_ilp_solution_length:	34
+mdd_ilp_upper_bound:	34
+mdd_ilp_runtime:	6e-08
+solution:	[63, 14, 121, 49, 108, 56, 135, 3, 37, 83, 109, 118, 28, 27, 82, 50, 19, 71, 72, 20, 150, 33, 120, 46, 5, 149, 57, 17, 102, 107, 140, 36, 55, 136, ]
