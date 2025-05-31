@@ -57,7 +57,7 @@ auto get_characters_ordered_by_importance(const instance& instance) -> std::vect
 
 auto get_single_character_repetitions(const instance& instance) -> std::vector<int> {
     instance.graph->matches.back().extension.repetition_counter = std::vector(instance.alphabet_size, 0);
-    for (auto& [character, upper_bound, dom_succ_matches, _heur, extension]: instance.graph->matches
+    for (auto& [character, upper_bound, dom_succ_matches, _heur, extension, _nodes]: instance.graph->matches
              | std::views::reverse | std::views::drop(1) | std::views::take(instance.graph->matches.size() - 2)) {
         if (extension.is_active) {
             extension.repetition_counter = std::vector(instance.alphabet_size, 0);
@@ -93,7 +93,7 @@ inline auto aggregate_pairwise_max_in_first_vector(std::vector<int>& repetition_
 
 auto get_sums_of_combined_upper_bounds(const instance& instance) -> std::vector<int> {
     auto sum_of_combined_upper_bounds = std::vector(instance.alphabet_size, 0);
-    for (const auto& [character, upper_bound, _dom, _heur, extension]: instance.graph->matches
+    for (const auto& [character, upper_bound, _dom, _heur, extension, _nodes]: instance.graph->matches
              | std::views::reverse | std::views::drop(1) | std::views::take(instance.graph->matches.size() - 2)) {
         if (extension.is_active) {
             sum_of_combined_upper_bounds.at(character) += extension.combined_upper_bound;
@@ -105,7 +105,7 @@ auto get_sums_of_combined_upper_bounds(const instance& instance) -> std::vector<
 
 auto get_active_match_counters(const instance& instance) -> std::vector<int> {
     auto counters = std::vector(instance.alphabet_size, 0);
-    for (const auto& [character, upper_bound, _dom, _heur, extension]: instance.graph->matches
+    for (const auto& [character, upper_bound, _dom, _heur, extension, _nodes]: instance.graph->matches
              | std::views::reverse | std::views::drop(1) | std::views::take(instance.graph->matches.size() - 2)) {
         if (extension.is_active) {
             counters.at(character) += 1;
@@ -118,7 +118,7 @@ auto get_having_max_combined_upper_bound_counters(const instance& instance) -> s
     auto counters = std::vector(instance.alphabet_size, 0);
     auto max_combined_upper_bound = 0;
 
-    for (const auto& [character, upper_bound, _dom, _heur, extension]: instance.graph->matches
+    for (const auto& [character, upper_bound, _dom, _heur, extension, _nodes]: instance.graph->matches
              | std::views::reverse | std::views::drop(1) | std::views::take(instance.graph->matches.size() - 2)) {
         if (extension.is_active) {
             if (extension.combined_upper_bound > max_combined_upper_bound) {

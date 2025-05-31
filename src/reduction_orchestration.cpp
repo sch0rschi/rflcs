@@ -33,6 +33,7 @@
 #include <sys/resource.h>
 #include <cstdlib>
 
+#include "graph/refinement_graph.hpp"
 #include "mdd/header/mdd_reduction.hpp"
 
 void handle_threads_for_mdd_reduction(instance &instance);
@@ -86,6 +87,14 @@ void reduce_graph_pre_solver(instance &instance) {
                     << 100.0 * (1 - static_cast<double>(instance.active_matches)
                                 / static_cast<double>(instance.graph->matches.size() - 2)) << "%."
                     << std::endl;
+    }
+
+    const auto forward_mdd = create_initial_mdd(instance, true);
+    filter_mdd(instance, *forward_mdd, true, *instance.mdd_node_source);
+    initialize_refinement_graph(instance);
+    graph_refinement(instance);
+    if (IS_WRITING_DOT_FILE) {
+        write_refinement_graph(instance, "refinement_graph.dot");
     }
 
     return reduce_graph_pre_solver_by_mdd(instance);

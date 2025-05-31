@@ -100,7 +100,7 @@ inline auto set_rf_relaxed_upper_bounds(std::vector<rflcs_graph::match>& matches
 
     auto improved = false;
 
-    for (auto& [character, upper_bound, dom_succ_matches, _heur, extension]: matches | std::views::reverse | std::views::drop(1) | std::views::take(matches.size() - 2)) {
+    for (auto& [character, upper_bound, dom_succ_matches, _heur, extension, _nodes]: matches | std::views::reverse | std::views::drop(1) | std::views::take(matches.size() - 2)) {
         if (extension.is_active) {
             extension.available_characters.reset();
             extension.available_characters.set(character);

@@ -62,7 +62,7 @@ auto heuristic_solve(instance &instance) -> void {
 }
 
 void setup(const instance &instance) {
-    for (auto &[character, upper_bound, _dom, heuristic_characters, extension]: instance.graph->matches) {
+    for (auto &[character, upper_bound, _dom, heuristic_characters, extension, _nodes]: instance.graph->matches) {
         heuristic_characters = boost::dynamic_bitset<>(instance.alphabet_size);
         extension.heuristic_previous_match = nullptr;
         extension.reversed->heuristic_characters = boost::dynamic_bitset<>(instance.alphabet_size);
@@ -75,7 +75,7 @@ void setup(const instance &instance) {
 }
 
 void clear(const instance &instance) {
-    for (auto &[character, upper_bound, _dom, heuristic_characters, extension]: instance.graph->matches) {
+    for (auto &[character, upper_bound, _dom, heuristic_characters, extension, _nodes]: instance.graph->matches) {
         if (extension.is_active) {
             heuristic_characters.reset();
             extension.reversed->heuristic_characters.reset();
