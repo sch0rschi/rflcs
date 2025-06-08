@@ -72,12 +72,9 @@ absl_cc_library(
     nullability
   HDRS
     "nullability.h"
-  SRCS
-    "internal/nullability_impl.h"
   DEPS
     absl::config
     absl::core_headers
-    absl::type_traits
   COPTS
     ${ABSL_DEFAULT_COPTS}
 )
@@ -216,7 +213,6 @@ absl_cc_library(
   HDRS
     "internal/hide_ptr.h"
     "internal/identity.h"
-    "internal/inline_variable.h"
     "internal/scheduling_mode.h"
   COPTS
     ${ABSL_DEFAULT_COPTS}
@@ -421,21 +417,6 @@ absl_cc_test(
     absl::base
     absl::config
     absl::throw_delegate
-    GTest::gtest_main
-)
-
-absl_cc_test(
-  NAME
-    inline_variable_test
-  SRCS
-    "internal/inline_variable_testing.h"
-    "inline_variable_test.cc"
-    "inline_variable_test_a.cc"
-    "inline_variable_test_b.cc"
-  COPTS
-    ${ABSL_TEST_COPTS}
-  DEPS
-    absl::base_internal
     GTest::gtest_main
 )
 
@@ -685,12 +666,11 @@ absl_cc_test(
     GTest::gtest_main
 )
 
-# Internal-only target, do not depend on directly.
 absl_cc_library(
   NAME
     fast_type_id
   HDRS
-    "internal/fast_type_id.h"
+    "fast_type_id.h"
   COPTS
     ${ABSL_DEFAULT_COPTS}
   LINKOPTS
@@ -703,10 +683,11 @@ absl_cc_test(
   NAME
     fast_type_id_test
   SRCS
-    "internal/fast_type_id_test.cc"
+    "fast_type_id_test.cc"
   COPTS
     ${ABSL_TEST_COPTS}
   DEPS
+    absl::core_headers
     absl::fast_type_id
     GTest::gtest_main
 )

@@ -8,15 +8,10 @@
 
 #include "gurobi_c++.h"
 #include "absl/container/flat_hash_set.h"
-
-#include "header/graphiz_utils.hpp"
-
-
-typedef short character_type;
+#include "../types.hpp"
 
 namespace rflcs_graph {
     struct match;
-    struct refinement_node;
 
     struct match_extension {
         bool is_active = true;
@@ -35,7 +30,6 @@ namespace rflcs_graph {
         long double search_space_occurrence_estimation = 1.0;
         GRBVar gurobi_variable;
         int lcs_depth = 0;
-        refinement_node *initial_refinement_node;
     };
 
     struct match {
@@ -44,21 +38,6 @@ namespace rflcs_graph {
         std::vector<match *> dom_succ_matches = std::vector<match *>();
         boost::dynamic_bitset<> heuristic_characters;
         match_extension extension;
-        std::vector<refinement_node *> nodes = std::vector<refinement_node *>();
-    };
-
-    struct refinement_node {
-        match *match;
-        character_type character;
-        int upper_bound_up = INT_MAX;
-        int upper_bound_down = INT_MAX;
-        boost::dynamic_bitset<> characters_on_paths_to_root;
-        boost::dynamic_bitset<> characters_on_all_paths_to_root;
-        boost::dynamic_bitset<> characters_on_paths_to_some_sink;
-        boost::dynamic_bitset<> characters_on_all_paths_to_lower_bound_length;
-        std::vector<refinement_node *> predecessors = std::vector<refinement_node *>();
-        std::vector<refinement_node *> successors = std::vector<refinement_node *>();
-        Vertex vertex;
     };
 
     struct graph {

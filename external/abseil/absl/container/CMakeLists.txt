@@ -41,6 +41,7 @@ absl_cc_library(
     absl::strings
     absl::throw_delegate
     absl::type_traits
+    absl::weakly_mixed_integer
 )
 
 # Internal-only target, do not depend on directly.
@@ -132,9 +133,9 @@ absl_cc_library(
     absl::core_headers
     absl::dynamic_annotations
     absl::iterator_traits_internal
-    absl::iterator_traits_test_helper_internal
     absl::throw_delegate
     absl::memory
+    absl::weakly_mixed_integer
   PUBLIC
 )
 
@@ -150,6 +151,7 @@ absl_cc_test(
     absl::config
     absl::exception_testing
     absl::hash_testing
+    absl::iterator_traits_test_helper_internal
     absl::memory
     absl::test_allocator
     GTest::gmock_main
@@ -202,6 +204,7 @@ absl_cc_library(
     absl::throw_delegate
     absl::memory
     absl::type_traits
+    absl::weakly_mixed_integer
   PUBLIC
 )
 
@@ -540,6 +543,7 @@ absl_cc_library(
     absl::memory
     absl::meta
     absl::no_destructor
+    absl::random_random
     absl::strings
   TESTONLY
 )
@@ -579,6 +583,7 @@ absl_cc_library(
   COPTS
     ${ABSL_DEFAULT_COPTS}
   DEPS
+    absl::container_memory
     absl::common_policy_traits
     absl::meta
   PUBLIC
@@ -655,6 +660,7 @@ absl_cc_test(
   DEPS
     absl::config
     absl::hashtablez_sampler
+    absl::random_random
     GTest::gmock_main
 )
 
@@ -720,9 +726,11 @@ absl_cc_library(
     ${ABSL_DEFAULT_COPTS}
   DEPS
     absl::config
+    absl::common_policy_traits
     absl::container_memory
     absl::core_headers
     absl::raw_hash_set
+    absl::type_traits
     absl::throw_delegate
   PUBLIC
 )
@@ -737,6 +745,34 @@ absl_cc_library(
     ${ABSL_DEFAULT_COPTS}
   DEPS
     absl::type_traits
+)
+
+# Internal-only target, do not depend on directly.
+absl_cc_library(
+  NAME
+    hashtable_control_bytes
+  HDRS
+    "internal/hashtable_control_bytes.h"
+  COPTS
+    ${ABSL_DEFAULT_COPTS}
+  DEPS
+    absl::bits
+    absl::config
+    absl::core_headers
+    absl::endian
+)
+
+absl_cc_test(
+  NAME
+    hashtable_control_bytes_test
+  SRCS
+    "internal/hashtable_control_bytes_test.cc"
+  COPTS
+    ${ABSL_TEST_COPTS}
+  DEPS
+    absl::config
+    absl::hashtable_control_bytes
+    GTest::gmock_main
 )
 
 # Internal-only target, do not depend on directly.
@@ -763,14 +799,17 @@ absl_cc_library(
     absl::hash
     absl::hash_function_defaults
     absl::hash_policy_traits
+    absl::hashtable_control_bytes
     absl::hashtable_debug_hooks
     absl::hashtablez_sampler
+    absl::iterator_traits_internal
     absl::memory
     absl::meta
     absl::optional
     absl::prefetch
     absl::raw_logging_internal
     absl::utility
+    absl::weakly_mixed_integer
   PUBLIC
 )
 
@@ -795,16 +834,44 @@ absl_cc_test(
     absl::hash_policy_testing
     absl::hashtable_debug
     absl::hashtablez_sampler
+    absl::int128
     absl::log
     absl::memory
     absl::node_hash_set
     absl::optional
     absl::prefetch
+    absl::random_random
     absl::raw_hash_set
     absl::strings
     absl::test_allocator
     absl::test_instance_tracker
     absl::type_traits
+    GTest::gmock_main
+)
+
+# Internal-only target, do not depend on directly.
+absl_cc_library(
+  NAME
+    raw_hash_set_resize_impl
+  HDRS
+    "internal/raw_hash_set_resize_impl.h"
+  COPTS
+    ${ABSL_DEFAULT_COPTS}
+  DEPS
+    absl::config
+  PUBLIC
+)
+
+absl_cc_test(
+  NAME
+    raw_hash_set_resize_impl_test
+  SRCS
+    "internal/raw_hash_set_resize_impl_test.cc"
+  COPTS
+    ${ABSL_TEST_COPTS}
+  DEPS
+    absl::config
+    absl::raw_hash_set_resize_impl
     GTest::gmock_main
 )
 

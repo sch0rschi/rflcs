@@ -50,6 +50,7 @@
 #include "absl/base/optimization.h"
 #include "absl/base/port.h"
 #include "absl/container/internal/compressed_tuple.h"
+#include "absl/hash/internal/weakly_mixed_integer.h"
 #include "absl/memory/memory.h"
 
 namespace absl {
@@ -391,8 +392,7 @@ class ABSL_ATTRIBUTE_WARN_UNUSED FixedArray {
 
   template <typename H>
   friend H AbslHashValue(H h, const FixedArray& v) {
-    return H::combine(H::combine_contiguous(std::move(h), v.data(), v.size()),
-                      v.size());
+    return H::combine_contiguous(std::move(h), v.data(), v.size());
   }
 
  private:
@@ -447,7 +447,8 @@ class ABSL_ATTRIBUTE_WARN_UNUSED FixedArray {
 
    private:
     ABSL_ADDRESS_SANITIZER_REDZONE(redzone_begin_);
-    alignas(StorageElement) char buff_[sizeof(StorageElement[inline_elements])];
+    alignas(StorageElement) unsigned char buff_[sizeof(
+        StorageElement[inline_elements])];
     ABSL_ADDRESS_SANITIZER_REDZONE(redzone_end_);
   };
 
@@ -516,15 +517,6 @@ class ABSL_ATTRIBUTE_WARN_UNUSED FixedArray {
 
   Storage storage_;
 };
-
-#ifdef ABSL_INTERNAL_NEED_REDUNDANT_CONSTEXPR_DECL
-template <typename T, size_t N, typename A>
-constexpr size_t FixedArray<T, N, A>::kInlineBytesDefault;
-
-template <typename T, size_t N, typename A>
-constexpr typename FixedArray<T, N, A>::size_type
-    FixedArray<T, N, A>::inline_elements;
-#endif
 
 template <typename T, size_t N, typename A>
 void FixedArray<T, N, A>::NonEmptyInlinedStorage::AnnotateConstruct(

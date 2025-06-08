@@ -35,6 +35,8 @@ set(Tests
     stack_test
     stack_unbounded_stress_test
     tagged_ptr_test
+    spsc_value_test
+    spsc_value_stress_test
 )
 
 foreach(Test ${Tests})
@@ -57,7 +59,7 @@ foreach(Test ${Tests})
         LINK_LIBRARIES ${Libs}
         COMPILE_DEFINITIONS BOOST_TEST_NO_OLD_TOOLS
     )
-    set_target_properties( boost_lockfree-${Test} PROPERTIES CMAKE_CXX_STANDARD_REQUIRED 14)
+    set_target_properties( boost_lockfree-${Test} PROPERTIES CXX_STANDARD_REQUIRED 14)
 
     if (TARGET boost_lockfree-${Test})
         add_dependencies(boost_lockfree_all_tests boost_lockfree-${Test} )

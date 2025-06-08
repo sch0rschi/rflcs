@@ -33,8 +33,9 @@
 #include <sys/resource.h>
 #include <cstdlib>
 
-#include "graph/refinement_graph.hpp"
+#include "refinement_graph/header/refinement_graph_reduction.hpp"
 #include "mdd/header/mdd_reduction.hpp"
+#include "refinement_graph/header/refinement_graph_initialisation.hpp"
 
 void handle_threads_for_mdd_reduction(instance &instance);
 

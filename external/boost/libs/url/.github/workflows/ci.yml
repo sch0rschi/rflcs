@@ -163,19 +163,28 @@ jobs:
           mkdir "libs/$module"
           cp -r "$workspace_root"/* "libs/$module"
           
-          # Default parameters for CMake workflows
-          echo 'CMAKE_GENERATOR=${{ matrix.generator || '' }}' >> $GITHUB_ENV
-          echo 'CMAKE_GENERATOR_TOOLSET=${{ matrix.generator-toolset || '' }}' >> $GITHUB_ENV
+          # Set default parameters for CMake workflows as env variables
+          if [ ${{ matrix.compiler }} != "clang-cl" ]; then
+              # We ignore clang-cl because in this case we're using the toolset "-T ClangCL",
+              # which defaults to the clang compiler that comes with Visual Studio.
+              echo 'CC=${{ steps.setup-cpp.outputs.cc || matrix.cc || '' }}' >> $GITHUB_ENV
+              echo 'CXX=${{ steps.setup-cpp.outputs.cxx || matrix.cxx || '' }}' >> $GITHUB_ENV
+          fi
           echo 'CMAKE_BUILD_TYPE=${{ matrix.build-type || '' }}' >> $GITHUB_ENV
-          echo 'CC=${{ steps.setup-cpp.outputs.cc || matrix.cc || '' }}' >> $GITHUB_ENV
           echo 'CFLAGS=${{ (matrix.intsan && '-fsanitize=integer -fno-sanitize=unsigned-integer-overflow -fno-sanitize-recover=integer -fno-omit-frame-pointer') || (matrix.boundssan && '-fsanitize=bounds -fno-sanitize-recover=bounds -fno-omit-frame-pointer') || matrix.ccflags || '' }}' >> $GITHUB_ENV
-          echo 'CXX=${{ steps.setup-cpp.outputs.cxx || matrix.cxx || '' }}' >> $GITHUB_ENV
           echo 'CXXFLAGS=${{ (matrix.intsan && '-fsanitize=integer -fno-sanitize=unsigned-integer-overflow -fno-sanitize-recover=integer -fno-omit-frame-pointer') || (matrix.boundssan && '-fsanitize=bounds -fno-sanitize-recover=bounds -fno-omit-frame-pointer') || matrix.cxxflags || '' }}' >> $GITHUB_ENV
           echo 'CXXSTD=${{ matrix.latest-cxxstd || '' }}' >> $GITHUB_ENV
           echo 'BUILD_SHARED_LIB=${{ matrix.shared || '' }}' >> $GITHUB_ENV
           echo 'BUILD_SHARED_LIBS=${{ matrix.shared || '' }}' >> $GITHUB_ENV
           echo 'CMAKE_RUN_TESTS=true' >> $GITHUB_ENV
           echo 'CMAKE_PACKAGE=false' >> $GITHUB_ENV
+          
+          # If windows, check if ml64.exe is available
+          if [ ${{ runner.os }} == "Windows" ]; then
+              if ! command -v ml64.exe &> /dev/null; then
+                  echo "ml64.exe not found in PATH."
+              fi
+          fi
           
           # Set PATH to find Boost DLLs
           if [ ${{ matrix.shared }} == "true" ]; then
@@ -200,6 +209,8 @@ jobs:
           source-dir: ../boost-root
           build-dir: build_cmake
           build-target: tests
+          generator: ${{ matrix.generator }}
+          generator-toolset: ${{ matrix.generator-toolset }}
           install: true
           install-prefix: .local
           cmake-version: '>=3.20'
@@ -219,6 +230,8 @@ jobs:
         with:
           source-dir: ../boost-root/libs/${{ steps.patch.outputs.module }}/test/cmake_test
           build-dir: build_cmake_test
+          generator: ${{ matrix.generator }}
+          generator-toolset: ${{ matrix.generator-toolset }}
           install: false
           cmake-version: '>=3.20'
           extra-args: |
@@ -235,6 +248,8 @@ jobs:
         with:
           source-dir: .
           build-dir: build_cmake_root
+          generator: ${{ matrix.generator }}
+          generator-toolset: ${{ matrix.generator-toolset }}
           build-target: tests
           run-tests: true
           install: false
@@ -272,7 +287,7 @@ jobs:
           shared: ${{ matrix.shared }}
           coverage: ${{ matrix.coverage }}
           define: ${{ (matrix.no-threads && 'BOOST_URL_DISABLE_THREADS') || '' }}
-          warnings-as-errors: ${{ matrix.is-latest }}
+          warnings-as-errors: true
 
       - name: FlameGraph
         uses: alandefreitas/cpp-actions/flamegraph@v1.8.8

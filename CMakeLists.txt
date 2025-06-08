@@ -26,7 +26,8 @@ set(SOURCE_FILES
         src/graph/match_deactivation.cpp
         src/graph/match_metrics.cpp
         src/graph/reduce_graph.cpp
-        src/graph/refinement_graph.cpp
+        src/refinement_graph/refinement_graph_reduction.cpp
+        src/refinement_graph/refinement_graph_initialisation.cpp
         src/graph/rf_subset_lcs_relaxation.cpp
         src/graph/simple_upper_bounds.cpp
         src/heuristic.cpp
@@ -47,6 +48,12 @@ set(SOURCE_FILES
         src/result_writer.cpp
         src/solver/sequence_enumeration_solver.cpp
         src/utils.cpp
+        src/refinement_graph/refinement_graph_refinement.cpp
+        src/refinement_graph/header/refinement_graph_refinement.hpp
+        src/refinement_graph/refinement_graph_filter.cpp
+        src/refinement_graph/header/refinement_graph_filter.hpp
+        src/refinement_graph/refinement_graph_dot_writer.cpp
+        src/refinement_graph/header/refinement_graph_dot_writer.hpp
 )
 
 add_executable(rflcs ${SOURCE_FILES})

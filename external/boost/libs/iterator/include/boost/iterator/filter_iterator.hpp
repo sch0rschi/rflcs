@@ -46,6 +46,9 @@ class filter_iterator :
 {
     friend class iterator_core_access;
 
+    template< typename, typename >
+    friend class filter_iterator;
+
 private:
     using super_t = detail::filter_iterator_base_t< Predicate, Iterator >;
 
@@ -75,7 +78,7 @@ private:
 
         template< typename Pred, typename Iter >
         storage(Pred&& pred, Iter&& end) :
-            predicate_base(boost::empty_init_t{}, static_cast< Predicate&& >(pred)), m_end(static_cast< Iterator&& >(end))
+            predicate_base(boost::empty_init_t{}, static_cast< Pred&& >(pred)), m_end(static_cast< Iter&& >(end))
         {
         }
 
@@ -101,7 +104,7 @@ public:
 
     template< typename OtherIterator, typename = enable_if_convertible_t< OtherIterator, Iterator > >
     filter_iterator(filter_iterator< Predicate, OtherIterator > const& t) :
-        super_t(t.base()), m_storage(t.m_storage.predicate(), m_storage.m_end)
+        super_t(t.base()), m_storage(t.m_storage.predicate(), t.m_storage.m_end)
     {}
 
     Predicate predicate() const { return m_storage.predicate(); }

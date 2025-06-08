@@ -74,10 +74,10 @@ void create_graph(instance &instance) {
 
     auto match_counter = 0;
     for (auto &
-         [character, upper_bound, _dom, _heur, extension, _nodes]: instance.graph->matches) {
+         [character, upper_bound, _dom, _heur, extension]: instance.graph->matches) {
         extension.match_id = match_counter++;
     }
-    for (auto &[character, upper_bound, _dom, _heur, extension, _nodes]: instance.graph->reverse_matches) {
+    for (auto &[character, upper_bound, _dom, _heur, extension]: instance.graph->reverse_matches) {
         extension.match_id = match_counter++;
     }
 
@@ -103,14 +103,14 @@ void create_matches(std::vector<match> &matches,
                     const unsigned int number_of_matches,
                     const unsigned_short_matrix &next_occurrences) {
     matches.resize(number_of_matches);
-    for (auto &[character, upper_bound, _dom, _heur, extension, _nodes]: matches) {
+    for (auto &[character, upper_bound, _dom, _heur, extension]: matches) {
         extension = match_extension();
     }
-    auto &[root_character, root_upper_bound, _dom_root, _heur_root, root_extension, _root_nodes] = matches.front();
+    auto &[root_character, root_upper_bound, _dom_root, _heur_root, root_extension] = matches.front();
     root_extension.position_1 = 0;
     root_character = SHRT_MAX;
     root_extension.position_2 = 0;
-    auto &[leaf_character, leaf_upper_bound, _dom_leaf, _heur_leaf, leaf_extension, _leaf_nodes] = matches.back();
+    auto &[leaf_character, leaf_upper_bound, _dom_leaf, _heur_leaf, leaf_extension] = matches.back();
     leaf_extension.position_1 = static_cast<int>(instance.string_1.size());
     leaf_character = SHRT_MAX;
     leaf_extension.position_2 = static_cast<int>(instance.string_2.size());
@@ -120,7 +120,7 @@ void create_matches(std::vector<match> &matches,
         const auto string_character = string_1.at(position_1);
         auto const start_position_2 = next_occurrences[string_character];
         for (short position_2 = start_position_2; position_2 < static_cast<int>(instance.string_2.size()); match_counter++) {
-            auto &[character, upper_bound, _dom, _heur, extension, _nodes] = matches.at(match_counter);
+            auto &[character, upper_bound, _dom, _heur, extension] = matches.at(match_counter);
             character = string_character;
             extension.position_1 = position_1;
             extension.position_2 = position_2;

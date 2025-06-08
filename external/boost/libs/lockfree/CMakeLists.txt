@@ -22,6 +22,7 @@ target_include_directories(boost_lockfree INTERFACE include)
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.23 AND BOOST_LOCKFREE_USE_FILE_SET)
     set(Headers
         include/boost/lockfree/spsc_queue.hpp
+        include/boost/lockfree/spsc_value.hpp
         include/boost/lockfree/policies.hpp
         include/boost/lockfree/queue.hpp
         include/boost/lockfree/lockfree_forward.hpp
@@ -41,7 +42,7 @@ if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.23 AND BOOST_LOCKFREE_USE_FILE_SET)
 endif()
 
 target_compile_features(boost_lockfree INTERFACE cxx_std_14)
-set_target_properties( boost_lockfree PROPERTIES CMAKE_CXX_STANDARD_REQUIRED 14)
+set_target_properties( boost_lockfree PROPERTIES CXX_STANDARD_REQUIRED 14)
 
 target_link_libraries(boost_lockfree
   INTERFACE

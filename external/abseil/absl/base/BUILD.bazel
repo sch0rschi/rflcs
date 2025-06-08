@@ -82,14 +82,12 @@ cc_library(
 
 cc_library(
     name = "nullability",
-    srcs = ["internal/nullability_impl.h"],
     hdrs = ["nullability.h"],
     copts = ABSL_DEFAULT_COPTS,
     linkopts = ABSL_DEFAULT_LINKOPTS,
     deps = [
         ":config",
         ":core_headers",
-        "//absl/meta:type_traits",
     ],
 )
 
@@ -230,7 +228,6 @@ cc_library(
     hdrs = [
         "internal/hide_ptr.h",
         "internal/identity.h",
-        "internal/inline_variable.h",
         "internal/scheduling_mode.h",
     ],
     copts = ABSL_DEFAULT_COPTS,
@@ -463,24 +460,6 @@ cc_test(
     ],
 )
 
-cc_test(
-    name = "inline_variable_test",
-    size = "small",
-    srcs = [
-        "inline_variable_test.cc",
-        "inline_variable_test_a.cc",
-        "inline_variable_test_b.cc",
-        "internal/inline_variable_testing.h",
-    ],
-    copts = ABSL_TEST_COPTS,
-    linkopts = ABSL_DEFAULT_LINKOPTS,
-    deps = [
-        ":base_internal",
-        "@googletest//:gtest",
-        "@googletest//:gtest_main",
-    ],
-)
-
 # Common test library made available for use in non-absl code that overrides
 # AbslInternalSpinLockDelay and AbslInternalSpinLockWake.
 cc_library(
@@ -560,6 +539,9 @@ cc_library(
     ],
     copts = ABSL_DEFAULT_COPTS,
     linkopts = ABSL_DEFAULT_LINKOPTS,
+    visibility = [
+        "//absl:__subpackages__",
+    ],
     deps = [
         ":base",
         ":config",
@@ -702,7 +684,6 @@ cc_test(
 
 cc_test(
     name = "thread_identity_test",
-    size = "small",
     srcs = ["internal/thread_identity_test.cc"],
     copts = ABSL_TEST_COPTS,
     linkopts = ABSL_DEFAULT_LINKOPTS,
@@ -718,8 +699,9 @@ cc_test(
     ],
 )
 
-cc_test(
+cc_binary(
     name = "thread_identity_benchmark",
+    testonly = True,
     srcs = ["internal/thread_identity_benchmark.cc"],
     copts = ABSL_TEST_COPTS,
     linkopts = ABSL_DEFAULT_LINKOPTS,
@@ -729,7 +711,6 @@ cc_test(
         ":base",
         "//absl/synchronization",
         "@google_benchmark//:benchmark_main",
-        "@googletest//:gtest",
     ],
 )
 
@@ -738,6 +719,7 @@ cc_library(
     testonly = True,
     srcs = ["internal/scoped_set_env.cc"],
     hdrs = ["internal/scoped_set_env.h"],
+    copts = ABSL_DEFAULT_COPTS,
     linkopts = ABSL_DEFAULT_LINKOPTS,
     visibility = [
         "//absl:__subpackages__",
@@ -823,12 +805,9 @@ cc_binary(
 
 cc_library(
     name = "fast_type_id",
-    hdrs = ["internal/fast_type_id.h"],
+    hdrs = ["fast_type_id.h"],
     copts = ABSL_DEFAULT_COPTS,
     linkopts = ABSL_DEFAULT_LINKOPTS,
-    visibility = [
-        "//absl:__subpackages__",
-    ],
     deps = [
         ":config",
     ],
@@ -837,10 +816,11 @@ cc_library(
 cc_test(
     name = "fast_type_id_test",
     size = "small",
-    srcs = ["internal/fast_type_id_test.cc"],
+    srcs = ["fast_type_id_test.cc"],
     copts = ABSL_TEST_COPTS,
     linkopts = ABSL_DEFAULT_LINKOPTS,
     deps = [
+        ":core_headers",
         ":fast_type_id",
         "@googletest//:gtest",
         "@googletest//:gtest_main",

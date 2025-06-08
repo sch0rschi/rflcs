@@ -11,7 +11,9 @@
 #include <deque>
 #include <random>
 
-using unsigned_short_matrix = short*;
+#include "refinement_graph/refinement_graph.hpp"
+
+using unsigned_short_matrix = short *;
 
 struct instance {
     std::string path;
@@ -37,10 +39,10 @@ struct instance {
     std::chrono::time_point<std::chrono::system_clock> heuristic_end;
     std::chrono::time_point<std::chrono::system_clock> reduction_end;
     std::chrono::time_point<std::chrono::system_clock> end;
-    std::vector<rflcs_graph::match*> active_match_pointers = std::vector<rflcs_graph::match*>();
+    std::vector<refinement_match *> active_refinement_match_pointers = std::vector<refinement_match *>();
     int active_matches = INT_MAX;
     int input_validity_code = 0;
-    shared_object* shared_object;
+    shared_object *shared_object;
 
     int reduction_upper_bound = 0;
 
