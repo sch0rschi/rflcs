@@ -25,7 +25,6 @@ void update_refinement_graph(const instance &instance) {
                 static_cast<int>(refinement_node_to_update->characters_on_paths_to_root.count()));
         }
     }
-    write_refinement_graph(instance, "refinement_graph_current.dot");
 
     for (const auto refinement_match: instance.active_refinement_match_pointers | std::views::reverse) {
         for (const auto refinement_node_to_update_node: refinement_match->refinement_nodes) {
@@ -67,6 +66,4 @@ void update_refinement_graph(const instance &instance) {
                 static_cast<int>(combined_characters.count()));
         }
     }
-    write_refinement_graph(instance, "refinement_graph_current.dot");
-    int i = 0;
 }

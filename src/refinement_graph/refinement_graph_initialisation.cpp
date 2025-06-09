@@ -39,7 +39,20 @@ void initialize_refinement_graph(instance &instance) {
         instance.active_refinement_match_pointers.push_back(new_match);
     }
     std::ranges::reverse(instance.active_refinement_match_pointers);
-    instance.active_refinement_match_pointers.front()->refinement_nodes.front()->upper_bound_up = 0;
+    const auto root_refinement_node = instance.active_refinement_match_pointers.front()->refinement_nodes.front();
+
+    root_refinement_node->upper_bound_up = 0;
+    std::ranges::sort(root_refinement_node->successors, [](const refinement_node *refinement_node_1, const refinement_node *refinement_node_2) {
+                    return refinement_node_1->refinement_match->position_1 < refinement_node_2->refinement_match->position_1;
+                });
+    int max_position_2 = INT_MAX;
+    for (const auto successor: std::vector(root_refinement_node->successors)) {
+        if (successor->refinement_match->position_2 > max_position_2) {
+            root_refinement_node->unlink_from_successor(successor);
+        } else {
+            max_position_2 = std::min(max_position_2, successor->refinement_match->position_2);
+        }
+    }
     filter_refinement_graph(instance);
     write_refinement_graph(instance, "refinement_graph_initial.dot");
 }

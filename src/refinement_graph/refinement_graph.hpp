@@ -85,7 +85,7 @@ struct refinement_node {
         }
     }
 
-    void unlink_from_succ(refinement_node* succ) {
+    void unlink_from_successor(refinement_node* succ) {
         std::erase(succ->predecessors, this);
         std::erase(this->successors, succ);
     }
