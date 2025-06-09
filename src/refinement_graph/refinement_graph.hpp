@@ -20,6 +20,7 @@ struct refinement_node {
     refinement_match *refinement_match;
     int upper_bound_up = INT_MAX;
     int upper_bound_down = INT_MAX;
+    int upper_bound = INT_MAX;
     boost::dynamic_bitset<> characters_on_paths_to_root;
     boost::dynamic_bitset<> characters_on_all_paths_to_root;
     boost::dynamic_bitset<> characters_on_paths_to_some_sink;

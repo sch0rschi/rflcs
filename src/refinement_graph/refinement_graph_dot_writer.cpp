@@ -22,7 +22,10 @@ void write_refinement_graph(const instance &instance, const std::string &filenam
                 + bitset_to_index_set(node->characters_on_paths_to_root) + " "
                 + bitset_to_index_set(node->characters_on_paths_to_some_sink) + "\n"
                 + bitset_to_index_set(node->characters_on_all_paths_to_root) + " "
-                + bitset_to_index_set(node->characters_on_all_paths_to_lower_bound_length),
+                + bitset_to_index_set(node->characters_on_all_paths_to_lower_bound_length) + "\n"
+                + std::to_string(node->upper_bound) + " "
+                + std::to_string(node->upper_bound_up) + " "
+                + std::to_string(node->upper_bound_down),
                 graph);
             for (const auto succ: node->successors) {
                 boost::add_edge(vertex_map[node], vertex_map[succ], graph);

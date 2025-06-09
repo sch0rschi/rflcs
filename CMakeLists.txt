@@ -54,6 +54,10 @@ set(SOURCE_FILES
         src/refinement_graph/header/refinement_graph_filter.hpp
         src/refinement_graph/refinement_graph_dot_writer.cpp
         src/refinement_graph/header/refinement_graph_dot_writer.hpp
+        src/refinement_graph/refinement_graph_pruning.cpp
+        src/refinement_graph/header/refinement_graph_pruning.hpp
+        src/refinement_graph/refinement_graph_update.cpp
+        src/refinement_graph/header/refinement_graph_update.hpp
 )
 
 add_executable(rflcs ${SOURCE_FILES})

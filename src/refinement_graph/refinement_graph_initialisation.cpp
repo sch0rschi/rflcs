@@ -39,6 +39,7 @@ void initialize_refinement_graph(instance &instance) {
         instance.active_refinement_match_pointers.push_back(new_match);
     }
     std::ranges::reverse(instance.active_refinement_match_pointers);
+    instance.active_refinement_match_pointers.front()->refinement_nodes.front()->upper_bound_up = 0;
     filter_refinement_graph(instance);
     write_refinement_graph(instance, "refinement_graph_initial.dot");
 }
