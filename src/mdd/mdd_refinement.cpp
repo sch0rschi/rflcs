@@ -31,6 +31,8 @@ void refine_mdd_level(const level_type &level,
     for (const auto node: nodes) {
         if (node->characters_on_paths_to_root.test(split_character)
             && node->characters_on_paths_to_some_sink.test(split_character)) {
+            static long counter = 0;
+            std::cout << counter++ << std::endl;
             split_node(node, split_character, level, instance, mdd_node_source);
         }
     }

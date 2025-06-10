@@ -2,6 +2,7 @@
 #include "../graph/match_loop_utils.h"
 #include "header/refinement_graph_filter.hpp"
 #include "header/refinement_graph_reduction.hpp"
+#include "header/refinement_graph_update.hpp"
 
 void initialize_refinement_graph(instance &instance) {
     absl::flat_hash_map<const rflcs_graph::match *, refinement_node *> refinement_nodes_map;
@@ -27,6 +28,11 @@ void initialize_refinement_graph(instance &instance) {
             new_node->characters_on_all_paths_to_root.set(match.character);
             new_node->characters_on_paths_to_some_sink.reset(match.character);
             new_node->characters_on_all_paths_to_lower_bound_length.reset(match.character);
+            new_node->upper_bound_up = match.extension.reversed->upper_bound;
+            new_node->upper_bound_down = 0;
+            for (const auto succ_match : match.dom_succ_matches) {
+                new_node->upper_bound_down = std::max(new_node->upper_bound_down, succ_match->upper_bound);
+            }
         }
 
         for (const auto *succ: match.extension.succ_matches) {
@@ -53,6 +59,8 @@ void initialize_refinement_graph(instance &instance) {
             max_position_2 = std::min(max_position_2, successor->refinement_match->position_2);
         }
     }
+    update_refinement_graph(instance);
+    write_refinement_graph(instance, "refinement_graph_initial_unfiltered.dot");
     filter_refinement_graph(instance);
     write_refinement_graph(instance, "refinement_graph_initial.dot");
 }

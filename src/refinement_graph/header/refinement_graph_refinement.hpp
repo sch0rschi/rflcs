@@ -3,6 +3,6 @@
 
 #include "../../instance.hpp"
 
-void refine_graph_by_character(const instance &instance, character_type refinement_character);
+void refine_graph_by_character(instance &instance, character_type refinement_character);
 
 #endif

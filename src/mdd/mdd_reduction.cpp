@@ -22,16 +22,16 @@ inline bool is_power_of_2(const int n) {
     return n > 0 && (n & n - 1) == 0;
 }
 
-bool is_perfect_square(int n) {
-    if (n <= 0) return false; // Negative numbers are not perfect squares
-    int sqrt_n = static_cast<int>(std::sqrt(n));
+bool is_perfect_square(const int n) {
+    if (n <= 0) return false;
+    const int sqrt_n = static_cast<int>(std::sqrt(n));
     return sqrt_n * sqrt_n == n;
 }
 
-void add_counts(mdd &mdd_reduction, std::vector<long> &time_series_node_count, std::vector<long> &time_series_edge_count) {
+void add_counts(const mdd &mdd_reduction, std::vector<long> &time_series_node_count, std::vector<long> &time_series_edge_count) {
     auto node_count = 0l;
     auto edge_count = 0l;
-    for (auto &level: *mdd_reduction.levels) {
+    for (const auto &level: *mdd_reduction.levels) {
         node_count += static_cast<long>(level->nodes->size());
         for (const auto node: *level->nodes) {
             edge_count += static_cast<long>(node->arcs_out.size());
@@ -57,20 +57,6 @@ void reduce_by_mdd(instance &instance) {
 
     instance.shared_object->number_of_refined_characters = 0;
 
-    std::cout << "First character selection started." << std::endl;
-    auto characters_ordered_by_importance = std::vector<character_type>(instance.alphabet_size);
-    std::iota(characters_ordered_by_importance.begin(), characters_ordered_by_importance.end(), 0);
-    boost::timer::progress_display progress(instance.alphabet_size);
-    get_characters_ordered_by_importance_mdd(instance,
-                                             *mdd_reduction,
-                                             *mdd_node_source,
-                                             *character_counters_source,
-                                             characters_ordered_by_importance, &progress);
-    std::cout << "First character selection done." << std::endl;
-    std::ranges::for_each(std::ranges::take_view(characters_ordered_by_importance, 20),
-                          [](const int num) { std::cout << num << ", "; });
-    std::cout << "..." << std::endl;
-
     auto time_series_node_count = std::vector<long>();
     auto time_series_edge_count = std::vector<long>();
 
@@ -79,29 +65,7 @@ void reduce_by_mdd(instance &instance) {
     }
 
     instance.shared_object->number_of_refined_characters = 0;
-    for (int refinement_character_index: std::views::iota(0, instance.alphabet_size)) {
-        if (is_power_of_2(refinement_character_index)) {
-            const auto start = std::clamp(refinement_character_index,
-                                          0,
-                                          static_cast<int>(characters_ordered_by_importance.size()));
-            // const auto end = characters_ordered_by_importance.size();
-            const auto end = std::clamp(3 * refinement_character_index,
-                                        0,
-                                        static_cast<int>(characters_ordered_by_importance.size()));
-            auto sub_characters = std::vector(characters_ordered_by_importance.begin() + start,
-                                              characters_ordered_by_importance.begin() + end);
-
-            prune_by_flat_mdd(instance.shared_object, *mdd_character_selection, *mdd_node_source);
-            get_characters_ordered_by_importance_mdd(instance,
-                                                     *mdd_character_selection,
-                                                     *mdd_node_source,
-                                                     *character_counters_source,
-                                                     sub_characters,
-                                                     nullptr);
-            std::ranges::copy(sub_characters.begin(), sub_characters.end(),characters_ordered_by_importance.begin() + start);
-        }
-
-        auto split_character = characters_ordered_by_importance[refinement_character_index];
+    for (int split_character: std::views::iota(0, instance.alphabet_size)) {
         refine_mdd(instance, *mdd_reduction, split_character, *mdd_node_source);
         filter_mdd(instance, *mdd_reduction, true, *mdd_node_source);
         instance.shared_object->number_of_refined_characters++;

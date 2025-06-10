@@ -102,6 +102,11 @@ auto main(const int argc, char **argv) -> int {
         delete instance->next_occurrences_1;
         delete instance->next_occurrences_2;
 
+        if (!instance->active_refinement_match_pointers.empty()
+            && !instance->active_refinement_match_pointers.front()->refinement_nodes.empty()) {
+            std::cout << instance->active_refinement_match_pointers.front()->refinement_nodes.front()->upper_bound << " " << instance->refinement_graph_refinement_count << std::endl;
+        }
+
         return 0;
     } catch (std::exception &e) {
         std::cerr << e.what() << std::endl;

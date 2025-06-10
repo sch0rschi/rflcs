@@ -53,6 +53,9 @@ struct instance {
     int mdd_ilp_upper_bound = 0;
     int mdd_ilp_solution = 0;
     std::chrono::time_point<std::chrono::system_clock> mdd_ilp_end;
+
+    long refinement_graph_refinement_count = 0;
+    long mdd_refinement_count = 0;
 };
 
 #endif
