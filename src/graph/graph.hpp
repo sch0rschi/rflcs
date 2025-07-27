@@ -1,5 +1,4 @@
-#ifndef RFLCS_GRAPH_H
-#define RFLCS_GRAPH_H
+#pragma once
 
 #include <climits>
 #include <vector>
@@ -50,5 +49,3 @@ namespace rflcs_graph {
         return first->extension.position_1 < second->extension.position_1;
     }
 }
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef CONFIG_HPP
-#define CONFIG_HPP
+#pragma once
 
 #include <string_view>
 
@@ -21,5 +20,3 @@ constexpr bool IS_WRITING_DOT_FILE = false;
 constexpr bool IS_WRITING_TIME_SERIES = false;
 constexpr Solver SOLVER = MULTI;
 constexpr int HEURISTIC_SOLUTION_DECREMENTER = 0;
-
-#endif

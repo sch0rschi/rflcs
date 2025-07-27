@@ -1,8 +1,5 @@
-#ifndef RFLCS_SEQUENCE_ENUMERATION_SOLVER_H
-#define RFLCS_SEQUENCE_ENUMERATION_SOLVER_H
+#pragma once
 
 #include "../instance.hpp"
 
 void solve_enumeration(instance &instance);
-
-#endif

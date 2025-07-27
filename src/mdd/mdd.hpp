@@ -1,10 +1,8 @@
-#ifndef RFLCS_MDD_HPP
-#define RFLCS_MDD_HPP
+#pragma once
 
 #include "mdd_node_source.hpp"
 #include "mdd_levels.hpp"
 #include "header/character_counters_source.hpp"
-#include <absl/container/flat_hash_map.h>
 
 #include <memory>
 
@@ -43,4 +41,3 @@ inline std::unique_ptr<mdd> mdd::copy_mdd(const mdd &original_mdd, mdd_node_sour
     return copy_mdd;
 }
 
-#endif

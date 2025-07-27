@@ -1,5 +1,4 @@
-#ifndef RFLCS_INSTANCE_HPP
-#define RFLCS_INSTANCE_HPP
+#pragma once
 
 #include "graph/graph.hpp"
 #include "mdd/mdd.hpp"
@@ -9,6 +8,7 @@
 #include <memory>
 #include <chrono>
 #include <deque>
+#include <random>
 
 using unsigned_short_matrix = short*;
 
@@ -50,5 +50,3 @@ struct instance {
     int mdd_ilp_solution = 0;
     std::chrono::time_point<std::chrono::system_clock> mdd_ilp_end;
 };
-
-#endif

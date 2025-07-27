@@ -1,5 +1,4 @@
-#ifndef MDD_LEVELS_HPP
-#define MDD_LEVELS_HPP
+#pragma once
 
 #include "mdd_node.hpp"
 
@@ -16,5 +15,3 @@ struct level_type {
 };
 
 typedef std::vector<std::unique_ptr<level_type>> levels_type;
-
-#endif

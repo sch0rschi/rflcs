@@ -1,8 +1,5 @@
-#ifndef RFLCS_RESULT_WRITER_H
-#define RFLCS_RESULT_WRITER_H
+#pragma once
 
 #include "instance.hpp"
 
 void write_result_file(const instance &instance);
-
-#endif

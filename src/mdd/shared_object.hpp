@@ -1,5 +1,4 @@
-#ifndef RFLCS_FLAT_MDD_H
-#define RFLCS_FLAT_MDD_H
+#pragma once
 
 #include "mdd.hpp"
 
@@ -45,5 +44,3 @@ struct shared_object {
     size_t num_levels = INT_MAX;
     flat_level flat_levels[];
 };
-
-#endif

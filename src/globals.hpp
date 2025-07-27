@@ -1,5 +1,5 @@
-#ifndef GLOBALS_HPP
-#define GLOBALS_HPP
+#pragma once
+
 #include <bitset>
 #include <vector>
 
@@ -19,5 +19,3 @@ struct globals {
     static std::vector<long> ingoing_arc_character_count;
     static std::vector<int> int_vector_positions_2;
 };
-
-#endif

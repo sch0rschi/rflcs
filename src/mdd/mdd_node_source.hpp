@@ -1,5 +1,4 @@
-#ifndef MDD_NODE_SOURCE_HPP
-#define MDD_NODE_SOURCE_HPP
+#pragma once
 
 #include "mdd_node.hpp"
 #include <algorithm>
@@ -116,5 +115,3 @@ public:
         cache.clear();
     }
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef CHARACTER_COUNTERS_SOURCE_HPP
-#define CHARACTER_COUNTERS_SOURCE_HPP
+#pragma once
 
 #include <vector>
 
@@ -31,5 +30,3 @@ public:
         delete cache;
     }
 };
-
-#endif

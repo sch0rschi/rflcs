@@ -1,5 +1,4 @@
-#ifndef MDD_NODE_HPP
-#define MDD_NODE_HPP
+#pragma once
 
 #include "../graph/graph.hpp"
 
@@ -220,5 +219,3 @@ inline void node::deactivate() {
     }
     this->is_active = false;
 }
-
-#endif
