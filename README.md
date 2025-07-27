@@ -30,7 +30,6 @@ Before building, make sure the following environment variables are set and cmake
 |---------------|-----------------------------------------------|----------------------------------------------------------------------------------------------------------------|
 | `GUROBI_HOME` | Root path to Gurobi installation              | `/opt/gurobi1200/linux64` or `/Library/gurobi1201/macos_universal2`                                            |
 | `GUROBI_LIB`  | Root path to Gurobi lib                       | `/opt/gurobi1200/linux64/lib/libgurobi120.so` or `/Library/gurobi1201/macos_universal2/lib/libgurobi120.dylib` |
-
 ---
 
 ## 🛠️ Build Instructions
@@ -44,18 +43,18 @@ cd rflcs
 
 ### Build the Project
 
-#### Classic build
+#### A standard build produces 11 executables for maximum alphabet sizes 4, 8, 16, ... 4096 
 ```bash
-cmake -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build
-cp build/rflcs ./rflcs
+cmake -B build -G Ninja
+ninja -C build
+cp build/rflcs_* .
 ```
 
-#### Fast build with Ninja
+#### The maximum alphabet size can be overridden with 
 ```bash
-cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake -B build -G Ninja -DCHARACTER_SET_SIZE=768
 ninja -C build
-cp build/rflcs ./rflcs
+cp build/rflcs_* .
 ```
 
 ## 🚀 Run instructions
@@ -64,15 +63,10 @@ cp build/rflcs ./rflcs
 ./rflcs -i path/to/instance
 ```
 
-e.g. one instance ⚡
+e.g. one instance with an alphabet size of 1024 ⚡
 
 ```bash
-./rflcs -i ./RFLCS_instances/type0/4096_n-div-4.0
-```
-
-or all instances ⏱️
-```bash
-find ./RFLCS_instances/**/* -type f -exec ./rflcs -i {} \;
+./rflcs_1024 -i ./RFLCS_instances/type0/4096_n-div-4.0
 ```
 
 ---

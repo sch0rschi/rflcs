@@ -3,6 +3,10 @@
 
 #include <string_view>
 
+#ifndef CHARACTER_SET_SIZE
+#define CHARACTER_SET_SIZE 512
+#endif
+
 enum Solver {
     GUROBI_GRAPH,
     GUROBI_MDD,

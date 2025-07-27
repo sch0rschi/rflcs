@@ -54,6 +54,5 @@ auto deactivate_matches(instance &instance) -> bool {
 }
 
 void release_smart_pointers(rflcs_graph::match &match) {
-    match.extension.available_characters.resize(0);
     match.extension.repetition_counter.clear();
 }

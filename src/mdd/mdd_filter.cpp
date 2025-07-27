@@ -168,7 +168,7 @@ inline bool filter_succ_edges_of_node(const instance &instance, const level_type
         const bool repetition_free_conflict = globals::temp_character_set_2.any();
         globals::temp_character_set_1 = succ->characters_on_paths_to_some_sink;
         globals::temp_character_set_1.set(succ->match->character);
-        globals::temp_character_set_1 -= node.characters_on_all_paths_to_root;
+        globals::temp_character_set_1 &= ~node.characters_on_all_paths_to_root;
         const bool too_many_characters_already_taken =
                 level.depth + static_cast<int>(globals::temp_character_set_1.count()) <= instance.lower_bound;
         const bool is_dominated = dominated_by_some_available_but_unused_character(

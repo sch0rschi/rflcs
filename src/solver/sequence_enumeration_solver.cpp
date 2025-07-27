@@ -41,7 +41,7 @@ void solve_enumeration(instance &instance) {
     }
 
     int depth = 0;
-    auto used_characters = boost::dynamic_bitset<>(instance.alphabet_size);
+    auto used_characters = std::bitset<CHARACTER_SET_SIZE>();
     used_characters.reset();
     flat_node *current_node;
     while (stack_pointer >= 0) {

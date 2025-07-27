@@ -4,8 +4,8 @@
 
 bool are_enough_characters_available(const int lower_bound,
                                      const int depth,
-                                     const boost::dynamic_bitset<>& pred_available_characters,
-                                     const boost::dynamic_bitset<>& succ_available_characters) {
+                                     const std::bitset<CHARACTER_SET_SIZE>& pred_available_characters,
+                                     const std::bitset<CHARACTER_SET_SIZE>& succ_available_characters) {
     const auto current_size = pred_available_characters.count();
     globals::temp_character_set_1 = pred_available_characters;
     globals::temp_character_set_1 &= succ_available_characters;

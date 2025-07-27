@@ -2,12 +2,12 @@
 #define RFLCS_GRAPH_H
 
 #include <climits>
-#include <memory>
 #include <vector>
 
-#include <boost/dynamic_bitset.hpp>
+#include <bitset>
 
 #include "gurobi_c++.h"
+#include "../config.hpp"
 
 typedef short character_type;
 
@@ -23,7 +23,7 @@ namespace rflcs_graph {
         std::vector<match *> succ_matches = std::vector<match *>();
         std::vector<int> rf_relaxed_upper_bounds = std::vector<int>();
         match* heuristic_previous_match;
-        boost::dynamic_bitset<> available_characters;
+        std::bitset<CHARACTER_SET_SIZE> available_characters;
         std::vector<int> repetition_counter;
         int position_1;
         int position_2;
@@ -37,7 +37,7 @@ namespace rflcs_graph {
         character_type character = -1;
         int upper_bound = INT_MAX; // including this character
         std::vector<match *> dom_succ_matches = std::vector<match *>();
-        boost::dynamic_bitset<> heuristic_characters;
+        std::bitset<CHARACTER_SET_SIZE> heuristic_characters;
         match_extension extension;
     };
 

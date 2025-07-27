@@ -46,12 +46,12 @@ auto main(const int argc, char **argv) -> int {
         }
 
         globals::alphabet_size = instance->alphabet_size;
-        globals::temp_character_set_1 = boost::dynamic_bitset<>(instance->alphabet_size);
-        globals::temp_character_set_2 = boost::dynamic_bitset<>(instance->alphabet_size);
-        globals::old_characters_on_paths_to_some_sink = boost::dynamic_bitset<>(instance->alphabet_size);
-        globals::old_characters_on_all_paths_to_lower_bound_levels = boost::dynamic_bitset<>(instance->alphabet_size);
-        globals::old_characters_on_paths_to_root = boost::dynamic_bitset<>(instance->alphabet_size);
-        globals::old_characters_on_all_paths_to_root = boost::dynamic_bitset<>(instance->alphabet_size);
+        globals::temp_character_set_1 = std::bitset<CHARACTER_SET_SIZE>();
+        globals::temp_character_set_2 = std::bitset<CHARACTER_SET_SIZE>();
+        globals::old_characters_on_paths_to_some_sink = std::bitset<CHARACTER_SET_SIZE>();
+        globals::old_characters_on_all_paths_to_lower_bound_levels = std::bitset<CHARACTER_SET_SIZE>();
+        globals::old_characters_on_paths_to_root = std::bitset<CHARACTER_SET_SIZE>();
+        globals::old_characters_on_all_paths_to_root = std::bitset<CHARACTER_SET_SIZE>();
         globals::chaining_numbers = std::vector<int>(instance->alphabet_size);
         globals::node_character_count = std::vector<long>(instance->alphabet_size);
         globals::ingoing_arc_character_count = std::vector<long>(instance->alphabet_size);
