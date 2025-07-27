@@ -6,6 +6,7 @@
 
 #include "gurobi_c++.h"
 #include "../config.hpp"
+#include "absl/container/flat_hash_map.h"
 
 void set_solution_from_graph(::instance &instance, const std::set<rflcs_graph::match *> &matches);
 

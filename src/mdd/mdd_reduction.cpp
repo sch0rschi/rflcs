@@ -12,6 +12,7 @@
 #include "../config.hpp"
 #include <iostream>
 #include <fstream>
+#include <ranges>
 
 void make_only_one_best_solution_remaining(
     const instance &instance,
