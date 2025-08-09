@@ -9,7 +9,28 @@ add_compile_options(-Wno-unknown-pragmas)
 add_compile_options(-Wno-c99-extensions)
 add_compile_options(-Wno-flexible-array-extensions)
 
-add_subdirectory(external/boost)
+add_library(boost_dynamic_bitset INTERFACE)
+target_include_directories(boost_dynamic_bitset INTERFACE
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/dynamic_bitset/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/config/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/static_assert/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/assert/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/core/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/integer/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/type_traits/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/functional/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/move/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/throw_exception/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/container_hash/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/describe/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/mp11/include
+)
+
+add_library(boost_timer INTERFACE)
+target_include_directories(boost_timer INTERFACE
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/timer/include
+)
+
 add_subdirectory(external/abseil)
 
 if (DEFINED ENV{GUROBI_HOME} AND DEFINED ENV{GUROBI_LIB})
@@ -61,8 +82,8 @@ foreach(CHARACTER_SET_SIZE IN LISTS CHARACTER_SET_SIZES)
     target_link_libraries("rflcs_${CHARACTER_SET_SIZE}"
             absl::flat_hash_set
             absl::flat_hash_map
-            Boost::dynamic_bitset
-            Boost::timer
+            boost_dynamic_bitset
+            boost_timer
             $ENV{GUROBI_LIB}
             $ENV{GUROBI_HOME}/lib/libgurobi_c++.a
     )

@@ -1,6 +1,45 @@
 [submodule "external/abseil"]
 	path = external/abseil
 	url = https://github.com/abseil/abseil-cpp.git
-[submodule "external/boost"]
-	path = external/boost
-	url = https://github.com/boostorg/boost.git
+[submodule "external/boost/dynamic_bitset"]
+	path = external/boost/dynamic_bitset
+	url = https://github.com/boostorg/dynamic_bitset.git
+[submodule "external/boost/timer"]
+	path = external/boost/timer
+	url = https://github.com/boostorg/timer.git
+[submodule "external/boost/config"]
+	path = external/boost/config
+	url = https://github.com/boostorg/config.git
+[submodule "external/boost/core"]
+	path = external/boost/core
+	url = https://github.com/boostorg/core.git
+[submodule "external/boost/static_assert"]
+	path = external/boost/static_assert
+	url = https://github.com/boostorg/static_assert.git
+[submodule "external/boost/assert"]
+	path = external/boost/assert
+	url = https://github.com/boostorg/assert.git
+[submodule "external/boost/integer"]
+	path = external/boost/integer
+	url = https://github.com/boostorg/integer.git
+[submodule "external/boost/type_traits"]
+	path = external/boost/type_traits
+	url = https://github.com/boostorg/type_traits.git
+[submodule "external/boost/functional"]
+	path = external/boost/functional
+	url = https://github.com/boostorg/functional.git
+[submodule "external/boost/move"]
+	path = external/boost/move
+	url = https://github.com/boostorg/move.git
+[submodule "external/boost/throw_exception"]
+	path = external/boost/throw_exception
+	url = https://github.com/boostorg/throw_exception.git
+[submodule "external/boost/container_hash"]
+	path = external/boost/container_hash
+	url = https://github.com/boostorg/container_hash.git
+[submodule "external/boost/describe"]
+	path = external/boost/describe
+	url = https://github.com/boostorg/describe.git
+[submodule "external/boost/mp11"]
+	path = external/boost/mp11
+	url = https://github.com/boostorg/mp11.git
