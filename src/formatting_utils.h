@@ -1,5 +1,5 @@
 #pragma once
 
-#include "graph/graph.hpp"
+#include "character.hpp"
 
-char format_as_character(character_type character);
+char format_as_character(Character character);

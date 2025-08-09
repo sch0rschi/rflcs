@@ -18,7 +18,7 @@ void get_characters_ordered_by_importance_mdd(
     const mdd &reduction_mdd,
     mdd_node_source &mdd_node_source,
     const character_counters_source &character_counters_source,
-    std::vector<character_type> &characters_ordered_by_importance,
+    std::vector<Character> &characters_ordered_by_importance,
     boost::timer::progress_display *progress) {
     chaining_numbers(reduction_mdd, character_counters_source);
 
@@ -62,7 +62,7 @@ void get_characters_ordered_by_importance_mdd(
         }
     }
     std::ranges::stable_sort(characters_ordered_by_importance,
-                             [greedy_scores](const character_type character_1, const character_type character_2) {
+                             [greedy_scores](const Character character_1, const Character character_2) {
                                  return greedy_scores[character_1] > greedy_scores[character_2];
                              });
 }

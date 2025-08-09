@@ -52,7 +52,7 @@ cp build/rflcs_* .
 
 #### The maximum alphabet size can be overridden with 
 ```bash
-cmake -B build -G Ninja -DCHARACTER_SET_SIZE=768
+cmake -B build -G Ninja -DCHARACTER_SET_SIZE=1024
 ninja -C build
 cp build/rflcs_* .
 ```

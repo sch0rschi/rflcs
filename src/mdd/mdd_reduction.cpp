@@ -59,7 +59,7 @@ void reduce_by_mdd(instance &instance) {
     instance.shared_object->number_of_refined_characters = 0;
 
     std::cout << "First character selection started." << std::endl;
-    auto characters_ordered_by_importance = std::vector<character_type>(instance.alphabet_size);
+    auto characters_ordered_by_importance = std::vector<Character>(instance.alphabet_size);
     std::iota(characters_ordered_by_importance.begin(), characters_ordered_by_importance.end(), 0);
     boost::timer::progress_display progress(instance.alphabet_size);
     get_characters_ordered_by_importance_mdd(instance,

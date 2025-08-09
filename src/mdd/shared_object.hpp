@@ -22,7 +22,7 @@ struct flat_arc {
 
 struct flat_node {
     void* match_ptr;
-    character_type character;
+    Character character;
     int position_2;
     bool is_active;
     size_t num_arcs_out;

@@ -21,7 +21,7 @@
 
 auto parse_next_integer(std::ifstream &input_file) -> int;
 
-void parse_string(std::vector<character_type> &character_sequence, std::ifstream &input_file, int string_length);
+void parse_string(std::vector<Character> &character_sequence, std::ifstream &input_file, int string_length);
 
 void check_solution(instance &instance);
 
@@ -46,12 +46,12 @@ auto main(const int argc, char **argv) -> int {
         }
 
         globals::alphabet_size = instance->alphabet_size;
-        globals::temp_character_set_1 = std::bitset<CHARACTER_SET_SIZE>();
-        globals::temp_character_set_2 = std::bitset<CHARACTER_SET_SIZE>();
-        globals::old_characters_on_paths_to_some_sink = std::bitset<CHARACTER_SET_SIZE>();
-        globals::old_characters_on_all_paths_to_lower_bound_levels = std::bitset<CHARACTER_SET_SIZE>();
-        globals::old_characters_on_paths_to_root = std::bitset<CHARACTER_SET_SIZE>();
-        globals::old_characters_on_all_paths_to_root = std::bitset<CHARACTER_SET_SIZE>();
+        globals::temp_character_set_1 = make_character_set(globals::alphabet_size);
+        globals::temp_character_set_2 = make_character_set(globals::alphabet_size);
+        globals::old_characters_on_paths_to_some_sink = make_character_set(globals::alphabet_size);
+        globals::old_characters_on_all_paths_to_lower_bound_levels = make_character_set(globals::alphabet_size);
+        globals::old_characters_on_paths_to_root = make_character_set(globals::alphabet_size);
+        globals::old_characters_on_all_paths_to_root = make_character_set(globals::alphabet_size);
         globals::chaining_numbers = std::vector<int>(instance->alphabet_size);
         globals::node_character_count = std::vector<long>(instance->alphabet_size);
         globals::ingoing_arc_character_count = std::vector<long>(instance->alphabet_size);
@@ -258,10 +258,10 @@ void check_solution(instance &instance) {
     }
 }
 
-void parse_string(std::vector<character_type> &character_sequence, std::ifstream &input_file, const int string_length) {
+void parse_string(std::vector<Character> &character_sequence, std::ifstream &input_file, const int string_length) {
     character_sequence.resize(string_length);
     for (int i = 0; i < string_length && input_file.good(); i++) {
-        character_sequence.at(i) = static_cast<character_type>(parse_next_integer(input_file));
+        character_sequence.at(i) = static_cast<Character>(parse_next_integer(input_file));
     }
 }
 
@@ -269,7 +269,7 @@ auto parse_next_integer(std::ifstream &input_file) -> int {
     if (input_file.good()) {
         std::string file_entry; // NOLINT(*-const-correctness)
         input_file >> file_entry;
-        return static_cast<character_type>(std::stoi(file_entry));
+        return static_cast<Character>(std::stoi(file_entry));
     }
     return -1;
 }

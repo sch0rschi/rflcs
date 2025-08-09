@@ -3,12 +3,10 @@
 #include <climits>
 #include <vector>
 
-#include <bitset>
-
 #include "gurobi_c++.h"
-#include "../config.hpp"
-
-typedef short character_type;
+#include "boost/dynamic_bitset/dynamic_bitset.hpp"
+#include "../character_set.hpp"
+#include "../character.hpp"
 
 namespace rflcs_graph {
 
@@ -22,7 +20,7 @@ namespace rflcs_graph {
         std::vector<match *> succ_matches = std::vector<match *>();
         std::vector<int> rf_relaxed_upper_bounds = std::vector<int>();
         match* heuristic_previous_match;
-        std::bitset<CHARACTER_SET_SIZE> available_characters;
+        Character_set available_characters;
         std::vector<int> repetition_counter;
         int position_1;
         int position_2;
@@ -33,10 +31,10 @@ namespace rflcs_graph {
     };
 
     struct match {
-        character_type character = -1;
+        Character character = MAX_CHARACTER;
         int upper_bound = INT_MAX; // including this character
         std::vector<match *> dom_succ_matches = std::vector<match *>();
-        std::bitset<CHARACTER_SET_SIZE> heuristic_characters;
+        Character_set heuristic_characters;
         match_extension extension;
     };
 

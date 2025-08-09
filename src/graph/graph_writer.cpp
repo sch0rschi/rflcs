@@ -8,8 +8,8 @@
 #include "match_loop_utils.h"
 
 void write_graph_dot(const std::vector<rflcs_graph::match> &matches,
-                     const std::vector<character_type> &string1,
-                     const std::vector<character_type> &string2,
+                     const std::vector<Character> &string1,
+                     const std::vector<Character> &string2,
                      const char *initial_dot_filename,
                      const bool is_reverse) {
     if (std::ofstream outputFile(initial_dot_filename, std::ios::trunc); outputFile.is_open()) {

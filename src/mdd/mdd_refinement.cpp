@@ -5,16 +5,16 @@
 
 void refine_mdd_level(const level_type &level,
                       const instance &instance,
-                      character_type split_character,
+                      Character split_character,
                       mdd_node_source &mdd_node_source);
 
 void split_node(node *node_yes_no,
-                character_type split_character,
+                Character split_character,
                 const level_type &level,
                 const instance &instance,
                 mdd_node_source &mdd_node_source);
 
-void refine_mdd(const instance &instance, const mdd &mdd, const character_type split_character,
+void refine_mdd(const instance &instance, const mdd &mdd, const Character split_character,
                 mdd_node_source &mdd_node_source) {
     for (const auto &level: *mdd.levels | std::views::drop(1)) {
         refine_mdd_level(*level, instance, split_character, mdd_node_source);
@@ -23,7 +23,7 @@ void refine_mdd(const instance &instance, const mdd &mdd, const character_type s
 
 void refine_mdd_level(const level_type &level,
                       const instance &instance,
-                      const character_type split_character,
+                      const Character split_character,
                       mdd_node_source &mdd_node_source) {
     static auto nodes = std::vector<node *>();
     nodes.resize(level.nodes->size());
@@ -37,7 +37,7 @@ void refine_mdd_level(const level_type &level,
 }
 
 inline void split_node(node *node_yes_no,
-           const character_type split_character,
+           const Character split_character,
            const level_type &level,
            const instance &instance,
            mdd_node_source &mdd_node_source) {

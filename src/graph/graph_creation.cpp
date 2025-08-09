@@ -14,9 +14,9 @@ match **create_match_matrix(const instance &instance, vector<match> &matches);
 
 auto calculate_number_of_matches(const instance &instance) -> unsigned int;
 
-unsigned_short_matrix create_next_occurrences(int alphabet_size, const vector<character_type> &string);
+unsigned_short_matrix create_next_occurrences(int alphabet_size, const vector<Character> &string);
 
-auto count_occurrences(int alphabet_size, const vector<character_type> &string) -> unique_ptr<vector<int> >;
+auto count_occurrences(int alphabet_size, const vector<Character> &string) -> unique_ptr<vector<int> >;
 
 auto manhattan_distance_comparator(const match &first, const match &second) -> bool;
 
@@ -27,7 +27,7 @@ void set_successor_matches(const instance &instance,
 
 void create_matches(std::vector<match> &matches,
                     const ::instance &instance,
-                    const vector<character_type> &string_1,
+                    const vector<Character> &string_1,
                     unsigned int number_of_matches,
                     const unsigned_short_matrix &next_occurrences);
 
@@ -99,7 +99,7 @@ auto calculate_number_of_matches(const instance &instance) -> unsigned int {
 
 void create_matches(std::vector<match> &matches,
                     const ::instance &instance,
-                    const vector<character_type> &string_1,
+                    const vector<Character> &string_1,
                     const unsigned int number_of_matches,
                     const unsigned_short_matrix &next_occurrences) {
     matches.resize(number_of_matches);
@@ -142,7 +142,7 @@ match **create_match_matrix(const instance &instance, vector<match> &matches) {
 }
 
 
-unsigned_short_matrix create_next_occurrences(const int alphabet_size, const vector<character_type> &string) {
+unsigned_short_matrix create_next_occurrences(const int alphabet_size, const vector<Character> &string) {
     auto character_next_occurrences = new short[string.size() * alphabet_size];
     for (int i = 0; i < static_cast<int>(string.size()) * alphabet_size; i++) {
         character_next_occurrences[i] = string.size();
@@ -167,7 +167,7 @@ unsigned_short_matrix create_next_occurrences(const int alphabet_size, const vec
 }
 
 auto count_occurrences(int alphabet_size,
-                       const vector<character_type> &string) -> unique_ptr<vector<int> > {
+                       const vector<Character> &string) -> unique_ptr<vector<int> > {
     auto occurrences_counter = make_unique<vector<int> >(alphabet_size);
     for (auto &count: *occurrences_counter) {
         count = 0;

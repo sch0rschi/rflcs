@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include "../globals.hpp"
+#include "boost/dynamic_bitset/dynamic_bitset.hpp"
 
 struct node;
 
@@ -14,10 +15,10 @@ typedef std::vector<node *> arcs_type;
 
 struct node {
     rflcs_graph::match *match = nullptr;
-    std::bitset<CHARACTER_SET_SIZE> characters_on_paths_to_root; // including match character
-    std::bitset<CHARACTER_SET_SIZE> characters_on_all_paths_to_root; // including match character
-    std::bitset<CHARACTER_SET_SIZE> characters_on_paths_to_some_sink; // not including match character
-    std::bitset<CHARACTER_SET_SIZE> characters_on_all_paths_to_lower_bound_levels; // not including match character
+    Character_set characters_on_paths_to_root; // including match character
+    Character_set characters_on_all_paths_to_root; // including match character
+    Character_set characters_on_paths_to_some_sink; // not including match character
+    Character_set characters_on_all_paths_to_lower_bound_levels; // not including match character
     std::vector<int> *sequences_character_counter; // not counting match character
     arcs_type arcs_out = arcs_type();
     arcs_type arcs_in = arcs_type();

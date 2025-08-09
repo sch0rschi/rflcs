@@ -69,17 +69,12 @@ set(SOURCE_FILES
         src/utils.cpp
 )
 
-if(CHARACTER_SET_SIZE)
-    set(CHARACTER_SET_SIZES ${CHARACTER_SET_SIZE})
-else()
-    set(CHARACTER_SET_SIZES 4 8 16 32 64 128 256 512 1024 2048 4096)
-endif()
+option(DYNAMIC_SET_SIZE_FEATURE "Enable synamic bitset feature" OFF)
+if(DYNAMIC_SET_SIZE_FEATURE)
+    target_compile_definitions(rflcs PRIVATE DYNAMIC_SET_SIZE_FEATURE)
+    add_executable(rflcs ${SOURCE_FILES})
 
-foreach(CHARACTER_SET_SIZE IN LISTS CHARACTER_SET_SIZES)
-    add_executable("rflcs_${CHARACTER_SET_SIZE}" ${SOURCE_FILES})
-    target_compile_definitions("rflcs_${CHARACTER_SET_SIZE}" PRIVATE CHARACTER_SET_SIZE=${CHARACTER_SET_SIZE})
-
-    target_link_libraries("rflcs_${CHARACTER_SET_SIZE}"
+    target_link_libraries(rflcs
             absl::flat_hash_set
             absl::flat_hash_map
             boost_dynamic_bitset
@@ -87,4 +82,24 @@ foreach(CHARACTER_SET_SIZE IN LISTS CHARACTER_SET_SIZES)
             $ENV{GUROBI_LIB}
             $ENV{GUROBI_HOME}/lib/libgurobi_c++.a
     )
-endforeach()
+else ()
+    if(CHARACTER_SET_SIZE)
+        set(CHARACTER_SET_SIZES ${CHARACTER_SET_SIZE})
+    else()
+        set(CHARACTER_SET_SIZES 4 8 16 32 64 128 256 512 1024 2048 4096)
+    endif()
+    foreach(CHARACTER_SET_SIZE IN LISTS CHARACTER_SET_SIZES)
+        add_executable("rflcs_${CHARACTER_SET_SIZE}" ${SOURCE_FILES})
+        target_compile_definitions("rflcs_${CHARACTER_SET_SIZE}" PRIVATE CHARACTER_SET_SIZE=${CHARACTER_SET_SIZE})
+
+        target_link_libraries("rflcs_${CHARACTER_SET_SIZE}"
+                absl::flat_hash_set
+                absl::flat_hash_map
+                boost_dynamic_bitset
+                boost_timer
+                $ENV{GUROBI_LIB}
+                $ENV{GUROBI_HOME}/lib/libgurobi_c++.a
+        )
+    endforeach()
+endif ()
+

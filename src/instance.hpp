@@ -20,13 +20,13 @@ struct instance {
     long mdd_memory_consumption = 0;
     long main_process_memory_consumption = 0;
     bool is_solving_forward = true;
-    std::deque<character_type> solution = std::deque<character_type>();
+    std::deque<Character> solution = std::deque<Character>();
     int lower_bound = 0;
     int upper_bound = 0;
     int alphabet_size = 0;
-    std::vector<character_type> string_1 = std::vector<character_type>();
+    std::vector<Character> string_1 = std::vector<Character>();
     unsigned_short_matrix next_occurrences_1 = unsigned_short_matrix();
-    std::vector<character_type> string_2 = std::vector<character_type>();
+    std::vector<Character> string_2 = std::vector<Character>();
     unsigned_short_matrix next_occurrences_2 = unsigned_short_matrix();
     int heuristic_solution_length = 0;
     std::mt19937 random = std::mt19937(0);
