@@ -73,7 +73,7 @@ void reduce_by_mdd(instance &instance) {
     instance.shared_object->number_of_refined_characters = 0;
     for (int refinement_character_index: std::views::iota(0, instance.alphabet_size)) {
         if (is_power_of_2(refinement_character_index)) {
-#ifndef MEMORY_SAFE_FEATURE
+#ifndef MDD_FREQUENT_SAVE_FEATURE
             filter_flat_mdd(instance, *mdd_reduction, true);
 #endif
             const auto start = std::clamp(refinement_character_index,
@@ -110,19 +110,19 @@ void reduce_by_mdd(instance &instance) {
                              mdd_reduction->levels->back()->nodes->front()->upper_bound_down);
         }
 
-#ifdef MEMORY_SAFE_FEATURE
+#ifdef MDD_FREQUENT_SAVE_FEATURE
         filter_flat_mdd(instance, *mdd_reduction, true);
 #endif
 
         if (instance.lower_bound >= instance.shared_object->upper_bound) {
-#ifndef MEMORY_SAFE_FEATURE
+#ifndef MDD_FREQUENT_SAVE_FEATURE
             filter_flat_mdd(instance, *mdd_reduction, false);
 #endif
             break;
         }
     }
     instance.shared_object->is_mdd_reduction_complete = true;
-#ifndef MEMORY_SAFE_FEATURE
+#ifndef MDD_FREQUENT_SAVE_FEATURE
     filter_flat_mdd(instance, *mdd_reduction, false);
 #endif
     make_only_one_best_solution_remaining(instance, *mdd_node_source, *mdd_reduction);

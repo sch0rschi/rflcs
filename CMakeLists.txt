@@ -1,14 +1,29 @@
 cmake_minimum_required(VERSION 3.22.1)
-project(rflcs)
+project(rflcs LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 
-add_compile_options(-O3)
-add_compile_options(-march=native)
-add_compile_options(-Wall -Wextra -Wpedantic)
-add_compile_options(-Wno-unknown-pragmas)
-add_compile_options(-Wno-c99-extensions)
-add_compile_options(-Wno-flexible-array-extensions)
+#---------------#
+# Build Options #
+#---------------#
+option(MDD_FREQUENT_SAVE_FEATURE "Enable frequent writebacks while in MDD phase (slow)" ON)
+set(ALPHABET_SIZES "" CACHE STRING "List of alphabet sizes to build executables for(e.g. 16;32;64)")
 
+#----------------#
+# Compiler Flags #
+#----------------#
+add_compile_options(
+        -O3
+        -march=native
+        -Wall -Wextra -Wpedantic
+        -Wno-unknown-pragmas
+        -Wno-c99-extensions
+        -Wno-flexible-array-extensions
+)
+
+#--------------------#
+# External Libraries #
+#--------------------#
+add_library(boost_timer INTERFACE)
 add_library(boost_dynamic_bitset INTERFACE)
 target_include_directories(boost_dynamic_bitset INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/assert/include
@@ -26,19 +41,20 @@ target_include_directories(boost_dynamic_bitset INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/type_traits/include
 )
 
-add_library(boost_timer INTERFACE)
 target_include_directories(boost_timer INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/timer/include
 )
-
 add_subdirectory(external/abseil)
 
-if (DEFINED ENV{GUROBI_HOME} AND DEFINED ENV{GUROBI_LIB})
+if(DEFINED ENV{GUROBI_HOME} AND DEFINED ENV{GUROBI_LIB})
     include_directories($ENV{GUROBI_HOME}/include)
-else ()
+else()
     message(FATAL_ERROR "GUROBI_HOME or GUROBI_LIB environment variable is not set")
-endif ()
+endif()
 
+#--------------#
+# Source Files #
+#--------------#
 set(SOURCE_FILES
         src/formatting_utils.cpp
         src/heuristic.cpp
@@ -66,8 +82,9 @@ set(SOURCE_FILES
         src/solver/sequence_enumeration_solver.cpp
 )
 
-option(MEMORY_SAFE_FEATURE "Enable memory safe feature" OFF)
-
+#-------------------------------#
+# Target Configuration Function #
+#-------------------------------#
 function(configure_rflcs_target target_name)
     target_link_libraries(${target_name}
             absl::flat_hash_map
@@ -78,12 +95,15 @@ function(configure_rflcs_target target_name)
             $ENV{GUROBI_HOME}/lib/libgurobi_c++.a
     )
 
-    if(MEMORY_SAFE_FEATURE)
-        target_compile_definitions(${target_name} PRIVATE MEMORY_SAFE_FEATURE)
+    if(MDD_FREQUENT_SAVE_FEATURE)
+        target_compile_definitions(${target_name} PRIVATE MDD_FREQUENT_SAVE_FEATURE)
     endif()
 endfunction()
 
-if(DEFINED ALPHABET_SIZES)
+#-------------#
+# Executables #
+#-------------#
+if(ALPHABET_SIZES)
     foreach(CHARACTER_SET_SIZE IN LISTS ALPHABET_SIZES)
         set(target_name "rflcs_${CHARACTER_SET_SIZE}")
         add_executable(${target_name} ${SOURCE_FILES})
@@ -94,3 +114,20 @@ else()
     add_executable(rflcs ${SOURCE_FILES})
     configure_rflcs_target(rflcs)
 endif()
+
+#----------------#
+# Summary Output #
+#----------------#
+message(STATUS "===================================================")
+message(STATUS "RFLCS Build Configuration")
+message(STATUS "===================================================")
+message(STATUS "C++ Standard:          ${CMAKE_CXX_STANDARD}")
+message(STATUS "Memory safe feature:   ${MDD_FREQUENT_SAVE_FEATURE}")
+if(ALPHABET_SIZES)
+    message(STATUS "Alphabet sizes:        ${ALPHABET_SIZES}")
+else()
+    message(STATUS "Alphabet size:         dynamic")
+endif()
+message(STATUS "Gurobi include dir:    $ENV{GUROBI_HOME}/include")
+message(STATUS "Gurobi lib:            $ENV{GUROBI_LIB}")
+message(STATUS "===================================================")
