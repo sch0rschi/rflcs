@@ -20,7 +20,6 @@
 #include "mdd/header/initial_mdd.hpp"
 #include "mdd/shared_object.hpp"
 #include "mdd/header/mdd_filter.hpp"
-#include "mdd/header/mdd_dot_writer.hpp"
 #include "config.hpp"
 
 #include <iostream>
@@ -105,10 +104,6 @@ void reduce_graph_pre_solver_by_mdd(instance &instance) {
             << ". Reduction is using forward problem: "
             << std::boolalpha << instance.is_solving_forward << "." << std::endl;
     instance.mdd = instance.is_solving_forward ? std::move(forward_mdd) : std::move(backward_mdd);
-
-    if (IS_WRITING_DOT_FILE) {
-        write_mdd_dot(*instance.mdd, "initial_filtered.dot");
-    }
 
     const auto flat_mdd_size = calculate_flat_array_size(*instance.mdd);
 

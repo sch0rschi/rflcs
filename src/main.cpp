@@ -1,7 +1,6 @@
 #include "config.hpp"
 #include "globals.hpp"
 #include "graph/header/graph_creation.hpp"
-#include "graph/header/graph_writer.hpp"
 #include "heuristic.hpp"
 #include "ilp_solver/ilp_solvers.hpp"
 #include "instance.hpp"
@@ -60,11 +59,6 @@ auto main(const int argc, char **argv) -> int {
 
         instance->start = std::chrono::system_clock::now();
         create_graph(*instance);
-        if (IS_WRITING_DOT_FILE) {
-            write_graph_dot(instance->graph->matches, instance->string_1, instance->string_2, "graph.dot", false);
-            write_graph_dot(instance->graph->reverse_matches, instance->string_1, instance->string_2,
-                            "graph_reverse.dot", true);
-        }
 
         heuristic(*instance);
         instance->heuristic_solution_length = instance->lower_bound;

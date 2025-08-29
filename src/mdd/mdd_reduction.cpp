@@ -8,8 +8,6 @@
 #include "header/character_selection.hpp"
 #include "header/mdd_filter.hpp"
 #include "header/initial_mdd.hpp"
-#include "header/mdd_dot_writer.hpp"
-#include "../config.hpp"
 #include <iostream>
 #include <fstream>
 #include <ranges>
@@ -72,16 +70,12 @@ void reduce_by_mdd(instance &instance) {
                           [](const int num) { std::cout << num << ", "; });
     std::cout << "..." << std::endl;
 
-    auto time_series_node_count = std::vector<long>();
-    auto time_series_edge_count = std::vector<long>();
-
-    if (IS_WRITING_TIME_SERIES) {
-        add_counts(*mdd_reduction, time_series_node_count, time_series_edge_count);
-    }
-
     instance.shared_object->number_of_refined_characters = 0;
     for (int refinement_character_index: std::views::iota(0, instance.alphabet_size)) {
         if (is_power_of_2(refinement_character_index)) {
+#ifndef MEMORY_SAFE_FEATURE
+            filter_flat_mdd(instance, *mdd_reduction, true);
+#endif
             const auto start = std::clamp(refinement_character_index,
                                           0,
                                           static_cast<int>(characters_ordered_by_importance.size()));
@@ -115,39 +109,24 @@ void reduce_by_mdd(instance &instance) {
                     std::max(instance.shared_object->upper_bound,
                              mdd_reduction->levels->back()->nodes->front()->upper_bound_down);
         }
-        filter_flat_mdd(instance, *mdd_reduction, true);
 
-        if (IS_WRITING_TIME_SERIES) {
-            add_counts(*mdd_reduction, time_series_node_count, time_series_edge_count);
-        }
+#ifdef MEMORY_SAFE_FEATURE
+        filter_flat_mdd(instance, *mdd_reduction, true);
+#endif
 
         if (instance.lower_bound >= instance.shared_object->upper_bound) {
+#ifndef MEMORY_SAFE_FEATURE
+            filter_flat_mdd(instance, *mdd_reduction, false);
+#endif
             break;
         }
     }
-
-    if (IS_WRITING_TIME_SERIES) {
-        std::ofstream node_count_file("time_series_node_count.txt", std::ios::app);
-        for (const auto& count : time_series_node_count) {
-            node_count_file << count << ", ";
-        }
-        node_count_file << "\n";
-        node_count_file.close();
-
-        std::ofstream edge_count_file("time_series_edge_count.txt", std::ios::app);
-        for (const auto& count : time_series_edge_count) {
-            edge_count_file << count << ", ";
-        }
-        edge_count_file << "\n";
-        edge_count_file.close();
-    }
-
     instance.shared_object->is_mdd_reduction_complete = true;
+#ifndef MEMORY_SAFE_FEATURE
+    filter_flat_mdd(instance, *mdd_reduction, false);
+#endif
     make_only_one_best_solution_remaining(instance, *mdd_node_source, *mdd_reduction);
     serialize_initial_mdd(*mdd_reduction, instance.shared_object);
-    if (IS_WRITING_DOT_FILE) {
-        write_mdd_dot(*mdd_reduction, "refined.dot");
-    }
 }
 
 void make_only_one_best_solution_remaining(

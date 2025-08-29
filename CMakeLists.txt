@@ -47,7 +47,6 @@ set(SOURCE_FILES
         src/reduction_orchestration.cpp
         src/result_writer.cpp
         src/graph/graph_creation.cpp
-        src/graph/graph_writer.cpp
         src/graph/match_deactivation.cpp
         src/graph/match_metrics.cpp
         src/graph/reduce_graph.cpp
@@ -61,31 +60,16 @@ set(SOURCE_FILES
         src/mdd/edge_utils.cpp
         src/mdd/flat_mdd.cpp
         src/mdd/initial_mdd.cpp
-        src/mdd/mdd_dot_writer.cpp
         src/mdd/mdd_filter.cpp
         src/mdd/mdd_reduction.cpp
         src/mdd/mdd_refinement.cpp
         src/solver/sequence_enumeration_solver.cpp
 )
 
-if(DEFINED ALPHABET_SIZES)
-    foreach(CHARACTER_SET_SIZE IN LISTS ALPHABET_SIZES)
-        add_executable("rflcs_${CHARACTER_SET_SIZE}" ${SOURCE_FILES})
-        target_compile_definitions("rflcs_${CHARACTER_SET_SIZE}" PRIVATE CHARACTER_SET_SIZE=${CHARACTER_SET_SIZE})
+option(MEMORY_SAFE_FEATURE "Enable memory safe feature" OFF)
 
-        target_link_libraries("rflcs_${CHARACTER_SET_SIZE}"
-                absl::flat_hash_map
-                absl::flat_hash_set
-                boost_dynamic_bitset
-                boost_timer
-                $ENV{GUROBI_LIB}
-                $ENV{GUROBI_HOME}/lib/libgurobi_c++.a
-        )
-    endforeach()
-else()
-    add_executable(rflcs ${SOURCE_FILES})
-
-    target_link_libraries(rflcs
+function(configure_rflcs_target target_name)
+    target_link_libraries(${target_name}
             absl::flat_hash_map
             absl::flat_hash_set
             boost_dynamic_bitset
@@ -93,4 +77,20 @@ else()
             $ENV{GUROBI_LIB}
             $ENV{GUROBI_HOME}/lib/libgurobi_c++.a
     )
+
+    if(MEMORY_SAFE_FEATURE)
+        target_compile_definitions(${target_name} PRIVATE MEMORY_SAFE_FEATURE)
+    endif()
+endfunction()
+
+if(DEFINED ALPHABET_SIZES)
+    foreach(CHARACTER_SET_SIZE IN LISTS ALPHABET_SIZES)
+        set(target_name "rflcs_${CHARACTER_SET_SIZE}")
+        add_executable(${target_name} ${SOURCE_FILES})
+        target_compile_definitions(${target_name} PRIVATE CHARACTER_SET_SIZE=${CHARACTER_SET_SIZE})
+        configure_rflcs_target(${target_name})
+    endforeach()
+else()
+    add_executable(rflcs ${SOURCE_FILES})
+    configure_rflcs_target(rflcs)
 endif()
