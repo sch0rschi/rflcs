@@ -46,12 +46,12 @@ auto main(const int argc, char **argv) -> int {
         }
 
         globals::alphabet_size = instance->alphabet_size;
-        globals::temp_character_set_1 = make_character_set(globals::alphabet_size);
-        globals::temp_character_set_2 = make_character_set(globals::alphabet_size);
-        globals::old_characters_on_paths_to_some_sink = make_character_set(globals::alphabet_size);
-        globals::old_characters_on_all_paths_to_lower_bound_levels = make_character_set(globals::alphabet_size);
-        globals::old_characters_on_paths_to_root = make_character_set(globals::alphabet_size);
-        globals::old_characters_on_all_paths_to_root = make_character_set(globals::alphabet_size);
+        globals::temp_character_set_1 = MAKE_CHARACTER_SET();
+        globals::temp_character_set_2 = MAKE_CHARACTER_SET();
+        globals::old_characters_on_paths_to_some_sink = MAKE_CHARACTER_SET();
+        globals::old_characters_on_all_paths_to_lower_bound_levels = MAKE_CHARACTER_SET();
+        globals::old_characters_on_paths_to_root = MAKE_CHARACTER_SET();
+        globals::old_characters_on_all_paths_to_root = MAKE_CHARACTER_SET();
         globals::chaining_numbers = std::vector<int>(instance->alphabet_size);
         globals::node_character_count = std::vector<long>(instance->alphabet_size);
         globals::ingoing_arc_character_count = std::vector<long>(instance->alphabet_size);

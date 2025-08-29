@@ -1,24 +1,11 @@
 #pragma once
 
-#ifndef CHARACTER_SET_SIZE
-#define CHARACTER_SET_SIZE 1024
-#endif
-#define DYNAMIC_SET_SIZE_FEATURE
-
-#ifdef DYNAMIC_SET_SIZE_FEATURE
-    #include "boost/dynamic_bitset/dynamic_bitset.hpp"
-
-    typedef boost::dynamic_bitset<> Character_set;
-
-    inline Character_set make_character_set(const int size) {
-        return Character_set(size);
-    }
-#else
+#ifdef CHARACTER_SET_SIZE
     #include <bitset>
-
     typedef std::bitset<CHARACTER_SET_SIZE> Character_set;
-
-    inline Character_set make_character_set(const int size) {
-        return {};
-    }
+    #define MAKE_CHARACTER_SET() Character_set()
+#else
+    #include "boost/dynamic_bitset/dynamic_bitset.hpp"
+    typedef boost::dynamic_bitset<> Character_set;
+    #define MAKE_CHARACTER_SET() Character_set(globals::alphabet_size)
 #endif

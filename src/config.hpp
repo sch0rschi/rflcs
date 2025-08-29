@@ -10,7 +10,7 @@ enum Solver {
 };
 constexpr Solver SOLVER = MULTI;
 
-constexpr std::string_view default_path = "../RFLCS_instances/type0/4096_3n-div-4.0";
+constexpr std::string_view default_path = "../RFLCS_instances/type1/512_8reps.0";
 constexpr long MDD_TIMEOUT_IN_SECONDS = 1800;
 constexpr int SOLVER_TIMEOUT_IN_SECONDS = 1800;
 constexpr bool IS_WRITING_DOT_FILE = false;

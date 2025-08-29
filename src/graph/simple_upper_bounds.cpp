@@ -31,8 +31,8 @@ void setup_matches_for_simple_upper_bound(const instance &instance) {
     instance.graph->matches.back().upper_bound = 0;
     instance.graph->reverse_matches.back().upper_bound = 0;
     for (auto &[character, upper_bound, _dom, _heur, extension]: instance.graph->matches) {
-        extension.available_characters = make_character_set(globals::alphabet_size);
-        extension.reversed->extension.available_characters = make_character_set(globals::alphabet_size);
+        extension.available_characters = MAKE_CHARACTER_SET();
+        extension.reversed->extension.available_characters = MAKE_CHARACTER_SET();
     }
 }
 

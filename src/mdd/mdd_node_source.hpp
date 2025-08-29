@@ -33,9 +33,9 @@ public:
         if (cache.empty()) {
             fresh_node = new_node();
             fresh_node->characters_on_paths_to_root = match.extension.reversed->extension.available_characters;
-            fresh_node->characters_on_all_paths_to_root = make_character_set(globals::alphabet_size);
+            fresh_node->characters_on_all_paths_to_root = MAKE_CHARACTER_SET();
             fresh_node->characters_on_paths_to_some_sink = match.extension.available_characters;
-            fresh_node->characters_on_all_paths_to_lower_bound_levels = make_character_set(globals::alphabet_size);
+            fresh_node->characters_on_all_paths_to_lower_bound_levels = MAKE_CHARACTER_SET();
         } else {
             fresh_node = cache.back();
             cache.pop_back();

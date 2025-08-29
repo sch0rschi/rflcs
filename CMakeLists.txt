@@ -69,26 +69,8 @@ set(SOURCE_FILES
         src/utils.cpp
 )
 
-option(DYNAMIC_SET_SIZE_FEATURE "Enable synamic bitset feature" OFF)
-if(DYNAMIC_SET_SIZE_FEATURE)
-    target_compile_definitions(rflcs PRIVATE DYNAMIC_SET_SIZE_FEATURE)
-    add_executable(rflcs ${SOURCE_FILES})
-
-    target_link_libraries(rflcs
-            absl::flat_hash_set
-            absl::flat_hash_map
-            boost_dynamic_bitset
-            boost_timer
-            $ENV{GUROBI_LIB}
-            $ENV{GUROBI_HOME}/lib/libgurobi_c++.a
-    )
-else ()
-    if(CHARACTER_SET_SIZE)
-        set(CHARACTER_SET_SIZES ${CHARACTER_SET_SIZE})
-    else()
-        set(CHARACTER_SET_SIZES 4 8 16 32 64 128 256 512 1024 2048 4096)
-    endif()
-    foreach(CHARACTER_SET_SIZE IN LISTS CHARACTER_SET_SIZES)
+if(DEFINED ALPHABET_SIZES)
+    foreach(CHARACTER_SET_SIZE IN LISTS ALPHABET_SIZES)
         add_executable("rflcs_${CHARACTER_SET_SIZE}" ${SOURCE_FILES})
         target_compile_definitions("rflcs_${CHARACTER_SET_SIZE}" PRIVATE CHARACTER_SET_SIZE=${CHARACTER_SET_SIZE})
 
@@ -101,5 +83,15 @@ else ()
                 $ENV{GUROBI_HOME}/lib/libgurobi_c++.a
         )
     endforeach()
-endif ()
+else()
+    add_executable(rflcs ${SOURCE_FILES})
 
+    target_link_libraries(rflcs
+            absl::flat_hash_set
+            absl::flat_hash_map
+            boost_dynamic_bitset
+            boost_timer
+            $ENV{GUROBI_LIB}
+            $ENV{GUROBI_HOME}/lib/libgurobi_c++.a
+    )
+endif()
