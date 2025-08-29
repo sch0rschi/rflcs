@@ -66,7 +66,6 @@ set(SOURCE_FILES
         src/reduction_orchestration.cpp
         src/result_writer.cpp
         src/solver/sequence_enumeration_solver.cpp
-        src/utils.cpp
 )
 
 if(DEFINED ALPHABET_SIZES)

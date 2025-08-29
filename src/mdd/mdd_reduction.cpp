@@ -5,8 +5,8 @@
 #include <memory>
 #include <vector>
 
-#include "header/character_selection.h"
-#include "header/mdd_filter.h"
+#include "header/character_selection.hpp"
+#include "header/mdd_filter.hpp"
 #include "header/initial_mdd.hpp"
 #include "header/mdd_dot_writer.hpp"
 #include "../config.hpp"

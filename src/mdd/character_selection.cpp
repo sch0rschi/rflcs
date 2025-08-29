@@ -1,12 +1,12 @@
-#include "header/character_selection.h"
+#include "header/character_selection.hpp"
 #include "header/initial_mdd.hpp"
 #include "header/mdd_refinement.hpp"
-#include "header/mdd_filter.h"
+#include "header/mdd_filter.hpp"
 #include <boost/timer/progress_display.hpp>
 #include <ranges>
 #include <absl/container/flat_hash_set.h>
 
-#include "edge_utils.h"
+#include "edge_utils.hpp"
 
 void chaining_numbers(const mdd &mdd, const character_counters_source &character_counters_source);
 

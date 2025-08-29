@@ -1,4 +1,4 @@
-#include "edge_utils.h"
+#include "edge_utils.hpp"
 
 #include "../graph/graph.hpp"
 

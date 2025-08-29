@@ -1,4 +1,4 @@
-#include "result_writer.h"
+#include "result_writer.hpp"
 #include <iostream>
 #include <fstream>
 #include <filesystem>

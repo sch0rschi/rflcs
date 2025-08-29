@@ -1,10 +1,10 @@
-#include "header/mdd_filter.h"
+#include "header/mdd_filter.hpp"
 #include "header/domination_utils.hpp"
 #include <iomanip>
 #include <ranges>
 #include <absl/container/flat_hash_set.h>
 
-#include "edge_utils.h"
+#include "edge_utils.hpp"
 
 bool update_nodes_and_prune(instance &instance, const mdd &mdd, mdd_node_source &mdd_node_source);
 

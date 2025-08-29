@@ -1,5 +1,5 @@
 
-#include "sequence_enumeration_solver.h"
+#include "sequence_enumeration_solver.hpp"
 
 void set_solution(instance &instance, const std::vector<flat_node *> &stack, int pointer);
 

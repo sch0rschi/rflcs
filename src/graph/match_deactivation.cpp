@@ -1,7 +1,7 @@
 #include "graph.hpp"
 #include "../instance.hpp"
 #include "header/match_deactivation.hpp"
-#include "match_loop_utils.h"
+#include "match_loop_utils.hpp"
 
 #include <ranges>
 

@@ -19,7 +19,7 @@
 #include "graph/header/reduce_graph.hpp"
 #include "mdd/header/initial_mdd.hpp"
 #include "mdd/shared_object.hpp"
-#include "mdd/header/mdd_filter.h"
+#include "mdd/header/mdd_filter.hpp"
 #include "mdd/header/mdd_dot_writer.hpp"
 #include "config.hpp"
 

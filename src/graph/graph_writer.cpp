@@ -1,11 +1,11 @@
-#include "header/graph_writer.h"
+#include "header/graph_writer.hpp"
 
 #include <fstream>
 #include <ranges>
 
 #include "../formatting_utils.h"
 #include "graph.hpp"
-#include "match_loop_utils.h"
+#include "match_loop_utils.hpp"
 
 void write_graph_dot(const std::vector<rflcs_graph::match> &matches,
                      const std::vector<Character> &string1,

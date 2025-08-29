@@ -1,12 +1,12 @@
 #include "config.hpp"
 #include "globals.hpp"
 #include "graph/header/graph_creation.hpp"
-#include "graph/header/graph_writer.h"
+#include "graph/header/graph_writer.hpp"
 #include "heuristic.hpp"
-#include "ilp_solver/ilp_solvers.h"
+#include "ilp_solver/ilp_solvers.hpp"
 #include "instance.hpp"
 #include "reduction_orchestration.hpp"
-#include "result_writer.h"
+#include "result_writer.hpp"
 
 #include <iostream>
 #include <fstream>
