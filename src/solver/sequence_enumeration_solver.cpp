@@ -41,7 +41,7 @@ void solve_enumeration(instance &instance) {
     }
 
     int depth = 0;
-    auto used_characters = MAKE_CHARACTER_SET();
+    auto used_characters = Character_set();
     used_characters.reset();
     flat_node *current_node;
     while (stack_pointer >= 0) {

@@ -63,9 +63,9 @@ auto heuristic_solve(instance &instance) -> void {
 
 void setup(const instance &instance) {
     for (auto &[character, upper_bound, _dom, heuristic_characters, extension]: instance.graph->matches) {
-        heuristic_characters = MAKE_CHARACTER_SET();
+        heuristic_characters = Character_set();
         extension.heuristic_previous_match = nullptr;
-        extension.reversed->heuristic_characters = MAKE_CHARACTER_SET();
+        extension.reversed->heuristic_characters = Character_set();
         extension.reversed->extension.heuristic_previous_match = nullptr;
         if (character < instance.alphabet_size) {
             heuristic_characters.set(character);

@@ -21,13 +21,13 @@ inline bool is_power_of_2(const int n) {
     return n > 0 && (n & n - 1) == 0;
 }
 
-bool is_perfect_square(int n) {
-    if (n <= 0) return false; // Negative numbers are not perfect squares
-    int sqrt_n = static_cast<int>(std::sqrt(n));
+bool is_perfect_square(const int n) {
+    if (n <= 0) return false;
+    const int sqrt_n = static_cast<int>(std::sqrt(n));
     return sqrt_n * sqrt_n == n;
 }
 
-void add_counts(mdd &mdd_reduction, std::vector<long> &time_series_node_count, std::vector<long> &time_series_edge_count) {
+void add_counts(const mdd &mdd_reduction, std::vector<long> &time_series_node_count, std::vector<long> &time_series_edge_count) {
     auto node_count = 0l;
     auto edge_count = 0l;
     for (auto &level: *mdd_reduction.levels) {

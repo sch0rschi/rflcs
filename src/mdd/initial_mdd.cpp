@@ -22,10 +22,10 @@ std::unique_ptr<mdd> create_initial_mdd(const instance &instance, bool forward) 
     root_node->is_active = true;
     auto &root_match = forward ? instance.graph->matches.front() : instance.graph->reverse_matches.front();
     root_node->match = &root_match;
-    root_node->characters_on_paths_to_root = MAKE_CHARACTER_SET();
-    root_node->characters_on_all_paths_to_root = MAKE_CHARACTER_SET();
+    root_node->characters_on_paths_to_root = Character_set();
+    root_node->characters_on_all_paths_to_root = Character_set();
     root_node->characters_on_paths_to_some_sink = root_match.extension.available_characters;
-    root_node->characters_on_all_paths_to_lower_bound_levels = MAKE_CHARACTER_SET();
+    root_node->characters_on_all_paths_to_lower_bound_levels = Character_set();
     root_node->upper_bound_down = instance.upper_bound;
 
     root_level->push_back(root_node);

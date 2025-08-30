@@ -1,11 +1,25 @@
 #pragma once
 
-#ifdef CHARACTER_SET_SIZE
-    #include <bitset>
-    typedef std::bitset<CHARACTER_SET_SIZE> Character_set;
-    #define MAKE_CHARACTER_SET() Character_set()
+#ifndef CHARACTER_SET_SIZE
+#include <bitset>
+
+struct Character_set : std::bitset<CHARACTER_SET_SIZE> {
+    Character_set() : std::bitset<CHARACTER_SET_SIZE>() {}
+
+    Character_set& operator-=(const Character_set& other) {
+        static std::bitset<CHARACTER_SET_SIZE> temp;
+        temp = ~other;
+        *this &= temp;
+        return *this;
+    }
+};
+
 #else
-    #include "boost/dynamic_bitset/dynamic_bitset.hpp"
-    typedef boost::dynamic_bitset<> Character_set;
-    #define MAKE_CHARACTER_SET() Character_set(globals::alphabet_size)
+#include "globals.hpp"
+#include "boost/dynamic_bitset/dynamic_bitset.hpp"
+
+struct Character_set : boost::dynamic_bitset<> {
+    Character_set() : dynamic_bitset(globals::alphabet_size) {}
+};
+
 #endif
