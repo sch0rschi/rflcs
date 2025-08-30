@@ -1,11 +1,11 @@
-# 🧬 RFLCS — Repetition-Free Longest Common Subsequence
+# RFLCS — Repetition-Free Longest Common Subsequence
 
 This project implements exact and heuristic algorithms for solving the **Repetition-Free Longest Common Subsequence (RFLCS)** problem.
 It uses Gurobi as the ILP backend.
 
 ---
 
-## ✅ Requirements
+## Requirements
 
 - **C++ compiler** supporting **C++23**
 - **CMake ≥ 3.22.1**
@@ -13,7 +13,7 @@ It uses Gurobi as the ILP backend.
 
 ---
 
-## 🖥️ Platform Compatibility
+## Platform Compatibility
 
 **Tested on:**
 
@@ -22,60 +22,69 @@ It uses Gurobi as the ILP backend.
 
 ---
 
-## 🌱 Environment Variables
+## Environment Variables
 
-Before building, make sure the following environment variables are set and cmake can access them:
+Before building, make sure the following environment variables are set and CMake can access them:
 
 | Variable      | Description                                   | Example                                                                                                        |
 |---------------|-----------------------------------------------|----------------------------------------------------------------------------------------------------------------|
 | `GUROBI_HOME` | Root path to Gurobi installation              | `/opt/gurobi1200/linux64` or `/Library/gurobi1201/macos_universal2`                                            |
-| `GUROBI_LIB`  | Root path to Gurobi lib                       | `/opt/gurobi1200/linux64/lib/libgurobi120.so` or `/Library/gurobi1201/macos_universal2/lib/libgurobi120.dylib` |
+| `GUROBI_LIB`  | Path to Gurobi library                        | `/opt/gurobi1200/linux64/lib/libgurobi120.so` or `/Library/gurobi1201/macos_universal2/lib/libgurobi120.dylib` |
+
 ---
 
-## 🛠️ Build Instructions
+## Build Instructions
 
-### Get the Project
+### Build Configuration Options
+
+ALPHABET_SIZES: List of alphabet sizes to build executables for, e.g., 16;32;64;512. If empty, a single dynamic target rflcs is built.
+MDD_FREQUENT_SAVE_FEATURE: Enable (ON) or disable (OFF) frequent writebacks during the MDD phase (default ON, is slower).
+
 
 ```bash
-git clone --recurse-submodules -b masters_thesis https://github.com/sch0rschi/rflcs 
+git clone --recurse-submodules https://github.com/sch0rschi/rflcs
 cd rflcs
 ```
 
-### Build the Project
+Build the Project
+Example: Build with alphabet size 512 and disable frequent MDD save
 
-#### A standard build produces 11 executables for maximum alphabet sizes 4, 8, 16, ... 4096 
 ```bash
-cmake -B build -G Ninja
+cmake -S . -B build -G Ninja -DALPHABET_SIZES=512 -DMDD_FREQUENT_SAVE_FEATURE=OFF
 ninja -C build
-cp build/rflcs_* .
+cp build/rflcs_512 .
 ```
 
-#### The maximum alphabet size can be overridden with 
+This produces an executable rflcs_512 with MDD_FREQUENT_SAVE_FEATURE enabled.
+Standard build
+
 ```bash
-cmake -B build -G Ninja -DCHARACTER_SET_SIZE=1024
+cmake -S . -B build -G Ninja
 ninja -C build
-cp build/rflcs_* .
+cp build/rflcs .
 ```
 
-## 🚀 Run instructions
-
-```console
-./rflcs -i path/to/instance
-```
-
-e.g. one instance with an alphabet size of 1024 ⚡
+This produces a single executable rflcs that works with every alphabet size.
+Run Instructions
 
 ```bash
-./rflcs_1024 -i ./RFLCS_instances/type0/4096_n-div-4.0
+./rflcs -i ./RFLCS_instances/type1/512_8reps.24
+```
+
+Or, for a specific alphabet size (example 512):
+
+```bash
+./rflcs_512 -i ./RFLCS_instances/type1/512_8reps.24
 ```
 
 ---
 
-## 📦 Dependencies
+## Dependencies
 
 This project includes third-party libraries under the following licenses:
 
-- [Boost](https://www.boost.org/LICENSE_1_0.txt) — Boost Software License 1.0
-- [Abseil](https://github.com/abseil/abseil-cpp/blob/master/LICENSE) — Apache License 2.0
+Boost — Boost Software License 1.0
+
+Abseil — Apache License 2.0
 
 These are compatible with the GPLv3 license under which this project is released.
