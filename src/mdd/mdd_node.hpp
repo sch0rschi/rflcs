@@ -102,11 +102,11 @@ inline bool node::update_from_preds(const int depth) {
     if (depth == static_cast<int>(this->characters_on_paths_to_root.count())) {
         this->characters_on_all_paths_to_root = this->characters_on_paths_to_root;
     }
-    this->characters_on_paths_to_some_sink -= this->characters_on_all_paths_to_root;
+    this->characters_on_paths_to_some_sink &= ~ this->characters_on_all_paths_to_root;
 
-    globals::old_characters_on_paths_to_root -= this->characters_on_paths_to_root;
+    globals::old_characters_on_paths_to_root &= ~ this->characters_on_paths_to_root;
     globals::old_characters_on_all_paths_to_root ^= this->characters_on_all_paths_to_root;
-    globals::old_characters_on_paths_to_some_sink -= this->characters_on_paths_to_some_sink;
+    globals::old_characters_on_paths_to_some_sink &= ~ this->characters_on_paths_to_some_sink;
     const bool notify_preds = globals::old_characters_on_paths_to_some_sink.any();
     const bool notify_succs = globals::old_characters_on_paths_to_root.any()
                               || globals::old_characters_on_all_paths_to_root.any();
@@ -165,7 +165,7 @@ inline bool node::update_from_succs(const int depth, const int lower_bound) {
                                       static_cast<int>(this->characters_on_paths_to_some_sink.count()));
 
     const bool notify_relatives = old_upper_bound_down > this->upper_bound_down;
-    globals::old_characters_on_paths_to_some_sink -= this->characters_on_paths_to_some_sink;
+    globals::old_characters_on_paths_to_some_sink &= ~ this->characters_on_paths_to_some_sink;
     globals::old_characters_on_all_paths_to_lower_bound_levels ^= this->characters_on_all_paths_to_lower_bound_levels;
     const bool notify_preds = globals::old_characters_on_paths_to_some_sink.any() ||
                               globals::old_characters_on_all_paths_to_lower_bound_levels.any();
