@@ -127,7 +127,7 @@ void combine(instance &instance, std::vector<rflcs_graph::match> &matches, const
 }
 
 void
-set_heuristic_solution(::instance &instance, const rflcs_graph::match &match, const bool is_building_from_back) {
+set_heuristic_solution(instance &instance, const rflcs_graph::match &match, const bool is_building_from_back) {
     instance.heuristic_solution_time = std::chrono::system_clock::now();
     instance.solution.clear();
     auto characters = std::set<int>();

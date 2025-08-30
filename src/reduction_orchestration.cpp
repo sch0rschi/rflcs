@@ -30,7 +30,6 @@
 
 #include <sys/types.h>
 #include <sys/resource.h>
-#include <cstdlib>
 
 #include "mdd/header/mdd_reduction.hpp"
 
@@ -149,7 +148,7 @@ void filter_matches_by_flat_mdd(instance &instance) {
 
         for (size_t node_index = 0; node_index < flat_level->num_nodes; ++node_index) {
             auto flat_node = reinterpret_cast<struct flat_node *>(current_pointer);
-            auto match_ptr = reinterpret_cast<rflcs_graph::match *>(flat_node->match_ptr);
+            const auto match_ptr = reinterpret_cast<rflcs_graph::match *>(flat_node->match_ptr);
             match_ptr->extension.is_active = flat_node->is_active;
             match_ptr->extension.reversed->extension.is_active = match_ptr->extension.is_active;
             current_pointer += sizeof(struct flat_node);

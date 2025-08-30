@@ -1,6 +1,6 @@
 #pragma once
 
-#ifndef CHARACTER_SET_SIZE
+#ifdef CHARACTER_SET_SIZE
 #include <bitset>
 
 struct Character_set : std::bitset<CHARACTER_SET_SIZE> {

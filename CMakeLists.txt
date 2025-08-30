@@ -56,7 +56,6 @@ endif()
 # Source Files #
 #--------------#
 set(SOURCE_FILES
-        src/formatting_utils.cpp
         src/heuristic.cpp
         src/globals.cpp
         src/main.cpp

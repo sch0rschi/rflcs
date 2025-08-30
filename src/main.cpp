@@ -36,65 +36,65 @@ void solve_enumeration(instance &instance);
 
 auto main(const int argc, char **argv) -> int {
     try {
-        const std::unique_ptr<instance> instance = std::make_unique<struct instance>();
+        instance instance;
 
-        process_input(*instance, argc, argv);
+        process_input(instance, argc, argv);
 
-        if (instance->input_validity_code != 0) {
-            return instance->input_validity_code;
+        if (instance.input_validity_code != 0) {
+            return instance.input_validity_code;
         }
 
-        globals::alphabet_size = instance->alphabet_size;
+        globals::alphabet_size = instance.alphabet_size;
         globals::temp_character_set_1 = Character_set();
         globals::temp_character_set_2 = Character_set();
         globals::old_characters_on_paths_to_some_sink = Character_set();
         globals::old_characters_on_all_paths_to_lower_bound_levels = Character_set();
         globals::old_characters_on_paths_to_root = Character_set();
         globals::old_characters_on_all_paths_to_root = Character_set();
-        globals::chaining_numbers = std::vector<int>(instance->alphabet_size);
-        globals::node_character_count = std::vector<long>(instance->alphabet_size);
-        globals::ingoing_arc_character_count = std::vector<long>(instance->alphabet_size);
-        globals::outgoing_arc_character_count = std::vector<long>(instance->alphabet_size);
+        globals::chaining_numbers = std::vector<int>(instance.alphabet_size);
+        globals::node_character_count = std::vector<long>(instance.alphabet_size);
+        globals::ingoing_arc_character_count = std::vector<long>(instance.alphabet_size);
+        globals::outgoing_arc_character_count = std::vector<long>(instance.alphabet_size);
         globals::int_vector_positions_2 = std::vector<int>();
 
-        instance->start = std::chrono::system_clock::now();
-        create_graph(*instance);
+        instance.start = std::chrono::system_clock::now();
+        create_graph(instance);
 
-        heuristic(*instance);
-        instance->heuristic_solution_length = instance->lower_bound;
-        instance->heuristic_end = std::chrono::system_clock::now();
-        const std::chrono::duration<double> heuristic_elapsed_seconds = instance->heuristic_end - instance->start;
+        heuristic(instance);
+        instance.heuristic_solution_length = instance.lower_bound;
+        instance.heuristic_end = std::chrono::system_clock::now();
+        const std::chrono::duration<double> heuristic_elapsed_seconds = instance.heuristic_end - instance.start;
         std::cout << std::fixed << std::setprecision(2)
                 << "Heuristic finished in " << heuristic_elapsed_seconds.count() << "s." << std::endl;
 
-        instance->mdd_node_source = std::make_unique<mdd_node_source>();
+        instance.mdd_node_source = std::make_unique<mdd_node_source>();
 
-        reduction(*instance);
-        instance->reduction_end = std::chrono::system_clock::now();
-        instance->reduction_upper_bound = instance->upper_bound;
+        reduction(instance);
+        instance.reduction_end = std::chrono::system_clock::now();
+        instance.reduction_upper_bound = instance.upper_bound;
 
-        solve(*instance);
-        instance->end = std::chrono::system_clock::now();
-        instance->upper_bound = std::max(instance->upper_bound, instance->lower_bound);
+        solve(instance);
+        instance.end = std::chrono::system_clock::now();
+        instance.upper_bound = std::max(instance.upper_bound, instance.lower_bound);
 
-        check_solution(*instance);
-        write_result_file(*instance);
+        check_solution(instance);
+        write_result_file(instance);
 
-        const std::chrono::duration<double> solve_elapsed_seconds = instance->end - instance->reduction_end;
-        const std::chrono::duration<double> elapsed_seconds = instance->end - instance->start;
+        const std::chrono::duration<double> solve_elapsed_seconds = instance.end - instance.reduction_end;
+        const std::chrono::duration<double> elapsed_seconds = instance.end - instance.start;
         std::cout << std::fixed << std::setprecision(2)
                 << solve_elapsed_seconds.count() << "\t"
-                << instance->lower_bound << "\t"
-                << (instance->is_valid_solution ? "true" : "false") << "\t"
+                << instance.lower_bound << "\t"
+                << (instance.is_valid_solution ? "true" : "false") << "\t"
                 << elapsed_seconds.count() << "\t"
                 << "found solution: [";
-        for (const auto character: instance->solution) {
+        for (const auto character: instance.solution) {
             std::cout << character << ", ";
         }
         std::cout << "]" << std::endl;
 
-        delete instance->next_occurrences_1;
-        delete instance->next_occurrences_2;
+        delete instance.next_occurrences_1;
+        delete instance.next_occurrences_2;
 
         return 0;
     } catch (std::exception &e) {
@@ -177,14 +177,14 @@ void solve(instance &instance) {
 
     std::cout << "Solver is running." << std::endl;
 
-    if (SOLVER == ENUMERATION) {
+    if constexpr (SOLVER == ENUMERATION) {
         solve_enumeration(instance);
         if (!instance.is_solving_forward) {
             std::ranges::reverse(instance.solution);
         }
     }
 
-    if (SOLVER == GUROBI_MDD || SOLVER == MULTI) {
+    if constexpr (SOLVER == GUROBI_MDD || SOLVER == MULTI) {
         instance.upper_bound = instance.reduction_upper_bound;
         instance.lower_bound = instance.heuristic_solution_length;
         solve_gurobi_mdd_ilp(instance);
@@ -193,7 +193,7 @@ void solve(instance &instance) {
     instance.mdd_ilp_solution = instance.lower_bound;
     instance.mdd_ilp_end = std::chrono::system_clock::now();
 
-    if (SOLVER == GUROBI_GRAPH || SOLVER == MULTI) {
+    if constexpr (SOLVER == GUROBI_GRAPH || SOLVER == MULTI) {
         instance.upper_bound = instance.reduction_upper_bound;
         instance.lower_bound = instance.heuristic_solution_length;
         solve_gurobi_graph_ilp(instance);

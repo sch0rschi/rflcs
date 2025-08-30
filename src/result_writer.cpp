@@ -19,9 +19,8 @@ void write_result_file(const instance &instance) {
     file_name += ".out";
 
     std::filesystem::path path(file_name);
-    std::filesystem::path dir = path.parent_path();
 
-    if (!dir.empty() && !exists(dir)) {
+    if (std::filesystem::path dir = path.parent_path(); !dir.empty() && !exists(dir)) {
         create_directories(dir);
     }
 

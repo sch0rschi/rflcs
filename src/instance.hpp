@@ -15,8 +15,8 @@ using unsigned_short_matrix = short*;
 struct instance {
     std::string path;
     std::unique_ptr<rflcs_graph::graph> graph = nullptr;
-    std::unique_ptr<struct mdd> mdd;
-    std::unique_ptr<struct mdd_node_source> mdd_node_source;
+    std::unique_ptr<mdd> mdd;
+    std::unique_ptr<mdd_node_source> mdd_node_source;
     long mdd_memory_consumption = 0;
     long main_process_memory_consumption = 0;
     bool is_solving_forward = true;
@@ -38,7 +38,7 @@ struct instance {
     std::chrono::time_point<std::chrono::system_clock> end;
     int active_matches = INT_MAX;
     int input_validity_code = 0;
-    struct shared_object* shared_object;
+    shared_object* shared_object;
 
     int reduction_upper_bound = 0;
 
