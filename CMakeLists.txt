@@ -18,6 +18,8 @@ add_compile_options(
         -Wno-unknown-pragmas
         -Wno-c99-extensions
         -Wno-flexible-array-extensions
+        -Wno-gcc-compat
+        -Wno-nullability-extension
 )
 
 #--------------------#
