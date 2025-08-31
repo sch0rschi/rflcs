@@ -35,7 +35,7 @@ void serialize_initial_mdd(const mdd& mdd, shared_object* shared_object) {
             flat_node->position_2 = node->match->extension.position_2;
             flat_node->is_active = true;
             flat_node->num_arcs_out = node->arcs_out.size();
-            level_node_to_match.emplace(std::make_pair(level->depth, node->match), flat_node);
+            level_node_to_match.try_emplace(std::make_pair(level->depth, node->match), flat_node);
             current_pointer += sizeof(struct flat_node);
             current_pointer += sizeof(flat_arc) * node->arcs_out.size();
         }

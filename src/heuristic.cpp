@@ -2,7 +2,7 @@
 #include "heuristic.hpp"
 #include "instance.hpp"
 #include "reduction_orchestration.hpp"
-#include "globals.hpp"
+#include "temporaries.hpp"
 
 #include <boost/timer/progress_display.hpp>
 
@@ -96,9 +96,9 @@ void combine(instance &instance, std::vector<rflcs_graph::match> &matches, const
             unsigned long best_heuristic_score = 0;
             for (auto *potential_match: current_match.dom_succ_matches) {
                 if (potential_match->extension.is_active) {
-                    globals::temp_character_set_1 = current_match.extension.reversed->heuristic_characters;
-                    globals::temp_character_set_1 |= potential_match->heuristic_characters;
-                    if (unsigned long const heuristic_score = globals::temp_character_set_1.count();
+                    temporaries::temp_character_set_1 = current_match.extension.reversed->heuristic_characters;
+                    temporaries::temp_character_set_1 |= potential_match->heuristic_characters;
+                    if (unsigned long const heuristic_score = temporaries::temp_character_set_1.count();
                             heuristic_score > best_heuristic_score) {
                         best_heuristic_score = heuristic_score;
                         position = 0;

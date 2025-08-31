@@ -14,7 +14,7 @@ public:
     [[nodiscard]] std::vector<int>* get_counter() const {
         std::vector<int>* fresh_counters;
         if (cache->empty()) {
-            fresh_counters = new std::vector<int>(globals::alphabet_size);
+            fresh_counters = new std::vector<int>(constants::alphabet_size);
         } else {
             fresh_counters = cache->back();
             cache->pop_back();

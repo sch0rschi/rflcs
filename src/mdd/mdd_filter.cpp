@@ -131,14 +131,14 @@ inline bool update_node_from_pred(node &node, const int depth) {
 inline bool prune_node_from_level(const instance &instance, level_type &level, node *node) {
     const bool no_incoming_arcs = node->arcs_in.empty();
     const bool is_insufficient_upper_bound = level.depth + node->upper_bound_down <= instance.lower_bound;
-    globals::temp_character_set_1 = node->characters_on_paths_to_root;
-    globals::temp_character_set_1 |= node->characters_on_paths_to_some_sink;
-    globals::temp_character_set_2 = node->characters_on_all_paths_to_root;
-    globals::temp_character_set_2 &= node->characters_on_all_paths_to_lower_bound_levels;
+    temporaries::temp_character_set_1 = node->characters_on_paths_to_root;
+    temporaries::temp_character_set_1 |= node->characters_on_paths_to_some_sink;
+    temporaries::temp_character_set_2 = node->characters_on_all_paths_to_root;
+    temporaries::temp_character_set_2 &= node->characters_on_all_paths_to_lower_bound_levels;
     if (no_incoming_arcs
         || is_insufficient_upper_bound
-        || static_cast<int>(globals::temp_character_set_1.count()) <= instance.lower_bound
-        || globals::temp_character_set_2.any()
+        || static_cast<int>(temporaries::temp_character_set_1.count()) <= instance.lower_bound
+        || temporaries::temp_character_set_2.any()
     ) {
         level.needs_pruning = true;
         node->is_active = false;
@@ -156,21 +156,21 @@ inline bool filter_succ_edges_of_node(const instance &instance, const level_type
     std::ranges::sort(succ_nodes, [](const auto node1, const auto node2) {
         return node1->match->extension.position_1 < node2->match->extension.position_1;
     });
-    globals::int_vector_positions_2.clear();
+    temporaries::int_vector_positions_2.clear();
     for (const auto succ: succ_nodes) {
-        globals::temp_character_set_1 = node.characters_on_paths_to_root;
-        globals::temp_character_set_1 |= succ->characters_on_paths_to_some_sink;
-        globals::temp_character_set_1.set(succ->match->character);
+        temporaries::temp_character_set_1 = node.characters_on_paths_to_root;
+        temporaries::temp_character_set_1 |= succ->characters_on_paths_to_some_sink;
+        temporaries::temp_character_set_1.set(succ->match->character);
         const bool combined_characters_not_sufficient =
-                static_cast<int>(globals::temp_character_set_1.count()) <= instance.lower_bound;
-        globals::temp_character_set_2 = node.characters_on_all_paths_to_root;
-        globals::temp_character_set_2 &= succ->characters_on_all_paths_to_lower_bound_levels;
-        const bool repetition_free_conflict = globals::temp_character_set_2.any();
-        globals::temp_character_set_1 = succ->characters_on_paths_to_some_sink;
-        globals::temp_character_set_1.set(succ->match->character);
-        globals::temp_character_set_1 &= ~ node.characters_on_all_paths_to_root;
+                static_cast<int>(temporaries::temp_character_set_1.count()) <= instance.lower_bound;
+        temporaries::temp_character_set_2 = node.characters_on_all_paths_to_root;
+        temporaries::temp_character_set_2 &= succ->characters_on_all_paths_to_lower_bound_levels;
+        const bool repetition_free_conflict = temporaries::temp_character_set_2.any();
+        temporaries::temp_character_set_1 = succ->characters_on_paths_to_some_sink;
+        temporaries::temp_character_set_1.set(succ->match->character);
+        temporaries::temp_character_set_1 &= ~ node.characters_on_all_paths_to_root;
         const bool too_many_characters_already_taken =
-                level.depth + static_cast<int>(globals::temp_character_set_1.count()) <= instance.lower_bound;
+                level.depth + static_cast<int>(temporaries::temp_character_set_1.count()) <= instance.lower_bound;
         const bool is_dominated = dominated_by_some_available_but_unused_character(
             succ->match->extension.position_2,
             level.depth - static_cast<int>(node.characters_on_all_paths_to_root.count()) + 1);

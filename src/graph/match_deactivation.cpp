@@ -20,10 +20,10 @@ auto deactivate_matches(instance &instance) -> bool {
 
         for (auto const &succ: match.dom_succ_matches | active_match_pointer_filter) {
             for (auto const &pred: match.extension.reversed->dom_succ_matches | active_match_pointer_filter) {
-                globals::temp_character_set_1 = succ->extension.available_characters;
-                globals::temp_character_set_1 |= pred->extension.available_characters;
-                globals::temp_character_set_1.set(match.character);
-                int specific_upper_bound = std::min(static_cast<int>(globals::temp_character_set_1.count()),
+                temporaries::temp_character_set_1 = succ->extension.available_characters;
+                temporaries::temp_character_set_1 |= pred->extension.available_characters;
+                temporaries::temp_character_set_1.set(match.character);
+                int specific_upper_bound = std::min(static_cast<int>(temporaries::temp_character_set_1.count()),
                                                     succ->upper_bound + pred->upper_bound + 1);
                 match.extension.combined_upper_bound = std::max(match.extension.combined_upper_bound,
                                                                  specific_upper_bound);

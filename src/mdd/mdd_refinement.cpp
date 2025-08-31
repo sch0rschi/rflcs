@@ -1,7 +1,6 @@
 #include "header/mdd_refinement.hpp"
 
 #include <ranges>
-#include <chrono>
 
 void refine_mdd_level(const level_type &level,
                       const instance &instance,

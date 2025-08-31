@@ -23,14 +23,14 @@ inline bool is_power_of_2(const int n) {
 
 bool is_perfect_square(const int n) {
     if (n <= 0) return false;
-    const int sqrt_n = static_cast<int>(std::sqrt(n));
+    const auto sqrt_n = static_cast<int>(std::sqrt(n));
     return sqrt_n * sqrt_n == n;
 }
 
 void add_counts(const mdd &mdd_reduction, std::vector<long> &time_series_node_count, std::vector<long> &time_series_edge_count) {
-    auto node_count = 0l;
-    auto edge_count = 0l;
-    for (auto &level: *mdd_reduction.levels) {
+    auto node_count = 0L;
+    auto edge_count = 0L;
+    for (const auto &level: *mdd_reduction.levels) {
         node_count += static_cast<long>(level->nodes->size());
         for (const auto node: *level->nodes) {
             edge_count += static_cast<long>(node->arcs_out.size());
@@ -41,8 +41,8 @@ void add_counts(const mdd &mdd_reduction, std::vector<long> &time_series_node_co
 }
 
 void reduce_by_mdd(instance &instance) {
-    const std::unique_ptr<mdd_node_source> mdd_node_source = std::make_unique<struct mdd_node_source>();
-    const std::unique_ptr<character_counters_source> character_counters_source = std::make_unique<struct character_counters_source>();
+    const auto mdd_node_source = std::make_unique<struct mdd_node_source>();
+    const auto character_counters_source = std::make_unique<struct character_counters_source>();
 
     auto mdd_reduction = mdd::copy_mdd(*instance.mdd, *mdd_node_source);
     prune_by_flat_mdd(instance.shared_object, *mdd_reduction, *mdd_node_source);
@@ -79,7 +79,6 @@ void reduce_by_mdd(instance &instance) {
             const auto start = std::clamp(refinement_character_index,
                                           0,
                                           static_cast<int>(characters_ordered_by_importance.size()));
-            // const auto end = characters_ordered_by_importance.size();
             const auto end = std::clamp(3 * refinement_character_index,
                                         0,
                                         static_cast<int>(characters_ordered_by_importance.size()));
@@ -93,7 +92,7 @@ void reduce_by_mdd(instance &instance) {
                                                      *character_counters_source,
                                                      sub_characters,
                                                      nullptr);
-            std::ranges::copy(sub_characters.begin(), sub_characters.end(),characters_ordered_by_importance.begin() + start);
+            std::ranges::copy(sub_characters,characters_ordered_by_importance.begin() + start);
         }
 
         auto split_character = characters_ordered_by_importance[refinement_character_index];

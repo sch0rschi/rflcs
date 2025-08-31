@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "gurobi_c++.h"
-#include "boost/dynamic_bitset/dynamic_bitset.hpp"
 #include "../character_set.hpp"
 #include "../character.hpp"
 

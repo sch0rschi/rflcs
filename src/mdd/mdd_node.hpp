@@ -5,7 +5,7 @@
 #include <memory>
 #include <sstream>
 
-#include "../globals.hpp"
+#include "../temporaries.hpp"
 #include "boost/dynamic_bitset/dynamic_bitset.hpp"
 
 struct node;
@@ -86,17 +86,17 @@ inline void node::unlink_pred_from_succ(node *succ) {
 inline bool node::update_from_preds(const int depth) {
     this->needs_update_from_pred = false;
 
-    globals::old_characters_on_paths_to_root = this->characters_on_paths_to_root;
-    globals::old_characters_on_all_paths_to_root = this->characters_on_all_paths_to_root;
-    globals::old_characters_on_paths_to_some_sink = this->characters_on_paths_to_some_sink;
+    temporaries::old_characters_on_paths_to_root = this->characters_on_paths_to_root;
+    temporaries::old_characters_on_all_paths_to_root = this->characters_on_all_paths_to_root;
+    temporaries::old_characters_on_paths_to_some_sink = this->characters_on_paths_to_some_sink;
 
-    globals::temp_character_set_1.reset();
+    temporaries::temp_character_set_1.reset();
     this->characters_on_all_paths_to_root.set();
     for (const auto pred: this->arcs_in) {
-        globals::temp_character_set_1 |= pred->characters_on_paths_to_root;
+        temporaries::temp_character_set_1 |= pred->characters_on_paths_to_root;
         this->characters_on_all_paths_to_root &= pred->characters_on_all_paths_to_root;
     }
-    this->characters_on_paths_to_root &= globals::temp_character_set_1;
+    this->characters_on_paths_to_root &= temporaries::temp_character_set_1;
     this->characters_on_paths_to_root.set(this->match->character);
     this->characters_on_all_paths_to_root.set(this->match->character);
     if (depth == static_cast<int>(this->characters_on_paths_to_root.count())) {
@@ -104,12 +104,12 @@ inline bool node::update_from_preds(const int depth) {
     }
     this->characters_on_paths_to_some_sink &= ~ this->characters_on_all_paths_to_root;
 
-    globals::old_characters_on_paths_to_root &= ~ this->characters_on_paths_to_root;
-    globals::old_characters_on_all_paths_to_root ^= this->characters_on_all_paths_to_root;
-    globals::old_characters_on_paths_to_some_sink &= ~ this->characters_on_paths_to_some_sink;
-    const bool notify_preds = globals::old_characters_on_paths_to_some_sink.any();
-    const bool notify_succs = globals::old_characters_on_paths_to_root.any()
-                              || globals::old_characters_on_all_paths_to_root.any();
+    temporaries::old_characters_on_paths_to_root &= ~ this->characters_on_paths_to_root;
+    temporaries::old_characters_on_all_paths_to_root ^= this->characters_on_all_paths_to_root;
+    temporaries::old_characters_on_paths_to_some_sink &= ~ this->characters_on_paths_to_some_sink;
+    const bool notify_preds = temporaries::old_characters_on_paths_to_some_sink.any();
+    const bool notify_succs = temporaries::old_characters_on_paths_to_root.any()
+                              || temporaries::old_characters_on_all_paths_to_root.any();
     if (notify_preds && notify_succs) {
       this->notify_relatives_of_update();
     } else {
@@ -126,8 +126,8 @@ inline bool node::update_from_preds(const int depth) {
 
 inline bool node::update_from_succs(const int depth, const int lower_bound) {
     this->needs_update_from_succ = false;
-    globals::old_characters_on_paths_to_some_sink = this->characters_on_paths_to_some_sink;
-    globals::old_characters_on_all_paths_to_lower_bound_levels = this->characters_on_all_paths_to_lower_bound_levels;
+    temporaries::old_characters_on_paths_to_some_sink = this->characters_on_paths_to_some_sink;
+    temporaries::old_characters_on_all_paths_to_lower_bound_levels = this->characters_on_all_paths_to_lower_bound_levels;
     const int old_upper_bound_down = this->upper_bound_down;
 
     if (this->arcs_out.empty()) {
@@ -142,19 +142,19 @@ inline bool node::update_from_succs(const int depth, const int lower_bound) {
     }
 
     auto max_upper_bound_down_succ = 0;
-    globals::temp_character_set_1.reset();
+    temporaries::temp_character_set_1.reset();
     this->characters_on_all_paths_to_lower_bound_levels.set();
     for (const auto succ: this->arcs_out) {
         max_upper_bound_down_succ = std::max(max_upper_bound_down_succ, succ->upper_bound_down);
-        globals::temp_character_set_1 |= succ->characters_on_paths_to_some_sink;
-        globals::temp_character_set_1.set(succ->match->character);
-        globals::temp_character_set_2 = succ->characters_on_all_paths_to_lower_bound_levels;
+        temporaries::temp_character_set_1 |= succ->characters_on_paths_to_some_sink;
+        temporaries::temp_character_set_1.set(succ->match->character);
+        temporaries::temp_character_set_2 = succ->characters_on_all_paths_to_lower_bound_levels;
         if (depth > 0 && depth <= lower_bound) {
-            globals::temp_character_set_2.set(succ->match->character);
+            temporaries::temp_character_set_2.set(succ->match->character);
         }
-        this->characters_on_all_paths_to_lower_bound_levels &= globals::temp_character_set_2;
+        this->characters_on_all_paths_to_lower_bound_levels &= temporaries::temp_character_set_2;
     }
-    this->characters_on_paths_to_some_sink &= globals::temp_character_set_1;
+    this->characters_on_paths_to_some_sink &= temporaries::temp_character_set_1;
 
     if (this->arcs_out.empty()) {
         this->characters_on_all_paths_to_lower_bound_levels.reset();
@@ -165,10 +165,10 @@ inline bool node::update_from_succs(const int depth, const int lower_bound) {
                                       static_cast<int>(this->characters_on_paths_to_some_sink.count()));
 
     const bool notify_relatives = old_upper_bound_down > this->upper_bound_down;
-    globals::old_characters_on_paths_to_some_sink &= ~ this->characters_on_paths_to_some_sink;
-    globals::old_characters_on_all_paths_to_lower_bound_levels ^= this->characters_on_all_paths_to_lower_bound_levels;
-    const bool notify_preds = globals::old_characters_on_paths_to_some_sink.any() ||
-                              globals::old_characters_on_all_paths_to_lower_bound_levels.any();
+    temporaries::old_characters_on_paths_to_some_sink &= ~ this->characters_on_paths_to_some_sink;
+    temporaries::old_characters_on_all_paths_to_lower_bound_levels ^= this->characters_on_all_paths_to_lower_bound_levels;
+    const bool notify_preds = temporaries::old_characters_on_paths_to_some_sink.any() ||
+                              temporaries::old_characters_on_all_paths_to_lower_bound_levels.any();
 
     if (notify_relatives) {
         this->notify_relatives_of_update();

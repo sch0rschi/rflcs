@@ -21,10 +21,10 @@ void set_repetition_free_constraint(GRBModel &model, const std::set<rflcs_graph:
 
 void set_common_sub_sequence_constraint(GRBModel &model, const std::set<rflcs_graph::match *> &matches);
 
-void solve_gurobi_graph_ilp(instance &instance) {
+void solve_gurobi_mis_ilp(instance &instance) {
 
     try {
-        GRBEnv env = GRBEnv(true);
+        auto env = GRBEnv(true);
 
         env.start();
         env.set(GRB_DoubleParam_TimeLimit, SOLVER_TIMEOUT_IN_SECONDS);
@@ -122,8 +122,8 @@ std::set<rflcs_graph::match *> get_active_matches(const instance &instance) {
     return matches;
 }
 
-void set_solution_from_graph(::instance &instance, const std::set<rflcs_graph::match *> &matches) {
-    if constexpr (SOLVER == MULTI || SOLVER == GUROBI_GRAPH) {
+void set_solution_from_graph(instance &instance, const std::set<rflcs_graph::match *> &matches) {
+    if constexpr (SOLVER == MULTI || SOLVER == GUROBI_MIS) {
         auto matches_in_solution = std::vector<rflcs_graph::match *>();
         std::ranges::copy_if(matches, std::back_inserter(matches_in_solution), [](const rflcs_graph::match *match) {
             return static_cast<int>(round(match->extension.gurobi_variable.get(GRB_DoubleAttr_X))) == 1;

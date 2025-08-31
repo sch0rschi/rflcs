@@ -1,5 +1,5 @@
 #include "config.hpp"
-#include "globals.hpp"
+#include "temporaries.hpp"
 #include "graph/header/graph_creation.hpp"
 #include "heuristic.hpp"
 #include "ilp_solver/ilp_solvers.hpp"
@@ -44,18 +44,18 @@ auto main(const int argc, char **argv) -> int {
             return instance.input_validity_code;
         }
 
-        globals::alphabet_size = instance.alphabet_size;
-        globals::temp_character_set_1 = Character_set();
-        globals::temp_character_set_2 = Character_set();
-        globals::old_characters_on_paths_to_some_sink = Character_set();
-        globals::old_characters_on_all_paths_to_lower_bound_levels = Character_set();
-        globals::old_characters_on_paths_to_root = Character_set();
-        globals::old_characters_on_all_paths_to_root = Character_set();
-        globals::chaining_numbers = std::vector<int>(instance.alphabet_size);
-        globals::node_character_count = std::vector<long>(instance.alphabet_size);
-        globals::ingoing_arc_character_count = std::vector<long>(instance.alphabet_size);
-        globals::outgoing_arc_character_count = std::vector<long>(instance.alphabet_size);
-        globals::int_vector_positions_2 = std::vector<int>();
+        constants::alphabet_size = instance.alphabet_size;
+        temporaries::temp_character_set_1 = Character_set();
+        temporaries::temp_character_set_2 = Character_set();
+        temporaries::old_characters_on_paths_to_some_sink = Character_set();
+        temporaries::old_characters_on_all_paths_to_lower_bound_levels = Character_set();
+        temporaries::old_characters_on_paths_to_root = Character_set();
+        temporaries::old_characters_on_all_paths_to_root = Character_set();
+        temporaries::chaining_numbers = std::vector<int>(instance.alphabet_size);
+        temporaries::node_character_count = std::vector<long>(instance.alphabet_size);
+        temporaries::ingoing_arc_character_count = std::vector<long>(instance.alphabet_size);
+        temporaries::outgoing_arc_character_count = std::vector<long>(instance.alphabet_size);
+        temporaries::int_vector_positions_2 = std::vector<int>();
 
         instance.start = std::chrono::system_clock::now();
         create_graph(instance);
@@ -92,9 +92,6 @@ auto main(const int argc, char **argv) -> int {
             std::cout << character << ", ";
         }
         std::cout << "]" << std::endl;
-
-        delete instance.next_occurrences_1;
-        delete instance.next_occurrences_2;
 
         return 0;
     } catch (std::exception &e) {
@@ -193,10 +190,10 @@ void solve(instance &instance) {
     instance.mdd_ilp_solution = instance.lower_bound;
     instance.mdd_ilp_end = std::chrono::system_clock::now();
 
-    if constexpr (SOLVER == GUROBI_GRAPH || SOLVER == MULTI) {
+    if constexpr (SOLVER == GUROBI_MIS || SOLVER == MULTI) {
         instance.upper_bound = instance.reduction_upper_bound;
         instance.lower_bound = instance.heuristic_solution_length;
-        solve_gurobi_graph_ilp(instance);
+        solve_gurobi_mis_ilp(instance);
         instance.match_ilp_upper_bound = std::min(instance.match_ilp_upper_bound, instance.upper_bound);
     }
     instance.match_ilp_end = std::chrono::system_clock::now();

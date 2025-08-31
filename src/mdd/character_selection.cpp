@@ -4,6 +4,7 @@
 #include "header/mdd_filter.hpp"
 #include <boost/timer/progress_display.hpp>
 #include <ranges>
+#include <algorithm>
 #include <absl/container/flat_hash_set.h>
 
 #include "edge_utils.hpp"
@@ -36,7 +37,7 @@ void get_characters_ordered_by_importance_mdd(
 
     auto greedy_scores = std::vector<double>(instance.alphabet_size);
     for (const auto split_character: characters_ordered_by_importance) {
-        if (globals::chaining_numbers[split_character] > 1) {
+        if (temporaries::chaining_numbers[split_character] > 1) {
             std::unique_ptr<mdd> mdd_character_selection = mdd::copy_mdd(reduction_mdd, mdd_node_source);
             refine_mdd(instance, *mdd_character_selection, split_character, mdd_node_source);
             filter_mdd(instance, *mdd_character_selection, true, mdd_node_source);
@@ -55,7 +56,7 @@ void get_characters_ordered_by_importance_mdd(
         }
     }
     std::ranges::stable_sort(characters_ordered_by_importance,
-                             [greedy_scores](const Character character_1, const Character character_2) {
+                             [&greedy_scores](const Character character_1, const Character character_2) {
                                  return greedy_scores[character_1] > greedy_scores[character_2];
                              });
 }
@@ -111,12 +112,13 @@ void chaining_numbers(const mdd &mdd, const character_counters_source &character
             node->sequences_character_counter = character_counters_source.get_counter();
             std::ranges::fill(*node->sequences_character_counter, 0);
             for (const auto succ: node->arcs_out) {
-                std::transform(node->sequences_character_counter->begin(),
-                               node->sequences_character_counter->end(), succ->sequences_character_counter->begin(),
-                               node->sequences_character_counter->begin(),
-                               [](const int first, const int second) {
-                                   return std::max(first, second);
-                               });
+                std::ranges::transform(
+                    *node->sequences_character_counter,
+                    *succ->sequences_character_counter,
+                    node->sequences_character_counter->begin(),
+                    [](const int first, const int second) {
+                        return std::max(first, second);
+                    });
                 node->sequences_character_counter->at(succ->match->character) = std::max(
                     node->sequences_character_counter->at(succ->match->character),
                     succ->sequences_character_counter->at(succ->match->character) + 1);
@@ -130,7 +132,7 @@ void chaining_numbers(const mdd &mdd, const character_counters_source &character
     }
 
     const auto root = *mdd.levels->front()->nodes->begin();
-    globals::chaining_numbers = *root->sequences_character_counter;
+    temporaries::chaining_numbers = *root->sequences_character_counter;
     character_counters_source.return_counter(root->sequences_character_counter);
     root->sequences_character_counter = nullptr;
 }

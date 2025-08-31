@@ -15,15 +15,15 @@ void solve_enumeration(instance &instance) {
             current_pointer += sizeof(struct flat_node);
             auto *arcs = reinterpret_cast<flat_arc *>(current_pointer);
             std::sort(arcs, arcs + flat_node->num_arcs_out, [](const flat_arc &arc_1, const flat_arc &arc_2) {
-                auto match_1 = reinterpret_cast<rflcs_graph::match *>(arc_1.arc_node->match_ptr);
-                auto match_2 = reinterpret_cast<rflcs_graph::match *>(arc_2.arc_node->match_ptr);
+                const auto match_1 = static_cast<rflcs_graph::match *>(arc_1.arc_node->match_ptr);
+                const auto match_2 = static_cast<rflcs_graph::match *>(arc_2.arc_node->match_ptr);
                 return std::tie(match_1->extension.position_1,
                                 match_1->extension.position_2)
                        <
                        std::tie(match_2->extension.position_1,
                                 match_2->extension.position_2);
             });
-            current_pointer += flat_node->num_arcs_out * sizeof(struct flat_arc);
+            current_pointer += flat_node->num_arcs_out * sizeof(flat_arc);
         }
     }
 
@@ -76,11 +76,10 @@ void solve_enumeration(instance &instance) {
     instance.is_valid_solution = true;
 }
 
-void set_solution(instance &instance, const std::vector<flat_node *> &stack, int pointer) {
+void set_solution(instance &instance, const std::vector<flat_node *> &stack, const int pointer) {
     instance.solution.clear();
     for (int i = 0; i <= pointer; i++) {
-        auto *node = stack[i];
-        if (node->is_active) {
+        if (const auto *node = stack[i]; node->is_active) {
             instance.solution.push_back(node->character);
         }
     }

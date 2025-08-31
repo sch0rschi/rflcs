@@ -10,7 +10,7 @@
 #include <deque>
 #include <random>
 
-using unsigned_short_matrix = short*;
+using int_matrix = std::vector<int>;
 
 struct instance {
     std::string path;
@@ -25,9 +25,9 @@ struct instance {
     int upper_bound = 0;
     int alphabet_size = 0;
     std::vector<Character> string_1 = std::vector<Character>();
-    unsigned_short_matrix next_occurrences_1 = unsigned_short_matrix();
+    int_matrix next_occurrences_1 = int_matrix();
     std::vector<Character> string_2 = std::vector<Character>();
-    unsigned_short_matrix next_occurrences_2 = unsigned_short_matrix();
+    int_matrix next_occurrences_2 = int_matrix();
     int heuristic_solution_length = 0;
     std::mt19937 random = std::mt19937(0);
     bool is_valid_solution = false;

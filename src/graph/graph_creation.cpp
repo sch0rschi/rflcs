@@ -10,11 +10,11 @@
 using namespace std;
 using namespace rflcs_graph;
 
-match **create_match_matrix(const instance &instance, vector<match> &matches);
+std::vector<match*> create_match_matrix(const instance &instance, vector<match> &matches);
 
 auto calculate_number_of_matches(const instance &instance) -> unsigned int;
 
-unsigned_short_matrix create_next_occurrences(int alphabet_size, const vector<Character> &string);
+int_matrix create_next_occurrences(int alphabet_size, const vector<Character> &string);
 
 auto count_occurrences(int alphabet_size, const vector<Character> &string) -> unique_ptr<vector<int> >;
 
@@ -22,14 +22,14 @@ auto manhattan_distance_comparator(const match &first, const match &second) -> b
 
 void set_successor_matches(const instance &instance,
                            vector<match> &matches,
-                           const unsigned_short_matrix &next_occurrences_1,
-                           const unsigned_short_matrix &next_occurrences_2);
+                           const int_matrix &next_occurrences_1,
+                           const int_matrix &next_occurrences_2);
 
 void create_matches(std::vector<match> &matches,
                     const ::instance &instance,
                     const vector<Character> &string_1,
                     unsigned int number_of_matches,
-                    const unsigned_short_matrix &next_occurrences);
+                    const int_matrix &next_occurrences);
 
 void create_graph(instance &instance) {
     auto reversed_string_1 = instance.string_1;
@@ -81,9 +81,6 @@ void create_graph(instance &instance) {
         extension.match_id = match_counter++;
     }
 
-    delete reverse_next_occurrences_1;
-    delete reverse_next_occurrences_2;
-
     setup_matches_for_simple_upper_bound(instance);
 }
 
@@ -101,7 +98,7 @@ void create_matches(std::vector<match> &matches,
                     const ::instance &instance,
                     const vector<Character> &string_1,
                     const unsigned int number_of_matches,
-                    const unsigned_short_matrix &next_occurrences) {
+                    const int_matrix &next_occurrences) {
     matches.resize(number_of_matches);
     for (auto &[character, upper_bound, _dom, _heur, extension]: matches) {
         extension = match_extension();
@@ -118,8 +115,8 @@ void create_matches(std::vector<match> &matches,
     unsigned int match_counter = 1;
     for (int position_1 = 0; position_1 < static_cast<int>(instance.string_1.size()); position_1++) {
         const auto string_character = string_1.at(position_1);
-        auto const start_position_2 = next_occurrences[string_character];
-        for (short position_2 = start_position_2; position_2 < static_cast<int>(instance.string_2.size()); match_counter++) {
+        const auto start_position_2 = next_occurrences[string_character];
+        for (int position_2 = start_position_2; position_2 < static_cast<int>(instance.string_2.size()); match_counter++) {
             auto &[character, upper_bound, _dom, _heur, extension] = matches.at(match_counter);
             character = string_character;
             extension.position_1 = position_1;
@@ -133,8 +130,8 @@ void create_matches(std::vector<match> &matches,
     }
 }
 
-match **create_match_matrix(const instance &instance, vector<match> &matches) {
-    auto match_matrix = new match *[instance.string_1.size() * instance.string_2.size()];
+std::vector<match*> create_match_matrix(const instance &instance, vector<match> &matches) {
+    auto match_matrix = std::vector<match*>(instance.string_1.size() * instance.string_2.size());
     for (auto &match: matches | std::views::drop(1) | std::views::take(matches.size() - 2)) {
         match_matrix[match.extension.position_1 * instance.string_2.size() + match.extension.position_2] = &match;
     }
@@ -142,22 +139,22 @@ match **create_match_matrix(const instance &instance, vector<match> &matches) {
 }
 
 
-unsigned_short_matrix create_next_occurrences(const int alphabet_size, const vector<Character> &string) {
-    auto character_next_occurrences = new short[string.size() * alphabet_size];
+int_matrix create_next_occurrences(const int alphabet_size, const vector<Character> &string) {
+    auto character_next_occurrences = std::vector<int>(string.size() * alphabet_size);
     for (int i = 0; i < static_cast<int>(string.size()) * alphabet_size; i++) {
-        character_next_occurrences[i] = string.size();
+        character_next_occurrences[i] = static_cast<int>(string.size());
     }
 
     for (int position = 0; position < static_cast<int>(string.size()); position++) {
         character_next_occurrences[position * alphabet_size + string.at(position)] = position;
     }
 
-    auto last_positions = vector<short>(alphabet_size);
+    auto last_positions = vector<int>(alphabet_size);
     for (int character = 0; character < alphabet_size; character++) {
         last_positions.at(character) = character_next_occurrences[alphabet_size * (string.size() - 1) + character];
     }
 
-    for (auto position = static_cast<short>(string.size() - 2); position >= 0; --position) {
+    for (auto position = static_cast<int>(string.size() - 2); position >= 0; --position) {
         for (auto character = 0; character < alphabet_size; character++) {
             character_next_occurrences[position * alphabet_size + character] = std::min(character_next_occurrences[position * alphabet_size + character], last_positions.at(character));
             last_positions.at(character) = character_next_occurrences[position * alphabet_size + character];
@@ -180,8 +177,8 @@ auto count_occurrences(int alphabet_size,
 
 void set_successor_matches(const instance &instance,
                            vector<match> &matches,
-                           const unsigned_short_matrix &next_occurrences_1,
-                           const unsigned_short_matrix &next_occurrences_2) {
+                           const int_matrix &next_occurrences_1,
+                           const int_matrix &next_occurrences_2) {
     const auto match_matrix = create_match_matrix(instance, matches);
 
     const auto string_1_length = instance.string_1.size();
@@ -211,7 +208,8 @@ void set_successor_matches(const instance &instance,
         for (const auto succ_match: succ_matches_copy | std::views::filter([](auto *succ_match_filter) {
             return succ_match_filter != nullptr;
         })) {
-            match.extension.succ_matches.at(succ_match_counter++) = succ_match;
+            match.extension.succ_matches.at(succ_match_counter) = succ_match;
+            succ_match_counter++;
         }
 
         match.dom_succ_matches.reserve(succ_match_counter);
@@ -229,14 +227,11 @@ void set_successor_matches(const instance &instance,
             match.dom_succ_matches.push_back(&matches.back());
         }
     }
-
-    delete match_matrix;
 }
 
 auto manhattan_distance_comparator(const match &first, const match &second) -> bool {
     const auto first_distance = first.extension.position_1 + first.extension.position_2;
-    const auto second_distance = second.extension.position_1 + second.extension.position_2;
-    if (first_distance != second_distance) {
+    if (const auto second_distance = second.extension.position_1 + second.extension.position_2; first_distance != second_distance) {
         return first_distance < second_distance;
     }
     return first.extension.position_1 < second.extension.position_1;

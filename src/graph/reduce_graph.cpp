@@ -65,9 +65,9 @@ inline auto bad_edge(const instance& instance,
     if (current_match.extension.reversed->upper_bound < target_match.extension.transient_match_domination_number) {
         return true;
     }
-    globals::temp_character_set_1 = current_match.extension.reversed->extension.available_characters;
-    globals::temp_character_set_1 |= target_match.extension.available_characters;
-    return static_cast<int>(globals::temp_character_set_1.count()) <= instance.lower_bound;
+    temporaries::temp_character_set_1 = current_match.extension.reversed->extension.available_characters;
+    temporaries::temp_character_set_1 |= target_match.extension.available_characters;
+    return static_cast<int>(temporaries::temp_character_set_1.count()) <= instance.lower_bound;
 }
 
 auto bad_edge_with_exception(const instance& instance,

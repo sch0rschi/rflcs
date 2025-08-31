@@ -11,7 +11,7 @@ void set_solution_from_ilp(instance &instance);
 void solve_gurobi_mdd_ilp(instance &instance) {
 
     try {
-        GRBEnv env = GRBEnv(true);
+        auto env = GRBEnv(true);
 
         env.start();
         env.set(GRB_DoubleParam_TimeLimit, SOLVER_TIMEOUT_IN_SECONDS);

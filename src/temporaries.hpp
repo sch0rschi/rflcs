@@ -4,8 +4,7 @@
 
 #include "character_set.hpp"
 
-struct globals {
-    static int alphabet_size;
+struct temporaries {
     static Character_set temp_character_set_1;
     static Character_set temp_character_set_2;
     static Character_set old_characters_on_paths_to_some_sink;

@@ -58,8 +58,9 @@ endif()
 # Source Files #
 #--------------#
 set(SOURCE_FILES
+        src/constants.cpp
         src/heuristic.cpp
-        src/globals.cpp
+        src/temporaries.cpp
         src/main.cpp
         src/reduction_orchestration.cpp
         src/result_writer.cpp
@@ -69,7 +70,7 @@ set(SOURCE_FILES
         src/graph/reduce_graph.cpp
         src/graph/rf_subset_lcs_relaxation.cpp
         src/graph/simple_upper_bounds.cpp
-        src/ilp_solver/gurobi_graph_ilp.cpp
+        src/ilp_solver/gurobi_mis_ilp.cpp
         src/ilp_solver/gurobi_mdd_ilp.cpp
         src/mdd/character_bound_utils.cpp
         src/mdd/character_selection.cpp

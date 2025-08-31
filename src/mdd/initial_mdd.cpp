@@ -12,12 +12,12 @@
 
 std::unique_ptr<mdd> create_initial_mdd(const instance &instance, bool forward) {
 
-    std::unique_ptr<mdd> mdd = std::make_unique<struct mdd>();
+    auto mdd = std::make_unique<struct mdd>();
     mdd->levels = std::make_unique<levels_type>();
 
     instance.mdd_node_source->sort_cache();
 
-    auto &[root_level, first_level_depth, _rp] = *mdd->levels->emplace_back(std::make_unique<level_type>());
+    const auto &[root_level, first_level_depth, _rp] = *mdd->levels->emplace_back(std::make_unique<level_type>());
     const auto root_node = instance.mdd_node_source->new_node();
     root_node->is_active = true;
     auto &root_match = forward ? instance.graph->matches.front() : instance.graph->reverse_matches.front();
@@ -33,13 +33,13 @@ std::unique_ptr<mdd> create_initial_mdd(const instance &instance, bool forward) 
     auto match_to_node_map = absl::flat_hash_map<rflcs_graph::match *, node *>();
     while (!mdd->levels->back()->nodes->empty() &&
            mdd->levels->back()->depth < instance.upper_bound) {
-        auto &[current_nodes, current_depth, _p] = *mdd->levels->back();
+        const auto &[current_nodes, current_depth, _p] = *mdd->levels->back();
         auto &[next_nodes, next_depth, _np] = *mdd->levels->emplace_back(std::make_unique<level_type>());
         next_depth = current_depth + 1;
         match_to_node_map.clear();
         for (const auto pred_node: *current_nodes) {
             int min_position_2 = INT_MAX;
-            globals::int_vector_positions_2.clear();
+            temporaries::int_vector_positions_2.clear();
             for (auto succ_match: pred_node->match->extension.succ_matches) {
                 const bool not_dominated = !dominated_by_some_available_but_unused_character(
                         succ_match->extension.position_2, current_depth);
