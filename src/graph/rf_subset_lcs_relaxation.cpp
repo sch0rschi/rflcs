@@ -113,11 +113,10 @@ inline auto set_rf_relaxed_upper_bounds(std::vector<rflcs_graph::match>& matches
             for (const auto* potential_match: dom_succ_matches) {
                 if (potential_match->extension.is_active) {
                     extension.available_characters |= potential_match->extension.available_characters;
-                    transform(current_upper_bounds.begin(),
-                              current_upper_bounds.end(),
-                              potential_match->extension.rf_relaxed_upper_bounds.begin(),
+                    std::ranges::transform(current_upper_bounds,
+                              potential_match->extension.rf_relaxed_upper_bounds,
                               current_upper_bounds.begin(),
-                              [](auto current, auto potential) -> auto {
+                              [](auto current, auto potential) {
                                   return std::max(current, potential);
                               });
                 }
@@ -126,7 +125,7 @@ inline auto set_rf_relaxed_upper_bounds(std::vector<rflcs_graph::match>& matches
             // add the step
             std::ranges::transform(current_upper_bounds,
                                    current_upper_bounds.begin(),
-                                   [](auto value) -> auto { return value + 1; });
+                                   [](auto value) { return value + 1; });
 
             // shift and decrement if context
             for (const auto& [index_without_character, index_with_character]: contexts.at(character)) {

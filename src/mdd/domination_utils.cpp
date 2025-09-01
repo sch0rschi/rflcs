@@ -1,6 +1,5 @@
 #include "header/domination_utils.hpp"
 #include "../temporaries.hpp"
-#include <ranges>
 #include <algorithm>
 
 

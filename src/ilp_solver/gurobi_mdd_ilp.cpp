@@ -18,21 +18,16 @@ void solve_gurobi_mdd_ilp(instance &instance) {
         env.set(GRB_IntParam_LogToConsole, 1);
         env.set(GRB_IntParam_Threads, 1);
         env.set(GRB_IntParam_MIPFocus, GRB_MIPFOCUS_BESTBOUND); // focus on upper bound
-        // TODO: benchmark
         env.set(GRB_IntParam_Presolve, GRB_PRESOLVE_AGGRESSIVE); // Aggressive presolve
-        // TODO: benchmark
-        //env.set(GRB_IntParam_Cuts, 0);
-        // TODO: benchmark
         env.set(GRB_IntParam_ScaleFlag, 3);
-//        env.set(GRB_IntParam_VarBranch, GRB_VARBRANCH_MAX_INFEAS);
 
         auto model = GRBModel(env);
 
         auto objective = GRBLinExpr();
         std::vector<GRBLinExpr> character_sums(instance.alphabet_size);
-        GRBLinExpr *previous_level_node_sum = nullptr;
+        const GRBLinExpr *previous_level_node_sum = nullptr;
         for (const auto &level : *instance.mdd->levels | std::views::drop(1)) {
-            GRBLinExpr level_node_sum = GRBLinExpr();
+            auto level_node_sum = GRBLinExpr();
             for(const auto node : *level->nodes) {
                 node->gurobi_variable = model.addVar(0.0, 1.0, 0, GRB_BINARY);
                 character_sums.at(node->match->character) += node->gurobi_variable;

@@ -1,7 +1,6 @@
 #include "header/simple_upper_bounds.hpp"
 #include "match_loop_utils.hpp"
 
-#include <memory>
 #include <ranges>
 
 bool set_simple_upper_bounds(std::vector<rflcs_graph::match> &matches);

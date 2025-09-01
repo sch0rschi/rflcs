@@ -31,17 +31,12 @@ void solve_gurobi_mis_ilp(instance &instance) {
         env.set(GRB_IntParam_LogToConsole, 1);
         env.set(GRB_IntParam_Threads, 1);
         env.set(GRB_IntParam_MIPFocus, GRB_MIPFOCUS_BESTBOUND); // focus on upper bound
-        // TODO: benchmark
         env.set(GRB_IntParam_Presolve, GRB_PRESOLVE_AGGRESSIVE); // Aggressive presolve
-        // TODO: benchmark
-        //env.set(GRB_IntParam_Cuts, 0);
-        // TODO: benchmark
         env.set(GRB_IntParam_ScaleFlag, 3);
-        //        env.set(GRB_IntParam_VarBranch, GRB_VARBRANCH_MAX_INFEAS);
 
-        GRBModel model = GRBModel(env);
+        auto model = GRBModel(env);
 
-        auto matches = get_active_matches(instance);
+        const auto matches = get_active_matches(instance);
 
         set_objective_function(instance, model, matches);
         set_common_sub_sequence_constraint(model, matches);
@@ -112,7 +107,7 @@ get_character_matches_map(const std::set<rflcs_graph::match *> &matches) {
 }
 
 std::set<rflcs_graph::match *> get_active_matches(const instance &instance) {
-    std::set<rflcs_graph::match *> matches = std::set<rflcs_graph::match *>();
+    auto matches = std::set<rflcs_graph::match *>();
     for (auto &match: instance.graph->matches | std::ranges::views::drop(1) |
                       std::ranges::views::take(instance.graph->matches.size() - 2)) {
         if (match.extension.is_active) {
