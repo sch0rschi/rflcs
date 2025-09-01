@@ -2,5 +2,5 @@
 
 #include <climits>
 
-typedef short Character;
-constexpr Character MAX_CHARACTER = SHRT_MAX;
+typedef int Character;
+constexpr Character MAX_CHARACTER = INT_MAX;

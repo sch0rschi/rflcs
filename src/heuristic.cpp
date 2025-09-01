@@ -101,10 +101,11 @@ void combine(instance &instance, std::vector<rflcs_graph::match> &matches, const
                     if (unsigned long const heuristic_score = temporaries::temp_character_set_1.count();
                             heuristic_score > best_heuristic_score) {
                         best_heuristic_score = heuristic_score;
-                        position = 0;
-                        candidate_matches[position++] = potential_match;
+                        candidate_matches[0] = potential_match;
+                        position = 1;
                     } else if (heuristic_score == best_heuristic_score) {
-                        candidate_matches[position++] = potential_match;
+                        candidate_matches[position] = potential_match;
+                        position++;
                     }
                 }
             }

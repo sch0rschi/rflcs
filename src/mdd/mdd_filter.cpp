@@ -226,14 +226,14 @@ void filter_flat_mdd(const instance &instance, const mdd &mdd, const bool is_rep
         for (size_t node_index = 0; node_index < flat_level->num_nodes; ++node_index) {
             auto flat_node = reinterpret_cast<struct flat_node *>(current_pointer);
             flat_node->is_active &=
-                    current_level_valid_matches.contains(reinterpret_cast<rflcs_graph::match *>(flat_node->match_ptr));
+                    current_level_valid_matches.contains(static_cast<rflcs_graph::match *>(flat_node->match_ptr));
             current_pointer += sizeof(struct flat_node);
             for (size_t arc_index = 0; arc_index < flat_node->num_arcs_out; ++arc_index) {
                 auto flat_arc = reinterpret_cast<struct flat_arc *>(current_pointer);
                 flat_arc->is_active &= current_level_valid_edges.contains(
                     match_pair_to_edge_long_encoding(
-                        reinterpret_cast<const rflcs_graph::match *>(flat_node->match_ptr),
-                        reinterpret_cast<const rflcs_graph::match *>(flat_arc->arc_node->match_ptr))
+                        static_cast<const rflcs_graph::match *>(flat_node->match_ptr),
+                        static_cast<const rflcs_graph::match *>(flat_arc->arc_node->match_ptr))
                 );
                 current_pointer += sizeof(struct flat_arc);
             }
