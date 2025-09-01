@@ -2,31 +2,31 @@
 
 #include <ranges>
 
-void refine_mdd_level(const level_type &level,
+void refine_mdd_level(level_type &level,
                       const instance &instance,
                       Character split_character,
                       mdd_node_source &mdd_node_source);
 
 void split_node(node *node_yes_no,
                 Character split_character,
-                const level_type &level,
+                level_type &level,
                 const instance &instance,
                 mdd_node_source &mdd_node_source);
 
 void refine_mdd(const instance &instance, const mdd &mdd, const Character split_character,
                 mdd_node_source &mdd_node_source) {
-    for (const auto &level: *mdd.levels | std::views::drop(1)) {
+    for (const auto &level: mdd.levels | std::views::drop(1)) {
         refine_mdd_level(*level, instance, split_character, mdd_node_source);
     }
 }
 
-void refine_mdd_level(const level_type &level,
+void refine_mdd_level(level_type &level,
                       const instance &instance,
                       const Character split_character,
                       mdd_node_source &mdd_node_source) {
     static auto nodes = std::vector<node *>();
-    nodes.resize(level.nodes->size());
-    std::ranges::copy(*level.nodes, nodes.begin());
+    nodes.resize(level.nodes.size());
+    std::ranges::copy(level.nodes, nodes.begin());
     for (const auto node: nodes) {
         if (node->characters_on_paths_to_root.test(split_character)
             && node->characters_on_paths_to_some_sink.test(split_character)) {
@@ -37,7 +37,7 @@ void refine_mdd_level(const level_type &level,
 
 inline void split_node(node *node_yes_no,
            const Character split_character,
-           const level_type &level,
+           level_type &level,
            const instance &instance,
            mdd_node_source &mdd_node_source) {
     node *node_no_maybe = mdd_node_source.get_copy_of_old_node(*node_yes_no);
@@ -77,7 +77,7 @@ inline void split_node(node *node_yes_no,
         (node_no_maybe->edges_out.empty() && level.depth <= instance.lower_bound)) {
         mdd_node_source.clear_node(node_no_maybe);
     } else {
-        level.nodes->push_back(node_no_maybe);
+        level.nodes.push_back(node_no_maybe);
     }
 
     if (node_yes_no->edges_in.empty()

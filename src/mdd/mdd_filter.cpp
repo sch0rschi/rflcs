@@ -6,7 +6,7 @@
 
 #include "edge_utils.hpp"
 
-bool update_nodes_and_prune(instance &instance, const mdd &mdd, mdd_node_source &mdd_node_source);
+bool update_nodes_and_prune(instance &instance, mdd &mdd, mdd_node_source &mdd_node_source);
 
 bool update_node_from_succ(const instance &instance, const level_type &level, node &node);
 
@@ -18,7 +18,7 @@ bool prune_node_from_level(const instance &instance, level_type &level, node *no
 
 void clear_level(level_type &level, mdd_node_source &mdd_node_source);
 
-void filter_mdd(instance &instance, const mdd &mdd, const bool full_filter, mdd_node_source &mdd_node_source) {
+void filter_mdd(instance &instance, mdd &mdd, const bool full_filter, mdd_node_source &mdd_node_source) {
     if (instance.lower_bound >= instance.upper_bound) {
         return;
     }
@@ -33,15 +33,15 @@ void filter_mdd(instance &instance, const mdd &mdd, const bool full_filter, mdd_
     }
 }
 
-bool update_nodes_and_prune(instance &instance, const mdd &mdd, mdd_node_source &mdd_node_source) {
+bool update_nodes_and_prune(instance &instance, mdd &mdd, mdd_node_source &mdd_node_source) {
     auto is_changed = false;
     auto is_still_changing = true;
 
     while (is_still_changing && instance.lower_bound < instance.upper_bound) {
         is_still_changing = false;
 
-        for (const auto &level: *mdd.levels | std::views::drop(1)) {
-            for (const auto node: *level->nodes) {
+        for (const auto &level: mdd.levels | std::views::drop(1)) {
+            for (const auto node: level->nodes) {
                 const auto needed_updates = node->needs_update_from_succ || node->needs_update_from_pred;
                 const auto is_updated_from_pred = update_node_from_pred(*node, level->depth);
                 is_still_changing |= is_updated_from_pred;
@@ -55,8 +55,8 @@ bool update_nodes_and_prune(instance &instance, const mdd &mdd, mdd_node_source 
             clear_level(*level, mdd_node_source);
         }
 
-        for (const auto &level: *mdd.levels | std::views::reverse | std::views::take(mdd.levels->size() - 1)) {
-            for (const auto node: *level->nodes) {
+        for (const auto &level: mdd.levels | std::views::reverse | std::views::take(mdd.levels.size() - 1)) {
+            for (const auto node: level->nodes) {
                 const auto needed_update_from_succ = node->needs_update_from_succ;
                 const auto needed_updates = node->needs_update_from_succ || node->needs_update_from_pred;
                 const auto is_updated_from_succ = update_node_from_succ(instance, *level, *node);
@@ -70,7 +70,7 @@ bool update_nodes_and_prune(instance &instance, const mdd &mdd, mdd_node_source 
             }
             clear_level(*level, mdd_node_source);
         }
-        for (const auto &root_level = mdd.levels->front(); const auto node: *root_level->nodes) {
+        for (const auto &root_level = mdd.levels.front(); const auto node: root_level->nodes) {
             const bool needs_update_from_succ = node->needs_update_from_succ;
             is_still_changing |= update_node_from_succ(instance, *root_level, *node);
             if (needs_update_from_succ) {
@@ -78,19 +78,19 @@ bool update_nodes_and_prune(instance &instance, const mdd &mdd, mdd_node_source 
             }
         }
 
-        std::erase_if(*mdd.levels, [](const std::unique_ptr<level_type> &level) { return level->nodes->empty(); });
-        int levels_depth = static_cast<int>(mdd.levels->size()) - 1;
+        std::erase_if(mdd.levels, [](const std::unique_ptr<level_type> &level) { return level->nodes.empty(); });
+        int levels_depth = static_cast<int>(mdd.levels.size()) - 1;
         instance.upper_bound = std::min(instance.upper_bound, levels_depth);
         instance.upper_bound = std::min(instance.upper_bound,
-                                        mdd.levels->front()->nodes->front()->upper_bound_down);
+                                        mdd.levels.front()->nodes.front()->upper_bound_down);
 
         if (levels_depth > instance.upper_bound) {
-            for (const auto &level: *mdd.levels | std::views::drop(instance.upper_bound + 1)) {
-                for (const auto node: *level->nodes) {
+            for (const auto &level: mdd.levels | std::views::drop(instance.upper_bound + 1)) {
+                for (const auto node: level->nodes) {
                     mdd_node_source.clear_node(node);
                 }
             }
-            mdd.levels->resize(instance.upper_bound + 1);
+            mdd.levels.resize(instance.upper_bound + 1);
         }
 
         if (instance.shared_object != nullptr) {
@@ -104,7 +104,7 @@ bool update_nodes_and_prune(instance &instance, const mdd &mdd, mdd_node_source 
 void clear_level(level_type &level, mdd_node_source &mdd_node_source) {
     if (level.needs_pruning) {
         level.needs_pruning = false;
-        std::erase_if(*level.nodes, [&mdd_node_source](node *node) {
+        std::erase_if(level.nodes, [&mdd_node_source](node *node) {
             if (node->is_active) {
                 return false;
             }
@@ -197,7 +197,7 @@ inline bool filter_succ_edges_of_node(const instance &instance, const level_type
 }
 
 void filter_flat_mdd(const instance &instance, const mdd &mdd, const bool is_reporting) {
-    instance.shared_object->num_levels = mdd.levels->size();
+    instance.shared_object->num_levels = mdd.levels.size();
     auto static valid_matches = absl::flat_hash_set<rflcs_graph::match *>();
     valid_matches.clear();
     auto static valid_edges = absl::flat_hash_set<long>();
@@ -210,7 +210,7 @@ void filter_flat_mdd(const instance &instance, const mdd &mdd, const bool is_rep
         auto static current_level_valid_edges = absl::flat_hash_set<long>();
         current_level_valid_edges.clear();
 
-        for (const auto node: *mdd.levels->at(level_index)->nodes) {
+        for (const auto node: mdd.levels.at(level_index)->nodes) {
             current_level_valid_matches.emplace(node->match);
             valid_matches.emplace(node->match);
             for (const auto to: node->edges_out) {

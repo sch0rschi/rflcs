@@ -251,8 +251,8 @@ double get_elapsed_seconds(const instance &instance) {
 
 long calculate_mdd_complexity(const mdd &mdd) {
     auto counter_set = absl::flat_hash_set<rflcs_graph::match*>();
-    for (const auto &level: *mdd.levels) {
-        for (const auto node: *level->nodes) {
+    for (const auto &level: mdd.levels) {
+        for (const auto node: level->nodes) {
             counter_set.insert(node->match);
         }
     }

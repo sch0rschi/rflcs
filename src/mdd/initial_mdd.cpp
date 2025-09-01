@@ -13,11 +13,11 @@
 std::unique_ptr<mdd> create_initial_mdd(const instance &instance, bool forward) {
 
     auto mdd = std::make_unique<struct mdd>();
-    mdd->levels = std::make_unique<levels_type>();
+    mdd->levels = levels_type();
 
     instance.mdd_node_source->sort_cache();
 
-    const auto &[root_level, first_level_depth, _rp] = *mdd->levels->emplace_back(std::make_unique<level_type>());
+    auto &[root_level, first_level_depth, _rp] = *mdd->levels.emplace_back(std::make_unique<level_type>());
     const auto root_node = instance.mdd_node_source->new_node();
     root_node->is_active = true;
     auto &root_match = forward ? instance.graph->matches.front() : instance.graph->reverse_matches.front();
@@ -28,16 +28,16 @@ std::unique_ptr<mdd> create_initial_mdd(const instance &instance, bool forward) 
     root_node->characters_on_all_paths_to_lower_bound_levels = Character_set();
     root_node->upper_bound_down = instance.upper_bound;
 
-    root_level->push_back(root_node);
+    root_level.push_back(root_node);
 
     auto match_to_node_map = absl::flat_hash_map<rflcs_graph::match *, node *>();
-    while (!mdd->levels->back()->nodes->empty() &&
-           mdd->levels->back()->depth < instance.upper_bound) {
-        const auto &[current_nodes, current_depth, _p] = *mdd->levels->back();
-        auto &[next_nodes, next_depth, _np] = *mdd->levels->emplace_back(std::make_unique<level_type>());
+    while (!mdd->levels.back()->nodes.empty() &&
+           mdd->levels.back()->depth < instance.upper_bound) {
+        const auto &[current_nodes, current_depth, _p] = *mdd->levels.back();
+        auto &[next_nodes, next_depth, _np] = *mdd->levels.emplace_back(std::make_unique<level_type>());
         next_depth = current_depth + 1;
         match_to_node_map.clear();
-        for (const auto pred_node: *current_nodes) {
+        for (const auto pred_node: current_nodes) {
             int min_position_2 = INT_MAX;
             temporaries::int_vector_positions_2.clear();
             for (auto succ_match: pred_node->match->extension.succ_matches) {
@@ -67,7 +67,7 @@ std::unique_ptr<mdd> create_initial_mdd(const instance &instance, bool forward) 
                         } else {
                             succ_node = instance.mdd_node_source->get_new_node_with_match(*succ_match);
                             match_to_node_map.insert({succ_match, succ_node});
-                            next_nodes->push_back(succ_node);
+                            next_nodes.push_back(succ_node);
                         }
                         pred_node->link_pred_to_succ(succ_node);
                     }
@@ -75,8 +75,8 @@ std::unique_ptr<mdd> create_initial_mdd(const instance &instance, bool forward) 
             }
         }
     }
-    while (mdd->levels->back()->nodes->empty()) {
-        mdd->levels->pop_back();
+    while (mdd->levels.back()->nodes.empty()) {
+        mdd->levels.pop_back();
     }
 
     return mdd;
@@ -85,15 +85,15 @@ std::unique_ptr<mdd> create_initial_mdd(const instance &instance, bool forward) 
 void prune_by_flat_mdd(shared_object *shared_object, const mdd &mdd, mdd_node_source &mdd_node_source) {
     auto *current_pointer = reinterpret_cast<int8_t *>(&shared_object->flat_levels);
 
-    auto static valid_matches_sets = std::vector<absl::flat_hash_set<rflcs_graph::match *> >(mdd.levels->size());
-    valid_matches_sets.resize(mdd.levels->size());
+    auto static valid_matches_sets = std::vector<absl::flat_hash_set<rflcs_graph::match *> >(mdd.levels.size());
+    valid_matches_sets.resize(mdd.levels.size());
     for (auto &valid_matches: valid_matches_sets) {
         valid_matches.clear();
     }
 
     static auto valid_edges_sets =
-        std::vector<absl::flat_hash_set<std::pair<rflcs_graph::match *, rflcs_graph::match*> > >(mdd.levels->size());
-    valid_edges_sets.resize(mdd.levels->size());
+        std::vector<absl::flat_hash_set<std::pair<rflcs_graph::match *, rflcs_graph::match*> > >(mdd.levels.size());
+    valid_edges_sets.resize(mdd.levels.size());
     for (auto &valid_edges: valid_edges_sets) {
         valid_edges.clear();
     }
@@ -122,12 +122,12 @@ void prune_by_flat_mdd(shared_object *shared_object, const mdd &mdd, mdd_node_so
         }
     }
 
-    for (const auto &level: *mdd.levels) {
+    for (const auto &level: mdd.levels) {
         const auto &current_valid_matches = valid_matches_sets.at(level->depth);
         const auto &current_valid_edges = valid_edges_sets.at(level->depth);
-        for (std::vector nodes(level->nodes->begin(), level->nodes->end()); const auto node: nodes) {
+        for (std::vector nodes(level->nodes.begin(), level->nodes.end()); const auto node: nodes) {
             if (!current_valid_matches.contains(node->match)) {
-                std::erase(*level->nodes, node);
+                std::erase(level->nodes, node);
                 mdd_node_source.clear_node(node);
             } else {
                 for (std::vector succs(node->edges_out.begin(), node->edges_out.end()); const auto succ: succs) {

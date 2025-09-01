@@ -6,9 +6,9 @@
 size_t calculate_flat_array_size(const mdd& data) {
     size_t size = 0;
     size += sizeof(shared_object);
-    for (const auto& level : *(data.levels)) {
+    for (const auto& level : data.levels) {
         size += sizeof(flat_level);
-        for (const auto node : *level->nodes) {
+        for (const auto node : level->nodes) {
             size += sizeof(flat_node);
             size += node->edges_out.size() * sizeof(flat_edge);
         }
@@ -19,16 +19,16 @@ size_t calculate_flat_array_size(const mdd& data) {
 void serialize_initial_mdd(const mdd& mdd, shared_object* shared_object) {
     auto level_node_to_match = std::map<std::pair<int, rflcs_graph::match*>, flat_node*>();
     auto* current_pointer = reinterpret_cast<int8_t *>(shared_object);
-    shared_object->num_levels = mdd.levels->size();
+    shared_object->num_levels = mdd.levels.size();
     current_pointer += sizeof(struct shared_object);
 
-    for (const auto& level : *mdd.levels) {
+    for (const auto& level : mdd.levels) {
         auto flat_level = reinterpret_cast<struct flat_level*>(current_pointer);
         flat_level->depth = level->depth;
-        flat_level->num_nodes = level->nodes->size();
+        flat_level->num_nodes = level->nodes.size();
         current_pointer += sizeof(struct flat_level);
 
-        for (const auto node : *level->nodes) {
+        for (const auto node : level->nodes) {
             auto flat_node = reinterpret_cast<struct flat_node*>(current_pointer);
             flat_node->match_ptr = node->match;
             flat_node->character = node->match->character;
@@ -44,10 +44,10 @@ void serialize_initial_mdd(const mdd& mdd, shared_object* shared_object) {
     current_pointer = reinterpret_cast<int8_t *>(shared_object);
     current_pointer += sizeof(struct shared_object);
 
-    for (const auto& level : *mdd.levels) {
+    for (const auto& level : mdd.levels) {
         current_pointer += sizeof(flat_level);
 
-        for (const auto node : *level->nodes) {
+        for (const auto node : level->nodes) {
             current_pointer += sizeof(flat_node);
 
             for (const auto edge : node->edges_out) {

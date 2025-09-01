@@ -30,9 +30,9 @@ bool is_perfect_square(const int n) {
 void add_counts(const mdd &mdd_reduction, std::vector<long> &time_series_node_count, std::vector<long> &time_series_edge_count) {
     auto node_count = 0L;
     auto edge_count = 0L;
-    for (const auto &level: *mdd_reduction.levels) {
-        node_count += static_cast<long>(level->nodes->size());
-        for (const auto node: *level->nodes) {
+    for (const auto &level: mdd_reduction.levels) {
+        node_count += static_cast<long>(level->nodes.size());
+        for (const auto node: level->nodes) {
             edge_count += static_cast<long>(node->edges_out.size());
         }
     }
@@ -100,13 +100,13 @@ void reduce_by_mdd(instance &instance) {
         filter_mdd(instance, *mdd_reduction, true, *mdd_node_source);
         instance.shared_object->number_of_refined_characters++;
         instance.shared_object->upper_bound =
-                std::min(instance.shared_object->upper_bound, mdd_reduction->levels->back()->depth);
+                std::min(instance.shared_object->upper_bound, mdd_reduction->levels.back()->depth);
         instance.shared_object->upper_bound =
                 std::max(instance.shared_object->upper_bound, instance.lower_bound);
-        if (!mdd_reduction->levels->empty()) {
+        if (!mdd_reduction->levels.empty()) {
             instance.shared_object->upper_bound =
                     std::max(instance.shared_object->upper_bound,
-                             mdd_reduction->levels->back()->nodes->front()->upper_bound_down);
+                             mdd_reduction->levels.back()->nodes.front()->upper_bound_down);
         }
 
 #ifdef MDD_FREQUENT_SAVE_FEATURE
@@ -132,12 +132,12 @@ void make_only_one_best_solution_remaining(
     const instance &instance,
     mdd_node_source &mdd_node_source,
     const mdd &mdd_reduction) {
-    for (auto const &level: *mdd_reduction.levels) {
-        for (const auto &node: *level->nodes) {
+    for (auto const &level: mdd_reduction.levels) {
+        for (const auto &node: level->nodes) {
             node->is_active = false;
         }
     }
-    auto solution_node = mdd_reduction.levels->front()->nodes->front();
+    auto solution_node = mdd_reduction.levels.front()->nodes.front();
     while (!solution_node->edges_out.empty()) {
         solution_node->is_active = true;
         int max_upper_bound_down = -1;
@@ -150,13 +150,13 @@ void make_only_one_best_solution_remaining(
     }
     solution_node->is_active = true;
 
-    for (auto const &level: *mdd_reduction.levels) {
-        for (const auto node: *level->nodes) {
+    for (auto const &level: mdd_reduction.levels) {
+        for (const auto node: level->nodes) {
             if (!node->is_active) {
                 mdd_node_source.clear_node(node);
             }
         }
-        std::erase_if(*level->nodes, [](auto *node) { return !node->is_active; });
+        std::erase_if(level->nodes, [](auto *node) { return !node->is_active; });
     }
     filter_flat_mdd(instance, mdd_reduction, true);
 }

@@ -26,16 +26,16 @@ void solve_gurobi_mdd_ilp(instance &instance) {
         auto objective = GRBLinExpr();
         std::vector<GRBLinExpr> character_sums(instance.alphabet_size);
         const GRBLinExpr *previous_level_node_sum = nullptr;
-        for (const auto &level : *instance.mdd->levels | std::views::drop(1)) {
+        for (const auto &level : instance.mdd->levels | std::views::drop(1)) {
             auto level_node_sum = GRBLinExpr();
-            for(const auto node : *level->nodes) {
+            for(const auto node : level->nodes) {
                 node->gurobi_variable = model.addVar(0.0, 1.0, 0, GRB_BINARY);
                 character_sums.at(node->match->character) += node->gurobi_variable;
                 level_node_sum += node->gurobi_variable;
                 objective += node->gurobi_variable;
                 if(level->depth > 1) {
                     auto preds = GRBLinExpr();
-                    for(auto pred : node->edges_in) {
+                    for(const auto pred : node->edges_in) {
                         preds += pred->gurobi_variable;
                     }
                     model.addConstr(node->gurobi_variable, GRB_LESS_EQUAL, preds);
@@ -79,8 +79,8 @@ void solve_gurobi_mdd_ilp(instance &instance) {
 void set_solution_from_ilp(instance &instance) {
     if constexpr (SOLVER == GUROBI_MDD) {
         instance.solution.clear();
-        for (const auto &level : *instance.mdd->levels | std::views::drop(1)) {
-            for(const auto node : *level->nodes) {
+        for (const auto &level : instance.mdd->levels | std::views::drop(1)) {
+            for(const auto node : level->nodes) {
                 if (static_cast<int>(round(node->gurobi_variable.get(GRB_DoubleAttr_X))) == 1) {
                     instance.solution.push_back(node->match->character);
                 }

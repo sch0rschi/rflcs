@@ -25,8 +25,8 @@ void get_characters_ordered_by_importance_mdd(
     auto matches_on_level = absl::flat_hash_set<rflcs_graph::match *>();
     auto static valid_edges = absl::flat_hash_set<long>();
     valid_edges.clear();
-    for (auto const &level: *reduction_mdd.levels | std::ranges::views::drop(1)) {
-        for (const auto node: *level->nodes) {
+    for (auto const &level: reduction_mdd.levels | std::ranges::views::drop(1)) {
+        for (const auto node: level->nodes) {
             matches_on_level.insert(node->match);
             for (auto const &succ: node->edges_out) {
                 valid_edges.insert(match_pair_to_edge_long_encoding(node->match, succ->match));
@@ -73,9 +73,9 @@ double calculate_greedy_score(const mdd &mdd,
     valid_edges.clear();
     auto number_of_mdd_edges = 0.0;
     auto max_in_edges = 0.0;
-    for (const auto &level: *mdd.levels | std::ranges::views::drop(1)) {
+    for (const auto &level: mdd.levels | std::ranges::views::drop(1)) {
         matches_on_level.clear();
-        for (const auto node: *level->nodes) {
+        for (const auto node: level->nodes) {
             matches_on_level.insert(node->match);
             number_of_mdd_nodes++;
             number_of_mdd_edges += static_cast<double>(node->edges_in.size());
@@ -101,14 +101,14 @@ double calculate_greedy_score(const mdd &mdd,
 }
 
 void chaining_numbers(const mdd &mdd, const character_counters_source &character_counters_source) {
-    for (const auto node: *mdd.levels->back()->nodes) {
+    for (const auto node: mdd.levels.back()->nodes) {
         node->sequences_character_counter = character_counters_source.get_counter();
         std::ranges::fill(*node->sequences_character_counter, 0);
         node->sequences_character_counter->at(node->match->character) = 1;
     }
 
-    for (int level_index = static_cast<int>(mdd.levels->size()) - 2; level_index >= 0; level_index--) {
-        for (const auto &level = mdd.levels->at(level_index); const auto node: *level->nodes) {
+    for (int level_index = static_cast<int>(mdd.levels.size()) - 2; level_index >= 0; level_index--) {
+        for (const auto &level = mdd.levels.at(level_index); const auto node: level->nodes) {
             node->sequences_character_counter = character_counters_source.get_counter();
             std::ranges::fill(*node->sequences_character_counter, 0);
             for (const auto succ: node->edges_out) {
@@ -125,13 +125,13 @@ void chaining_numbers(const mdd &mdd, const character_counters_source &character
             }
         }
 
-        for (const auto &level = mdd.levels->at(level_index + 1); auto node: *level->nodes) {
+        for (const auto &level = mdd.levels.at(level_index + 1); auto node: level->nodes) {
             character_counters_source.return_counter(node->sequences_character_counter);
             node->sequences_character_counter = nullptr;
         }
     }
 
-    const auto root = *mdd.levels->front()->nodes->begin();
+    const auto root = *mdd.levels.front()->nodes.begin();
     temporaries::chaining_numbers = *root->sequences_character_counter;
     character_counters_source.return_counter(root->sequences_character_counter);
     root->sequences_character_counter = nullptr;
