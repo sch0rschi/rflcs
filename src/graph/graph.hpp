@@ -24,7 +24,6 @@ namespace rflcs_graph {
         int position_1;
         int position_2;
         int transient_match_domination_number;
-        long double search_space_occurrence_estimation = 1.0;
         GRBVar gurobi_variable;
         int lcs_depth = 0;
     };

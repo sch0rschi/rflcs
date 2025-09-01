@@ -30,7 +30,7 @@ inline std::unique_ptr<mdd> mdd::copy_mdd(const mdd &original_mdd, mdd_node_sour
         for (const auto original_node: *original_level->nodes) {
             node *copy_node = mdd_node_source.get_copy_of_old_node_with_copy_helper(original_node);
             copy_nodes->push_back(copy_node);
-            for (const node *original_pred: original_node->arcs_in) {
+            for (const node *original_pred: original_node->edges_in) {
                 original_pred->copy_helper->link_pred_to_succ(copy_node);
                 original_pred->copy_helper->needs_update_from_succ = false;
             }

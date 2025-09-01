@@ -33,7 +33,7 @@ void add_counts(const mdd &mdd_reduction, std::vector<long> &time_series_node_co
     for (const auto &level: *mdd_reduction.levels) {
         node_count += static_cast<long>(level->nodes->size());
         for (const auto node: *level->nodes) {
-            edge_count += static_cast<long>(node->arcs_out.size());
+            edge_count += static_cast<long>(node->edges_out.size());
         }
     }
     time_series_node_count.push_back(node_count);
@@ -138,10 +138,10 @@ void make_only_one_best_solution_remaining(
         }
     }
     auto solution_node = mdd_reduction.levels->front()->nodes->front();
-    while (!solution_node->arcs_out.empty()) {
+    while (!solution_node->edges_out.empty()) {
         solution_node->is_active = true;
         int max_upper_bound_down = -1;
-        for (const auto &succ_node: solution_node->arcs_out) {
+        for (const auto &succ_node: solution_node->edges_out) {
             if (succ_node->upper_bound_down > max_upper_bound_down) {
                 solution_node = succ_node;
                 max_upper_bound_down = succ_node->upper_bound_down;

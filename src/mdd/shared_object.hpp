@@ -11,12 +11,12 @@ void serialize_initial_mdd(const mdd& mdd, shared_object* shared_object);
 
 int get_active_match_count(shared_object* flat_mdd);
 
-int get_active_arc_count(shared_object* flat_mdd);
+int get_active_edge_count(shared_object* flat_mdd);
 
 struct flat_node;
 
-struct flat_arc {
-    flat_node* arc_node;
+struct flat_edge {
+    flat_node* edge_node;
     bool is_active;
 };
 
@@ -25,8 +25,8 @@ struct flat_node {
     Character character;
     int position_2;
     bool is_active;
-    size_t num_arcs_out;
-    flat_arc arcs_out[];
+    size_t num_edges_out;
+    flat_edge edges_out[];
 };
 
 struct flat_level {

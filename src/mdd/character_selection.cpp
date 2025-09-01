@@ -28,7 +28,7 @@ void get_characters_ordered_by_importance_mdd(
     for (auto const &level: *reduction_mdd.levels | std::ranges::views::drop(1)) {
         for (const auto node: *level->nodes) {
             matches_on_level.insert(node->match);
-            for (auto const &succ: node->arcs_out) {
+            for (auto const &succ: node->edges_out) {
                 valid_edges.insert(match_pair_to_edge_long_encoding(node->match, succ->match));
             }
         }
@@ -78,9 +78,9 @@ double calculate_greedy_score(const mdd &mdd,
         for (const auto node: *level->nodes) {
             matches_on_level.insert(node->match);
             number_of_mdd_nodes++;
-            number_of_mdd_edges += static_cast<double>(node->arcs_in.size());
-            max_in_edges = std::max(max_in_edges, static_cast<double>(node->arcs_in.size()));
-            for (const auto *succ: node->arcs_out) {
+            number_of_mdd_edges += static_cast<double>(node->edges_in.size());
+            max_in_edges = std::max(max_in_edges, static_cast<double>(node->edges_in.size()));
+            for (const auto *succ: node->edges_out) {
                 valid_edges.insert(match_pair_to_edge_long_encoding(node->match, succ->match));
             }
         }
@@ -111,7 +111,7 @@ void chaining_numbers(const mdd &mdd, const character_counters_source &character
         for (const auto &level = mdd.levels->at(level_index); const auto node: *level->nodes) {
             node->sequences_character_counter = character_counters_source.get_counter();
             std::ranges::fill(*node->sequences_character_counter, 0);
-            for (const auto succ: node->arcs_out) {
+            for (const auto succ: node->edges_out) {
                 std::ranges::transform(
                     *node->sequences_character_counter,
                     *succ->sequences_character_counter,

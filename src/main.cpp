@@ -53,8 +53,8 @@ auto main(const int argc, char **argv) -> int {
         temporaries::old_characters_on_all_paths_to_root = Character_set();
         temporaries::chaining_numbers = std::vector<int>(instance.alphabet_size);
         temporaries::node_character_count = std::vector<long>(instance.alphabet_size);
-        temporaries::ingoing_arc_character_count = std::vector<long>(instance.alphabet_size);
-        temporaries::outgoing_arc_character_count = std::vector<long>(instance.alphabet_size);
+        temporaries::incoming_edge_character_count = std::vector<long>(instance.alphabet_size);
+        temporaries::outgoing_edge_character_count = std::vector<long>(instance.alphabet_size);
         temporaries::int_vector_positions_2 = std::vector<int>();
 
         instance.start = std::chrono::system_clock::now();
@@ -251,16 +251,16 @@ void check_solution(instance &instance) {
 
 void parse_string(std::vector<Character> &character_sequence, std::ifstream &input_file, const int string_length) {
     character_sequence.resize(string_length);
-    for (int i = 0; i < string_length && input_file.good(); i++) {
-        character_sequence.at(i) = static_cast<Character>(parse_next_integer(input_file));
+    for (int i = 0; i < string_length; i++) {
+        character_sequence.at(i) = parse_next_integer(input_file);
     }
 }
 
-auto parse_next_integer(std::ifstream &input_file) -> int {
+auto parse_next_integer(std::ifstream &input_file) -> Character {
     if (input_file.good()) {
         std::string file_entry; // NOLINT(*-const-correctness)
         input_file >> file_entry;
-        return static_cast<Character>(std::stoi(file_entry));
+        return std::stoi(file_entry);
     }
-    return -1;
+    exit(1);
 }

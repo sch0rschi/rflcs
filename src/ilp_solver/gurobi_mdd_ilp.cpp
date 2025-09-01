@@ -35,7 +35,7 @@ void solve_gurobi_mdd_ilp(instance &instance) {
                 objective += node->gurobi_variable;
                 if(level->depth > 1) {
                     auto preds = GRBLinExpr();
-                    for(auto pred : node->arcs_in) {
+                    for(auto pred : node->edges_in) {
                         preds += pred->gurobi_variable;
                     }
                     model.addConstr(node->gurobi_variable, GRB_LESS_EQUAL, preds);

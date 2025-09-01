@@ -122,20 +122,20 @@ inline bool update_node_from_succ(const instance &instance, const level_type &le
 }
 
 inline bool update_node_from_pred(node &node, const int depth) {
-    if (!node.needs_update_from_pred || node.arcs_in.empty()) {
+    if (!node.needs_update_from_pred || node.edges_in.empty()) {
         return false;
     }
     return node.update_from_preds(depth);
 }
 
 inline bool prune_node_from_level(const instance &instance, level_type &level, node *node) {
-    const bool no_incoming_arcs = node->arcs_in.empty();
+    const bool no_incoming_edges = node->edges_in.empty();
     const bool is_insufficient_upper_bound = level.depth + node->upper_bound_down <= instance.lower_bound;
     temporaries::temp_character_set_1 = node->characters_on_paths_to_root;
     temporaries::temp_character_set_1 |= node->characters_on_paths_to_some_sink;
     temporaries::temp_character_set_2 = node->characters_on_all_paths_to_root;
     temporaries::temp_character_set_2 &= node->characters_on_all_paths_to_lower_bound_levels;
-    if (no_incoming_arcs
+    if (no_incoming_edges
         || is_insufficient_upper_bound
         || static_cast<int>(temporaries::temp_character_set_1.count()) <= instance.lower_bound
         || temporaries::temp_character_set_2.any()
@@ -151,8 +151,8 @@ inline bool filter_succ_edges_of_node(const instance &instance, const level_type
     bool filtered_edge = false;
     int max_position_2 = INT_MAX;
     static auto succ_nodes = std::vector<struct node *>();
-    succ_nodes.resize(node.arcs_out.size());
-    std::ranges::copy(node.arcs_out, succ_nodes.begin());
+    succ_nodes.resize(node.edges_out.size());
+    std::ranges::copy(node.edges_out, succ_nodes.begin());
     std::ranges::sort(succ_nodes, [](const auto node1, const auto node2) {
         return node1->match->extension.position_1 < node2->match->extension.position_1;
     });
@@ -213,7 +213,7 @@ void filter_flat_mdd(const instance &instance, const mdd &mdd, const bool is_rep
         for (const auto node: *mdd.levels->at(level_index)->nodes) {
             current_level_valid_matches.emplace(node->match);
             valid_matches.emplace(node->match);
-            for (const auto to: node->arcs_out) {
+            for (const auto to: node->edges_out) {
                 long pair_long_encoding = match_pair_to_edge_long_encoding(node->match, to->match);
                 current_level_valid_edges.emplace(pair_long_encoding);
                 valid_edges.emplace(pair_long_encoding);
@@ -228,14 +228,14 @@ void filter_flat_mdd(const instance &instance, const mdd &mdd, const bool is_rep
             flat_node->is_active &=
                     current_level_valid_matches.contains(static_cast<rflcs_graph::match *>(flat_node->match_ptr));
             current_pointer += sizeof(struct flat_node);
-            for (size_t arc_index = 0; arc_index < flat_node->num_arcs_out; ++arc_index) {
-                auto flat_arc = reinterpret_cast<struct flat_arc *>(current_pointer);
-                flat_arc->is_active &= current_level_valid_edges.contains(
+            for (size_t edge_index = 0; edge_index < flat_node->num_edges_out; ++edge_index) {
+                auto flat_edge = reinterpret_cast<struct flat_edge *>(current_pointer);
+                flat_edge->is_active &= current_level_valid_edges.contains(
                     match_pair_to_edge_long_encoding(
                         static_cast<const rflcs_graph::match *>(flat_node->match_ptr),
-                        static_cast<const rflcs_graph::match *>(flat_arc->arc_node->match_ptr))
+                        static_cast<const rflcs_graph::match *>(flat_edge->edge_node->match_ptr))
                 );
-                current_pointer += sizeof(struct flat_arc);
+                current_pointer += sizeof(struct flat_edge);
             }
         }
     }

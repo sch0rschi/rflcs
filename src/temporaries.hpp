@@ -13,7 +13,7 @@ struct temporaries {
     static Character_set old_characters_on_all_paths_to_root;
     static std::vector<int> chaining_numbers;
     static std::vector<long> node_character_count;
-    static std::vector<long> outgoing_arc_character_count;
-    static std::vector<long> ingoing_arc_character_count;
+    static std::vector<long> outgoing_edge_character_count;
+    static std::vector<long> incoming_edge_character_count;
     static std::vector<int> int_vector_positions_2;
 };

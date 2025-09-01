@@ -13,17 +13,17 @@ void solve_enumeration(instance &instance) {
             auto flat_node = reinterpret_cast<struct flat_node *>(current_pointer);
             flat_node->is_active = false;
             current_pointer += sizeof(struct flat_node);
-            auto *arcs = reinterpret_cast<flat_arc *>(current_pointer);
-            std::sort(arcs, arcs + flat_node->num_arcs_out, [](const flat_arc &arc_1, const flat_arc &arc_2) {
-                const auto match_1 = static_cast<rflcs_graph::match *>(arc_1.arc_node->match_ptr);
-                const auto match_2 = static_cast<rflcs_graph::match *>(arc_2.arc_node->match_ptr);
+            auto *edges = reinterpret_cast<flat_edge *>(current_pointer);
+            std::sort(edges, edges + flat_node->num_edges_out, [](const flat_edge &edge_1, const flat_edge &edge_2) {
+                const auto match_1 = static_cast<rflcs_graph::match *>(edge_1.edge_node->match_ptr);
+                const auto match_2 = static_cast<rflcs_graph::match *>(edge_2.edge_node->match_ptr);
                 return std::tie(match_1->extension.position_1,
                                 match_1->extension.position_2)
                        <
                        std::tie(match_2->extension.position_1,
                                 match_2->extension.position_2);
             });
-            current_pointer += flat_node->num_arcs_out * sizeof(flat_arc);
+            current_pointer += flat_node->num_edges_out * sizeof(flat_edge);
         }
     }
 
@@ -36,8 +36,8 @@ void solve_enumeration(instance &instance) {
 
     auto stack = stack_vector.data();
     int stack_pointer = -1;
-    for (size_t i = 0; i < root_node->num_arcs_out; i++) {
-        stack[++stack_pointer] = root_node->arcs_out[i].arc_node;
+    for (size_t i = 0; i < root_node->num_edges_out; i++) {
+        stack[++stack_pointer] = root_node->edges_out[i].edge_node;
     }
 
     int depth = 0;
@@ -64,8 +64,8 @@ void solve_enumeration(instance &instance) {
                 }
             }
             int position_2_min = INT_MAX;
-            for (size_t i = 0; i < current_node->num_arcs_out; ++i) {
-                flat_node *potential_node = current_node->arcs_out[i].arc_node;
+            for (size_t i = 0; i < current_node->num_edges_out; ++i) {
+                flat_node *potential_node = current_node->edges_out[i].edge_node;
                 if (position_2_min > potential_node->position_2 && !used_characters.test(potential_node->character)) {
                     stack[++stack_pointer] = potential_node;
                     position_2_min = potential_node->position_2;

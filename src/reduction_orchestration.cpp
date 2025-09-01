@@ -152,7 +152,7 @@ void filter_matches_by_flat_mdd(instance &instance) {
             match_ptr->extension.is_active = flat_node->is_active;
             match_ptr->extension.reversed->extension.is_active = match_ptr->extension.is_active;
             current_pointer += sizeof(struct flat_node);
-            current_pointer += flat_node->num_arcs_out * sizeof(flat_arc);
+            current_pointer += flat_node->num_edges_out * sizeof(flat_edge);
         }
     }
     instance.graph->matches.front().extension.is_active = false;

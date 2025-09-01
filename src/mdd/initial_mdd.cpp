@@ -112,12 +112,12 @@ void prune_by_flat_mdd(shared_object *shared_object, const mdd &mdd, mdd_node_so
             }
             current_pointer += sizeof(struct flat_node);
 
-            for (size_t arc_index = 0; arc_index < flat_node->num_arcs_out; ++arc_index) {
-                if(auto flat_arc = reinterpret_cast<struct flat_arc *>(current_pointer); flat_arc->is_active) {
-                    auto *to = reinterpret_cast<rflcs_graph::match *>(flat_arc->arc_node->match_ptr);
+            for (size_t edge_index = 0; edge_index < flat_node->num_edges_out; ++edge_index) {
+                if(auto flat_edge = reinterpret_cast<struct flat_edge *>(current_pointer); flat_edge->is_active) {
+                    auto *to = reinterpret_cast<rflcs_graph::match *>(flat_edge->edge_node->match_ptr);
                     current_level_valid_edges.emplace(match, to);
                 }
-                current_pointer += sizeof(flat_arc);
+                current_pointer += sizeof(flat_edge);
             }
         }
     }
@@ -130,7 +130,7 @@ void prune_by_flat_mdd(shared_object *shared_object, const mdd &mdd, mdd_node_so
                 std::erase(*level->nodes, node);
                 mdd_node_source.clear_node(node);
             } else {
-                for (std::vector succs(node->arcs_out.begin(), node->arcs_out.end()); const auto succ: succs) {
+                for (std::vector succs(node->edges_out.begin(), node->edges_out.end()); const auto succ: succs) {
                     if (!current_valid_edges.contains({node->match, succ->match})) {
                         node->unlink_pred_from_succ(succ);
                     }
