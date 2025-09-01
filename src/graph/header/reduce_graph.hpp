@@ -2,4 +2,4 @@
 
 #include "../../instance.hpp"
 
-void reduce_graph(instance &instance);
+void reduce_graph(const instance &instance);

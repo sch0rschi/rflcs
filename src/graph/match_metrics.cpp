@@ -49,7 +49,7 @@ auto get_characters_ordered_by_importance(const instance& instance) -> std::vect
                  });
 
     auto selected_rf_characters = std::vector<int>();
-    for (auto tuple: characters_with_metrics) {
+    for (auto &tuple: characters_with_metrics) {
         selected_rf_characters.push_back(std::get<0>(tuple));
     }
     return selected_rf_characters;
@@ -80,11 +80,10 @@ auto get_single_character_repetitions(const instance& instance) -> std::vector<i
     return lcs_scores;
 }
 
-inline auto aggregate_pairwise_max_in_first_vector(std::vector<int>& repetition_counter1,
-                                                   std::vector<int>& repetition_counter2) -> void {
-    std::transform(repetition_counter1.begin(),
-                   repetition_counter1.end(),
-                   repetition_counter2.begin(),
+inline void aggregate_pairwise_max_in_first_vector(std::vector<int>& repetition_counter1,
+                                                   std::vector<int>& repetition_counter2) {
+    std::ranges::transform(repetition_counter1,
+                   repetition_counter2,
                    repetition_counter1.begin(),
                    [](const int first_value, const int second_value) {
                        return std::max(first_value, second_value);
