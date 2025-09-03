@@ -26,10 +26,10 @@ bool calculate_simple_upper_bounds(rflcs_graph::graph &graph) {
 }
 
 
-void setup_matches_for_simple_upper_bound(const instance &instance) {
-    instance.graph->matches.back().upper_bound = 0;
-    instance.graph->reverse_matches.back().upper_bound = 0;
-    for (auto &[character, upper_bound, _dom, _heur, extension]: instance.graph->matches) {
+void setup_matches_for_simple_upper_bound(rflcs_graph::graph &graph) {
+    graph.matches.back().upper_bound = 0;
+    graph.reverse_matches.back().upper_bound = 0;
+    for (auto &[character, upper_bound, _dom, _heur, extension]: graph.matches) {
         extension.available_characters = Character_set();
         extension.reversed->extension.available_characters = Character_set();
     }

@@ -81,7 +81,7 @@ void create_graph(instance &instance) {
         extension.match_id = match_counter++;
     }
 
-    setup_matches_for_simple_upper_bound(instance);
+    setup_matches_for_simple_upper_bound(*instance.graph);
 }
 
 auto calculate_number_of_matches(const instance &instance) -> unsigned int {

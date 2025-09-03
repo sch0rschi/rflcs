@@ -56,7 +56,7 @@ void reduce_graph_while_heuristic(instance &instance) {
         is_improving = false;
         is_improving |= calculate_simple_upper_bounds(*instance.graph);
         is_improving |= deactivate_matches(instance);
-        reduce_graph(instance);
+        reduce_graph(*instance.graph);
     }
     const std::chrono::duration<double> heuristic_elapsed_seconds = std::chrono::system_clock::now() - instance.start;
     std::cout << std::fixed << std::setprecision(2)
@@ -76,10 +76,10 @@ void reduce_graph_pre_solver(instance &instance) {
             return;
         }
         is_improving = false;
-        is_improving |= relax_by_fixed_character_rf_constraint(instance);
+        is_improving |= relax_by_fixed_character_rf_constraint(*instance.graph);
         is_improving |= calculate_simple_upper_bounds(*instance.graph);
         is_improving |= deactivate_matches(instance);
-        reduce_graph(instance);
+        reduce_graph(*instance.graph);
         std::cout << "Repetition-Free Subset LCS Relaxation reduced to " << instance.active_matches << " matches = "
                 << 100.0 * (1 - static_cast<double>(instance.active_matches)
                             / static_cast<double>(instance.graph->matches.size() - 2)) << "%."

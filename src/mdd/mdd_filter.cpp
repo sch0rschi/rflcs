@@ -6,7 +6,7 @@
 
 #include "edge_utils.hpp"
 
-bool update_nodes_and_prune(const instance &instance, mdd &mdd, mdd_node_source &mdd_node_source);
+bool update_nodes_and_prune(shared_object *shared_object, mdd &mdd, mdd_node_source &mdd_node_source);
 
 bool update_node_from_succ(const level_type &level, node &node);
 
@@ -25,11 +25,11 @@ void filter_mdd(const instance &instance, mdd &mdd, mdd_node_source &mdd_node_so
 
     auto is_still_running = true;
     while (is_still_running) {
-        is_still_running = update_nodes_and_prune(instance, mdd, mdd_node_source);
+        is_still_running = update_nodes_and_prune(instance.shared_object, mdd, mdd_node_source);
     }
 }
 
-bool update_nodes_and_prune(const instance &instance, mdd &mdd, mdd_node_source &mdd_node_source) {
+bool update_nodes_and_prune(shared_object *shared_object, mdd &mdd, mdd_node_source &mdd_node_source) {
     auto is_changed = false;
     auto is_still_changing = true;
 
@@ -89,8 +89,8 @@ bool update_nodes_and_prune(const instance &instance, mdd &mdd, mdd_node_source 
             mdd.levels.resize(temporaries::upper_bound + 1);
         }
 
-        if (instance.shared_object != nullptr) {
-            instance.shared_object->upper_bound = temporaries::upper_bound;
+        if (shared_object != nullptr) {
+            shared_object->upper_bound = temporaries::upper_bound;
         }
         is_changed |= is_still_changing;
     }

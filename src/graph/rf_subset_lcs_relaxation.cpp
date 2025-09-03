@@ -16,25 +16,25 @@ auto set_rf_relaxed_upper_bounds(std::vector<rflcs_graph::match>& matches,
                                  const std::vector<std::vector<std::pair<int, int>>>& contexts,
                                  int number_of_characters) -> bool;
 
-auto all_single_character_relaxation(const instance& instance, std::vector<std::vector<std::pair<int, int>>>& upper_bound_redistributions) -> bool;
+auto all_single_character_relaxation(rflcs_graph::graph &graph, std::vector<std::vector<std::pair<int, int>>>& upper_bound_redistributions) -> bool;
 
-auto selected_characters_rf_relaxation(const instance& instance, std::vector<std::vector<std::pair<int, int>>>& upper_bound_redistributions) -> bool;
+auto selected_characters_rf_relaxation(rflcs_graph::graph &graph, std::vector<std::vector<std::pair<int, int>>>& upper_bound_redistributions) -> bool;
 
-auto relax_by_fixed_character_rf_constraint(instance& instance) -> bool {
+auto relax_by_fixed_character_rf_constraint(rflcs_graph::graph &graph) -> bool {
     auto upper_bound_redistributions = std::vector<std::vector<std::pair<int, int>>>(constants::alphabet_size);
-    auto found_improvement = all_single_character_relaxation(instance, upper_bound_redistributions);
-    found_improvement |= selected_characters_rf_relaxation(instance, upper_bound_redistributions);
+    auto found_improvement = all_single_character_relaxation(graph, upper_bound_redistributions);
+    found_improvement |= selected_characters_rf_relaxation(graph, upper_bound_redistributions);
     return found_improvement;
 }
 
-inline auto selected_characters_rf_relaxation(const instance& instance, std::vector<std::vector<std::pair<int, int>>>& upper_bound_redistributions) -> bool {
+inline auto selected_characters_rf_relaxation(rflcs_graph::graph &graph, std::vector<std::vector<std::pair<int, int>>>& upper_bound_redistributions) -> bool {
     auto found_improvement = false;
     for (int number_of_selected_characters = 2;
          number_of_selected_characters < std::min(constants::alphabet_size, static_cast<int>(log2(constants::alphabet_size)));
          number_of_selected_characters++) {
         auto still_improving = true;
         while (still_improving) {
-            std::vector<int> relaxation_characters = get_characters_ordered_by_importance(instance);
+            std::vector<int> relaxation_characters = get_characters_ordered_by_importance(graph);
             relaxation_characters.resize(
                 std::min(number_of_selected_characters, static_cast<int>(relaxation_characters.size())));
 
@@ -56,8 +56,8 @@ inline auto selected_characters_rf_relaxation(const instance& instance, std::vec
             }
 
 
-            still_improving = set_rf_relaxed_upper_bounds(instance.graph->matches, upper_bound_redistributions, number_of_selected_characters);
-            still_improving |= set_rf_relaxed_upper_bounds(instance.graph->reverse_matches, upper_bound_redistributions, number_of_selected_characters);
+            still_improving = set_rf_relaxed_upper_bounds(graph.matches, upper_bound_redistributions, number_of_selected_characters);
+            still_improving |= set_rf_relaxed_upper_bounds(graph.reverse_matches, upper_bound_redistributions, number_of_selected_characters);
             found_improvement |= still_improving;
             for (const auto character: relaxation_characters) {
                 upper_bound_redistributions.at(character).clear();
@@ -67,17 +67,17 @@ inline auto selected_characters_rf_relaxation(const instance& instance, std::vec
     return found_improvement;
 }
 
-inline auto all_single_character_relaxation(const instance& instance, std::vector<std::vector<std::pair<int, int>>>& upper_bound_redistributions) -> bool {
+inline auto all_single_character_relaxation(rflcs_graph::graph &graph, std::vector<std::vector<std::pair<int, int>>>& upper_bound_redistributions) -> bool {
     auto found_improvement = false;
     auto still_improving = true;
-    const std::vector<int> single_character_repetitions = get_single_character_repetitions(instance);
+    const std::vector<int> single_character_repetitions = get_single_character_repetitions(graph);
     while (still_improving) {
         still_improving = false;
         for (int character = 0; character < constants::alphabet_size; character++) {
             if (single_character_repetitions.at(character) > 1) {
                 upper_bound_redistributions.at(character).emplace_back(0, 1);
-                still_improving |= set_rf_relaxed_upper_bounds(instance.graph->matches, upper_bound_redistributions, 1);
-                still_improving |= set_rf_relaxed_upper_bounds(instance.graph->reverse_matches, upper_bound_redistributions, 1);
+                still_improving |= set_rf_relaxed_upper_bounds(graph.matches, upper_bound_redistributions, 1);
+                still_improving |= set_rf_relaxed_upper_bounds(graph.reverse_matches, upper_bound_redistributions, 1);
                 found_improvement |= still_improving;
 
                 upper_bound_redistributions.at(character).clear();
