@@ -8,21 +8,29 @@
 #include "../config.hpp"
 #include "absl/container/flat_hash_map.h"
 
-void set_solution_from_graph(instance &instance, const std::set<rflcs_graph::match *> &matches);
+void set_solution_from_graph(
+    instance &instance,
+    const std::set<rflcs_graph::match *> &matches,
+    const absl::flat_hash_map<rflcs_graph::match *, GRBVar> &gurobi_variable_map);
 
 std::set<rflcs_graph::match *> get_active_matches(const instance &instance);
 
 absl::flat_hash_map<int, std::vector<rflcs_graph::match *> >
 get_character_matches_map(const std::set<rflcs_graph::match *> &matches);
 
-void set_objective_function(GRBModel &model, const std::set<rflcs_graph::match *> &matches);
+void set_objective_function(GRBModel &model,
+                            const std::set<rflcs_graph::match *> &matches,
+                            const absl::flat_hash_map<rflcs_graph::match *, GRBVar> &gurobi_variable_map);
 
-void set_repetition_free_constraint(GRBModel &model, const std::set<rflcs_graph::match *> &matches);
+void set_repetition_free_constraint(GRBModel &model,
+                                    const std::set<rflcs_graph::match *> &matches,
+                                    const absl::flat_hash_map<rflcs_graph::match *, GRBVar> &gurobi_variable_map);
 
-void set_common_sub_sequence_constraint(GRBModel &model, const std::set<rflcs_graph::match *> &matches);
+void set_common_sub_sequence_constraint(GRBModel &model,
+                                        const std::set<rflcs_graph::match *> &matches,
+                                        const absl::flat_hash_map<rflcs_graph::match *, GRBVar> &gurobi_variable_map);
 
 void solve_gurobi_mis_ilp(instance &instance) {
-
     try {
         auto env = GRBEnv(true);
 
@@ -38,9 +46,14 @@ void solve_gurobi_mis_ilp(instance &instance) {
 
         const auto matches = get_active_matches(instance);
 
-        set_objective_function(model, matches);
-        set_common_sub_sequence_constraint(model, matches);
-        set_repetition_free_constraint(model, matches);
+        auto gurobi_variable_map = absl::flat_hash_map<rflcs_graph::match *, GRBVar>();
+        for (const auto match: matches) {
+            gurobi_variable_map[match] = model.addVar(0.0, 1.0, 0.0, GRB_BINARY);
+        }
+
+        set_objective_function(model, matches, gurobi_variable_map);
+        set_common_sub_sequence_constraint(model, matches, gurobi_variable_map);
+        set_repetition_free_constraint(model, matches, gurobi_variable_map);
         model.optimize();
 
         const auto result_status = model.get(GRB_IntAttr_Status);
@@ -48,7 +61,7 @@ void solve_gurobi_mis_ilp(instance &instance) {
         if (model.get(GRB_IntAttr_SolCount) > 0) {
             temporaries::lower_bound = static_cast<int>(round(model.get(GRB_DoubleAttr_ObjVal)));
             instance.match_ilp_upper_bound = static_cast<int>(round(model.get(GRB_DoubleAttr_ObjBound)));
-            set_solution_from_graph(instance, matches);
+            set_solution_from_graph(instance, matches, gurobi_variable_map);
         } else if (result_status == GRB_INFEASIBLE) {
             instance.match_ilp_upper_bound = temporaries::lower_bound;
         } else {
@@ -60,35 +73,42 @@ void solve_gurobi_mis_ilp(instance &instance) {
     }
 }
 
-void set_common_sub_sequence_constraint(GRBModel &model, const std::set<rflcs_graph::match *> &matches) {
+void set_common_sub_sequence_constraint(
+    GRBModel &model,
+    const std::set<rflcs_graph::match *> &matches,
+    const absl::flat_hash_map<rflcs_graph::match *, GRBVar> &gurobi_variable_map) {
     for (const auto match1: matches) {
         for (const auto match2: matches) {
             if (match1->extension.position_1 < match2->extension.position_1
                 && match1->extension.position_2 > match2->extension.position_2) {
                 auto conflict = GRBLinExpr();
-                conflict += match1->extension.gurobi_variable;
-                conflict += match2->extension.gurobi_variable;
+                conflict += gurobi_variable_map.at(match1);
+                conflict += gurobi_variable_map.at(match2);
                 model.addConstr(conflict, GRB_LESS_EQUAL, 1.0);
             }
         }
     }
 }
 
-void set_repetition_free_constraint(GRBModel &model, const std::set<rflcs_graph::match *> &matches) {
-    for (const auto&[character, matches_with_character]: get_character_matches_map(matches)) {
+void set_repetition_free_constraint(
+    GRBModel &model,
+    const std::set<rflcs_graph::match *> &matches,
+    const absl::flat_hash_map<rflcs_graph::match *, GRBVar> &gurobi_variable_map) {
+    for (const auto &[character, matches_with_character]: get_character_matches_map(matches)) {
         auto same_character_sum = GRBLinExpr();
         for (const auto same_character_match: matches_with_character) {
-            same_character_sum += same_character_match->extension.gurobi_variable;
+            same_character_sum += gurobi_variable_map.at(same_character_match);
         }
         model.addConstr(same_character_sum, GRB_LESS_EQUAL, 1.0);
     }
 }
 
-void set_objective_function(GRBModel &model, const std::set<rflcs_graph::match *> &matches) {
+void set_objective_function(GRBModel &model,
+                            const std::set<rflcs_graph::match *> &matches,
+                            const absl::flat_hash_map<rflcs_graph::match *, GRBVar> &gurobi_variable_map) {
     auto objective = GRBLinExpr();
     for (const auto match: matches) {
-        match->extension.gurobi_variable = model.addVar(0.0, 1.0, 0.0, GRB_BINARY);
-        objective += match->extension.gurobi_variable;
+        objective += gurobi_variable_map.at(match);
     }
     model.setObjective(objective, GRB_MAXIMIZE);
     model.addConstr(objective, GRB_GREATER_EQUAL, temporaries::lower_bound + 1);
@@ -117,12 +137,16 @@ std::set<rflcs_graph::match *> get_active_matches(const instance &instance) {
     return matches;
 }
 
-void set_solution_from_graph(instance &instance, const std::set<rflcs_graph::match *> &matches) {
+void set_solution_from_graph(instance &instance,
+                             const std::set<rflcs_graph::match *> &matches,
+                             const absl::flat_hash_map<rflcs_graph::match *, GRBVar> &gurobi_variable_map) {
     if constexpr (SOLVER == MULTI || SOLVER == GUROBI_MIS) {
         auto matches_in_solution = std::vector<rflcs_graph::match *>();
-        std::ranges::copy_if(matches, std::back_inserter(matches_in_solution), [](const rflcs_graph::match *match) {
-            return static_cast<int>(round(match->extension.gurobi_variable.get(GRB_DoubleAttr_X))) == 1;
-        });
+        std::ranges::copy_if(matches, std::back_inserter(matches_in_solution),
+                             [gurobi_variable_map](const rflcs_graph::match *match) {
+                                 return static_cast<int>(round(gurobi_variable_map.at(match).get(GRB_DoubleAttr_X))) ==
+                                        1;
+                             });
 
         std::ranges::sort(matches_in_solution, [](const rflcs_graph::match *m1, const rflcs_graph::match *m2) {
             return m1->extension.position_1 < m2->extension.position_1;

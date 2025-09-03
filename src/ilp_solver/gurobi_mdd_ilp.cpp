@@ -6,7 +6,9 @@
 #include "gurobi_c++.h"
 #include "../config.hpp"
 
-void set_solution_from_ilp(instance &instance);
+#include <absl/container/flat_hash_map.h>
+
+void set_solution_from_ilp(instance &instance, absl::flat_hash_map<node*, GRBVar>& gurobi_variable_map);
 
 void solve_gurobi_mdd_ilp(instance &instance) {
 
@@ -26,19 +28,21 @@ void solve_gurobi_mdd_ilp(instance &instance) {
         auto objective = GRBLinExpr();
         std::vector<GRBLinExpr> character_sums(constants::alphabet_size);
         const GRBLinExpr *previous_level_node_sum = nullptr;
+        auto gurobi_variable_map = absl::flat_hash_map<node*, GRBVar>();
+
         for (const auto &level : instance.mdd->levels | std::views::drop(1)) {
             auto level_node_sum = GRBLinExpr();
             for(const auto node : level->nodes) {
-                node->gurobi_variable = model.addVar(0.0, 1.0, 0, GRB_BINARY);
-                character_sums.at(node->match->character) += node->gurobi_variable;
-                level_node_sum += node->gurobi_variable;
-                objective += node->gurobi_variable;
+                gurobi_variable_map[node] = model.addVar(0.0, 1.0, 0, GRB_BINARY);
+                character_sums.at(node->match->character) += gurobi_variable_map.at(node);
+                level_node_sum += gurobi_variable_map.at(node);
+                objective += gurobi_variable_map.at(node);
                 if(level->depth > 1) {
                     auto preds = GRBLinExpr();
                     for(const auto pred : node->edges_in) {
-                        preds += pred->gurobi_variable;
+                        preds += gurobi_variable_map.at(pred);
                     }
-                    model.addConstr(node->gurobi_variable, GRB_LESS_EQUAL, preds);
+                    model.addConstr(gurobi_variable_map.at(node), GRB_LESS_EQUAL, preds);
                 }
             }
             if (level->depth <= temporaries::lower_bound + 1) {
@@ -64,7 +68,7 @@ void solve_gurobi_mdd_ilp(instance &instance) {
         if (model.get(GRB_IntAttr_SolCount) > 0) {
             temporaries::lower_bound = static_cast<int>(round(model.get(GRB_DoubleAttr_ObjVal)));
             instance.mdd_ilp_upper_bound = static_cast<int>(round(model.get(GRB_DoubleAttr_ObjBound)));
-            set_solution_from_ilp(instance);
+            set_solution_from_ilp(instance, gurobi_variable_map);
         } else if (result_status == GRB_INFEASIBLE) {
             instance.mdd_ilp_upper_bound = temporaries::lower_bound;
         } else {
@@ -76,12 +80,12 @@ void solve_gurobi_mdd_ilp(instance &instance) {
     }
 }
 
-void set_solution_from_ilp(instance &instance) {
+void set_solution_from_ilp(instance &instance, absl::flat_hash_map<node*, GRBVar>& gurobi_variable_map) {
     if constexpr (SOLVER == GUROBI_MDD) {
         instance.solution.clear();
         for (const auto &level : instance.mdd->levels | std::views::drop(1)) {
             for(const auto node : level->nodes) {
-                if (static_cast<int>(round(node->gurobi_variable.get(GRB_DoubleAttr_X))) == 1) {
+                if (static_cast<int>(round(gurobi_variable_map.at(node).get(GRB_DoubleAttr_X))) == 1) {
                     instance.solution.push_back(node->match->character);
                 }
             }
