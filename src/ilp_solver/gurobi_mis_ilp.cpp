@@ -15,7 +15,7 @@ std::set<rflcs_graph::match *> get_active_matches(const instance &instance);
 absl::flat_hash_map<int, std::vector<rflcs_graph::match *> >
 get_character_matches_map(const std::set<rflcs_graph::match *> &matches);
 
-void set_objective_function(const instance &instance, GRBModel &model, const std::set<rflcs_graph::match *> &matches);
+void set_objective_function(GRBModel &model, const std::set<rflcs_graph::match *> &matches);
 
 void set_repetition_free_constraint(GRBModel &model, const std::set<rflcs_graph::match *> &matches);
 
@@ -38,7 +38,7 @@ void solve_gurobi_mis_ilp(instance &instance) {
 
         const auto matches = get_active_matches(instance);
 
-        set_objective_function(instance, model, matches);
+        set_objective_function(model, matches);
         set_common_sub_sequence_constraint(model, matches);
         set_repetition_free_constraint(model, matches);
         model.optimize();
@@ -46,11 +46,11 @@ void solve_gurobi_mis_ilp(instance &instance) {
         auto result_status = model.get(GRB_IntAttr_Status);
         instance.is_valid_solution = result_status == GRB_OPTIMAL || result_status == GRB_INFEASIBLE;
         if (model.get(GRB_IntAttr_SolCount) > 0) {
-            instance.lower_bound = static_cast<int>(round(model.get(GRB_DoubleAttr_ObjVal)));
+            temporaries::lower_bound = static_cast<int>(round(model.get(GRB_DoubleAttr_ObjVal)));
             instance.match_ilp_upper_bound = static_cast<int>(round(model.get(GRB_DoubleAttr_ObjBound)));
             set_solution_from_graph(instance, matches);
         } else if (result_status == GRB_INFEASIBLE) {
-            instance.match_ilp_upper_bound = instance.lower_bound;
+            instance.match_ilp_upper_bound = temporaries::lower_bound;
         } else {
             instance.match_ilp_upper_bound = static_cast<int>(round(model.get(GRB_DoubleAttr_ObjBound)));
         }
@@ -84,14 +84,14 @@ void set_repetition_free_constraint(GRBModel &model, const std::set<rflcs_graph:
     }
 }
 
-void set_objective_function(const instance &instance, GRBModel &model, const std::set<rflcs_graph::match *> &matches) {
+void set_objective_function(GRBModel &model, const std::set<rflcs_graph::match *> &matches) {
     auto objective = GRBLinExpr();
     for (const auto match: matches) {
         match->extension.gurobi_variable = model.addVar(0.0, 1.0, 0.0, GRB_BINARY);
         objective += match->extension.gurobi_variable;
     }
     model.setObjective(objective, GRB_MAXIMIZE);
-    model.addConstr(objective, GRB_GREATER_EQUAL, instance.lower_bound + 1);
+    model.addConstr(objective, GRB_GREATER_EQUAL, temporaries::lower_bound + 1);
 }
 
 absl::flat_hash_map<int, std::vector<rflcs_graph::match *> >

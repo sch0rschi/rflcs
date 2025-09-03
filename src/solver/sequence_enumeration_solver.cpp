@@ -32,7 +32,7 @@ void solve_enumeration(instance &instance) {
     auto *root_node = reinterpret_cast<flat_node *>(current_pointer);
 
     auto stack_vector = std::vector<flat_node *>();
-    stack_vector.reserve(constants::alphabet_size * instance.upper_bound);
+    stack_vector.reserve(constants::alphabet_size * temporaries::upper_bound);
 
     auto stack = stack_vector.data();
     int stack_pointer = -1;
@@ -55,10 +55,10 @@ void solve_enumeration(instance &instance) {
             current_node->is_active = true;
             used_characters.set(current_node->character);
             ++depth;
-            if (depth > instance.lower_bound) {
+            if (depth > temporaries::lower_bound) {
                 set_solution(instance, stack_vector, stack_pointer);
-                instance.lower_bound = depth;
-                if(instance.lower_bound >= instance.upper_bound) {
+                temporaries::lower_bound = depth;
+                if(temporaries::lower_bound >= temporaries::upper_bound) {
                     instance.is_valid_solution = true;
                     return;
                 }

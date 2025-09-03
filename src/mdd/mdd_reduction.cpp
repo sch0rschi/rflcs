@@ -49,7 +49,7 @@ void reduce_by_mdd(instance &instance) {
     filter_mdd(instance, *mdd_reduction, *mdd_node_source);
     auto mdd_character_selection = mdd::copy_mdd(*mdd_reduction, *mdd_node_source);
 
-    if (instance.lower_bound >= instance.upper_bound) {
+    if (temporaries::lower_bound >= temporaries::upper_bound) {
         instance.shared_object->is_mdd_reduction_complete = true;
         return;
     }
@@ -96,13 +96,13 @@ void reduce_by_mdd(instance &instance) {
         }
 
         auto split_character = characters_ordered_by_importance[refinement_character_index];
-        refine_mdd(instance, *mdd_reduction, split_character, *mdd_node_source);
+        refine_mdd(*mdd_reduction, split_character, *mdd_node_source);
         filter_mdd(instance, *mdd_reduction, *mdd_node_source);
         instance.shared_object->number_of_refined_characters++;
         instance.shared_object->upper_bound =
                 std::min(instance.shared_object->upper_bound, mdd_reduction->levels.back()->depth);
         instance.shared_object->upper_bound =
-                std::max(instance.shared_object->upper_bound, instance.lower_bound);
+                std::max(instance.shared_object->upper_bound, temporaries::lower_bound);
         if (!mdd_reduction->levels.empty()) {
             instance.shared_object->upper_bound =
                     std::max(instance.shared_object->upper_bound,
@@ -113,7 +113,7 @@ void reduce_by_mdd(instance &instance) {
         filter_flat_mdd(instance, *mdd_reduction, true);
 #endif
 
-        if (instance.lower_bound >= instance.shared_object->upper_bound) {
+        if (temporaries::lower_bound >= instance.shared_object->upper_bound) {
 #ifndef MDD_FREQUENT_SAVE_FEATURE
             filter_flat_mdd(instance, *mdd_reduction, false);
 #endif

@@ -21,7 +21,7 @@ bool calculate_simple_upper_bounds(instance &instance) {
             reverse_upper_bound = std::max(reverse_upper_bound, dominating_match->upper_bound);
         }
     }
-    instance.upper_bound = std::min(upper_bound, reverse_upper_bound);
+    temporaries::upper_bound = std::min(upper_bound, reverse_upper_bound);
     return is_improving;
 }
 

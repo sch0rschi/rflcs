@@ -26,13 +26,13 @@ std::unique_ptr<mdd> create_initial_mdd(const instance &instance, bool forward) 
     root_node->characters_on_all_paths_to_root = Character_set();
     root_node->characters_on_paths_to_some_sink = root_match.extension.available_characters;
     root_node->characters_on_all_paths_to_lower_bound_levels = Character_set();
-    root_node->upper_bound_down = instance.upper_bound;
+    root_node->upper_bound_down = temporaries::upper_bound;
 
     root_level.push_back(root_node);
 
     auto match_to_node_map = absl::flat_hash_map<rflcs_graph::match *, node *>();
     while (!mdd->levels.back()->nodes.empty() &&
-           mdd->levels.back()->depth < instance.upper_bound) {
+           mdd->levels.back()->depth < temporaries::upper_bound) {
         const auto &[current_nodes, current_depth, _p] = *mdd->levels.back();
         auto &[next_nodes, next_depth, _np] = *mdd->levels.emplace_back(std::make_unique<level_type>());
         next_depth = current_depth + 1;
@@ -47,9 +47,9 @@ std::unique_ptr<mdd> create_initial_mdd(const instance &instance, bool forward) 
                     && next_depth <= succ_match->extension.reversed->upper_bound
                     && succ_match->extension.position_2 < min_position_2
                     && pred_node->characters_on_paths_to_some_sink.test(succ_match->character)
-                    && next_depth + succ_match->upper_bound > instance.lower_bound
+                    && next_depth + succ_match->upper_bound > temporaries::lower_bound
                     && not_dominated
-                    && are_enough_characters_available(instance.lower_bound,
+                    && are_enough_characters_available(temporaries::lower_bound,
                                                        next_depth,
                                                        pred_node->match->extension.reversed->extension.available_characters,
                                                        succ_match->extension.available_characters)

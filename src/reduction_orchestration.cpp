@@ -50,7 +50,7 @@ long calculate_mdd_complexity(const mdd &mdd);
 void reduce_graph_while_heuristic(instance &instance) {
     bool is_improving = true;
     while (is_improving) {
-        if (instance.lower_bound >= instance.upper_bound) {
+        if (temporaries::lower_bound >= temporaries::upper_bound) {
             return;
         }
         is_improving = false;
@@ -61,7 +61,7 @@ void reduce_graph_while_heuristic(instance &instance) {
     const std::chrono::duration<double> heuristic_elapsed_seconds = std::chrono::system_clock::now() - instance.start;
     std::cout << std::fixed << std::setprecision(2)
             << "\n"
-            << "Heuristic found solution with length " << instance.lower_bound << ", took "
+            << "Heuristic found solution with length " << temporaries::lower_bound << ", took "
             << heuristic_elapsed_seconds.count() << "s. Reducing to " << instance.active_matches << " nodes = "
             << 100.0 * (1
                         - static_cast<double>(instance.active_matches)
@@ -72,7 +72,7 @@ void reduce_graph_while_heuristic(instance &instance) {
 void reduce_graph_pre_solver(instance &instance) {
     bool is_improving = true;
     while (is_improving) {
-        if (instance.lower_bound >= instance.upper_bound) {
+        if (temporaries::lower_bound >= temporaries::upper_bound) {
             return;
         }
         is_improving = false;
@@ -110,11 +110,11 @@ void reduce_graph_pre_solver_by_mdd(instance &instance) {
         nullptr, flat_mdd_size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0));
 
     instance.shared_object->is_mdd_reduction_complete = false;
-    instance.shared_object->upper_bound = instance.upper_bound;
+    instance.shared_object->upper_bound = temporaries::upper_bound;
     instance.shared_object->refinement_round = 1;
     serialize_initial_mdd(*instance.mdd, instance.shared_object);
 
-    while (instance.lower_bound < instance.upper_bound
+    while (temporaries::lower_bound < temporaries::upper_bound
            && !instance.shared_object->is_mdd_reduction_complete) {
         const double seconds_since_start = get_elapsed_seconds(instance);
 
@@ -128,8 +128,8 @@ void reduce_graph_pre_solver_by_mdd(instance &instance) {
 
         handle_threads_for_mdd_reduction(instance);
         instance.shared_object->refinement_round++;
-        instance.upper_bound = std::min(instance.upper_bound, instance.shared_object->upper_bound);
-        instance.upper_bound = std::max(instance.upper_bound, instance.lower_bound);
+        temporaries::upper_bound = std::min(temporaries::upper_bound, instance.shared_object->upper_bound);
+        temporaries::upper_bound = std::max(temporaries::upper_bound, temporaries::lower_bound);
     }
     instance.shared_object->is_mdd_reduction_complete = true;
     filter_matches_by_flat_mdd(instance);
@@ -194,7 +194,7 @@ void handle_threads_for_mdd_reduction(instance &instance) {
         pthread_setname_np("rflcs_mdd");
 #endif
 
-        if (instance.lower_bound >= instance.upper_bound) {
+        if (temporaries::lower_bound >= temporaries::upper_bound) {
             return;
         }
         reduce_by_mdd(instance);
@@ -215,9 +215,9 @@ void handle_threads_for_mdd_reduction(instance &instance) {
         instance.mdd_memory_consumption = -1;
     }
 
-    instance.upper_bound = std::min(instance.upper_bound, instance.shared_object->upper_bound);
-    instance.upper_bound = std::max(instance.upper_bound, instance.lower_bound);
-    if (instance.lower_bound >= instance.upper_bound) {
+    temporaries::upper_bound = std::min(temporaries::upper_bound, instance.shared_object->upper_bound);
+    temporaries::upper_bound = std::max(temporaries::upper_bound, temporaries::lower_bound);
+    if (temporaries::lower_bound >= temporaries::upper_bound) {
         return;
     }
     prune_by_flat_mdd(instance.shared_object, *instance.mdd, *instance.mdd_node_source);

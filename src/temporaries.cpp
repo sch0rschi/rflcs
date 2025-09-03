@@ -11,3 +11,5 @@ std::vector<long> temporaries::node_character_count;
 std::vector<long> temporaries::incoming_edge_character_count;
 std::vector<long> temporaries::outgoing_edge_character_count;
 std::vector<int> temporaries::int_vector_positions_2;
+int temporaries::lower_bound;
+int temporaries::upper_bound;

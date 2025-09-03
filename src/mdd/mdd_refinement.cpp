@@ -3,25 +3,22 @@
 #include <ranges>
 
 void refine_mdd_level(level_type &level,
-                      const instance &instance,
                       Character split_character,
                       mdd_node_source &mdd_node_source);
 
 void split_node(node *node_yes_no,
                 Character split_character,
                 level_type &level,
-                const instance &instance,
                 mdd_node_source &mdd_node_source);
 
-void refine_mdd(const instance &instance, const mdd &mdd, const Character split_character,
+void refine_mdd(const mdd &mdd, const Character split_character,
                 mdd_node_source &mdd_node_source) {
     for (const auto &level: mdd.levels | std::views::drop(1)) {
-        refine_mdd_level(*level, instance, split_character, mdd_node_source);
+        refine_mdd_level(*level, split_character, mdd_node_source);
     }
 }
 
 void refine_mdd_level(level_type &level,
-                      const instance &instance,
                       const Character split_character,
                       mdd_node_source &mdd_node_source) {
     static auto nodes = std::vector<node *>();
@@ -30,16 +27,15 @@ void refine_mdd_level(level_type &level,
     for (const auto node: nodes) {
         if (node->characters_on_paths_to_root.test(split_character)
             && node->characters_on_paths_to_some_sink.test(split_character)) {
-            split_node(node, split_character, level, instance, mdd_node_source);
+            split_node(node, split_character, level, mdd_node_source);
         }
     }
 }
 
 inline void split_node(node *node_yes_no,
-           const Character split_character,
-           level_type &level,
-           const instance &instance,
-           mdd_node_source &mdd_node_source) {
+                       const Character split_character,
+                       level_type &level,
+                       mdd_node_source &mdd_node_source) {
     node *node_no_maybe = mdd_node_source.get_copy_of_old_node(*node_yes_no);
     node_no_maybe->characters_on_paths_to_root.reset(split_character);
     node_no_maybe->characters_on_all_paths_to_root.reset(split_character);
@@ -74,14 +70,14 @@ inline void split_node(node *node_yes_no,
     }
 
     if (node_no_maybe->edges_in.empty() ||
-        (node_no_maybe->edges_out.empty() && level.depth <= instance.lower_bound)) {
+        (node_no_maybe->edges_out.empty() && level.depth <= temporaries::lower_bound)) {
         mdd_node_source.clear_node(node_no_maybe);
     } else {
         level.nodes.push_back(node_no_maybe);
     }
 
     if (node_yes_no->edges_in.empty()
-        || (node_yes_no->edges_out.empty() && level.depth <= instance.lower_bound)
+        || (node_yes_no->edges_out.empty() && level.depth <= temporaries::lower_bound)
         || static_cast<int>(node_yes_no->characters_on_all_paths_to_root.count()) > level.depth) {
         node_yes_no->deactivate();
     }

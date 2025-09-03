@@ -60,7 +60,7 @@ auto main(const int argc, char **argv) -> int {
         create_graph(instance);
 
         heuristic(instance);
-        instance.heuristic_solution_length = instance.lower_bound;
+        instance.heuristic_solution_length = temporaries::lower_bound;
         instance.heuristic_end = std::chrono::system_clock::now();
         const std::chrono::duration<double> heuristic_elapsed_seconds = instance.heuristic_end - instance.start;
         std::cout << std::fixed << std::setprecision(2)
@@ -70,11 +70,11 @@ auto main(const int argc, char **argv) -> int {
 
         reduction(instance);
         instance.reduction_end = std::chrono::system_clock::now();
-        instance.reduction_upper_bound = instance.upper_bound;
+        instance.reduction_upper_bound = temporaries::upper_bound;
 
         solve(instance);
         instance.end = std::chrono::system_clock::now();
-        instance.upper_bound = std::max(instance.upper_bound, instance.lower_bound);
+        temporaries::upper_bound = std::max(temporaries::upper_bound, temporaries::lower_bound);
 
         check_solution(instance);
         write_result_file(instance);
@@ -83,7 +83,7 @@ auto main(const int argc, char **argv) -> int {
         const std::chrono::duration<double> elapsed_seconds = instance.end - instance.start;
         std::cout << std::fixed << std::setprecision(2)
                 << solve_elapsed_seconds.count() << "\t"
-                << instance.lower_bound << "\t"
+                << temporaries::lower_bound << "\t"
                 << (instance.is_valid_solution ? "true" : "false") << "\t"
                 << elapsed_seconds.count() << "\t"
                 << "found solution: [";
@@ -125,8 +125,8 @@ void process_input(instance &instance, const int argc, char **argv) {
             instance.input_validity_code = 1;
         } else {
             constants::alphabet_size = parse_next_integer(input_file);
-            instance.lower_bound = 0;
-            instance.upper_bound = constants::alphabet_size;
+            temporaries::upper_bound = constants::alphabet_size;
+            temporaries::lower_bound = 0;
             const auto string_1_length = parse_next_integer(input_file);
             parse_string(instance.string_1, input_file, string_1_length);
             const auto string_2_length = parse_next_integer(input_file);
@@ -147,24 +147,24 @@ void heuristic(instance &instance) {
 }
 
 void reduction(instance &instance) {
-    if (instance.lower_bound >= instance.upper_bound) {
-        instance.upper_bound = instance.lower_bound;
+    if (temporaries::lower_bound >= temporaries::upper_bound) {
+        temporaries::upper_bound = temporaries::lower_bound;
         instance.active_matches = 0;
         return;
     }
     std::cout << "reduction is running." << std::endl;
     reduce_graph_pre_solver(instance);
-    instance.upper_bound = std::max(instance.upper_bound, instance.lower_bound);
+    temporaries::upper_bound = std::max(temporaries::upper_bound, temporaries::lower_bound);
 }
 
 void solve(instance &instance) {
-    if (instance.lower_bound >= instance.upper_bound) {
+    if (temporaries::lower_bound >= temporaries::upper_bound) {
         instance.mdd_ilp_end = std::chrono::system_clock::now();
         instance.mdd_ilp_solution = instance.heuristic_solution_length;
-        instance.mdd_ilp_upper_bound = instance.upper_bound;
+        instance.mdd_ilp_upper_bound = temporaries::upper_bound;
         instance.match_ilp_end = std::chrono::system_clock::now();
         instance.match_ilp_solution = instance.heuristic_solution_length;
-        instance.match_ilp_upper_bound = instance.lower_bound;
+        instance.match_ilp_upper_bound = temporaries::lower_bound;
         instance.end = std::chrono::system_clock::now();
         instance.active_matches = 0;
         instance.is_valid_solution = true;
@@ -181,24 +181,24 @@ void solve(instance &instance) {
     }
 
     if constexpr (SOLVER == GUROBI_MDD || SOLVER == MULTI) {
-        instance.upper_bound = instance.reduction_upper_bound;
-        instance.lower_bound = instance.heuristic_solution_length;
+        temporaries::upper_bound = instance.reduction_upper_bound;
+        temporaries::lower_bound = instance.heuristic_solution_length;
         solve_gurobi_mdd_ilp(instance);
-        instance.mdd_ilp_upper_bound = std::min(instance.mdd_ilp_upper_bound, instance.upper_bound);
+        instance.mdd_ilp_upper_bound = std::min(instance.mdd_ilp_upper_bound, temporaries::upper_bound);
     }
-    instance.mdd_ilp_solution = instance.lower_bound;
+    instance.mdd_ilp_solution = temporaries::lower_bound;
     instance.mdd_ilp_end = std::chrono::system_clock::now();
 
     if constexpr (SOLVER == GUROBI_MIS || SOLVER == MULTI) {
-        instance.upper_bound = instance.reduction_upper_bound;
-        instance.lower_bound = instance.heuristic_solution_length;
+        temporaries::upper_bound = instance.reduction_upper_bound;
+        temporaries::lower_bound = instance.heuristic_solution_length;
         solve_gurobi_mis_ilp(instance);
-        instance.match_ilp_upper_bound = std::min(instance.match_ilp_upper_bound, instance.upper_bound);
+        instance.match_ilp_upper_bound = std::min(instance.match_ilp_upper_bound, temporaries::upper_bound);
     }
     instance.match_ilp_end = std::chrono::system_clock::now();
-    instance.match_ilp_solution = instance.lower_bound;
-    instance.upper_bound = std::min(instance.upper_bound, instance.match_ilp_upper_bound);
-    instance.match_ilp_upper_bound = instance.upper_bound;
+    instance.match_ilp_solution = temporaries::lower_bound;
+    temporaries::upper_bound = std::min(temporaries::upper_bound, instance.match_ilp_upper_bound);
+    instance.match_ilp_upper_bound = temporaries::upper_bound;
 
     if (int status; WIFEXITED(status)) {
         auto usage = rusage();
@@ -235,8 +235,8 @@ void check_solution(instance &instance) {
         position_1 = instance.next_occurrences_1[position_1 * constants::alphabet_size + character];
         position_2 = instance.next_occurrences_2[position_2 * constants::alphabet_size + character];
     }
-    if (static_cast<int>(characters.size()) != instance.lower_bound) {
-        std::cout << "Solution lower bound " << instance.lower_bound << " does not fit solution length of "
+    if (static_cast<int>(characters.size()) != temporaries::lower_bound) {
+        std::cout << "Solution lower bound " << temporaries::lower_bound << " does not fit solution length of "
                 << characters.size() << ".\t";
         instance.is_valid_solution = false;
         return;

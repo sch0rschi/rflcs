@@ -16,4 +16,6 @@ struct temporaries {
     static std::vector<long> outgoing_edge_character_count;
     static std::vector<long> incoming_edge_character_count;
     static std::vector<int> int_vector_positions_2;
+    static int lower_bound;
+    static int upper_bound;
 };

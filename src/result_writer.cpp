@@ -39,8 +39,8 @@ void write_result_file(const instance &instance) {
     std::chrono::duration<double> match_ilp_runtime = instance.end - instance.mdd_ilp_end;
 
     out_file << "solved:\t" << std::boolalpha << instance.is_valid_solution << std::endl;
-    out_file << "solution_length:\t" << instance.lower_bound << std::endl;
-    out_file << "upper_bound:\t" << instance.upper_bound << std::endl;
+    out_file << "solution_length:\t" << temporaries::lower_bound << std::endl;
+    out_file << "upper_bound:\t" << temporaries::upper_bound << std::endl;
     out_file << "solution_runtime:\t" << overall_runtime.count() << std::endl;
 
     out_file << "heuristic_solution_length:\t" << instance.heuristic_solution_length << std::endl;

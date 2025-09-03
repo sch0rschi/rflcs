@@ -8,18 +8,18 @@
 
 bool update_nodes_and_prune(instance &instance, mdd &mdd, mdd_node_source &mdd_node_source);
 
-bool update_node_from_succ(const instance &instance, const level_type &level, node &node);
+bool update_node_from_succ(const level_type &level, node &node);
 
 bool update_node_from_pred(node &node, int depth);
 
-bool filter_succ_edges_of_node(const instance &instance, const level_type &level, node &node);
+bool filter_succ_edges_of_node(const level_type &level, node &node);
 
-bool prune_node_from_level(const instance &instance, level_type &level, node *node);
+bool prune_node_from_level(level_type &level, node *node);
 
 void clear_level(level_type &level, mdd_node_source &mdd_node_source);
 
 void filter_mdd(instance &instance, mdd &mdd, mdd_node_source &mdd_node_source) {
-    if (instance.lower_bound >= instance.upper_bound) {
+    if (temporaries::lower_bound >= temporaries::upper_bound) {
         return;
     }
 
@@ -33,7 +33,7 @@ bool update_nodes_and_prune(instance &instance, mdd &mdd, mdd_node_source &mdd_n
     auto is_changed = false;
     auto is_still_changing = true;
 
-    while (is_still_changing && instance.lower_bound < instance.upper_bound) {
+    while (is_still_changing && temporaries::lower_bound < temporaries::upper_bound) {
         is_still_changing = false;
 
         for (const auto &level: mdd.levels | std::views::drop(1)) {
@@ -42,10 +42,10 @@ bool update_nodes_and_prune(instance &instance, mdd &mdd, mdd_node_source &mdd_n
                 const auto is_updated_from_pred = update_node_from_pred(*node, level->depth);
                 is_still_changing |= is_updated_from_pred;
                 if (is_updated_from_pred) {
-                    is_still_changing |= filter_succ_edges_of_node(instance, *level, *node);
+                    is_still_changing |= filter_succ_edges_of_node(*level, *node);
                 }
                 if (needed_updates) {
-                    is_still_changing |= prune_node_from_level(instance, *level, node);
+                    is_still_changing |= prune_node_from_level(*level, node);
                 }
             }
             clear_level(*level, mdd_node_source);
@@ -55,42 +55,42 @@ bool update_nodes_and_prune(instance &instance, mdd &mdd, mdd_node_source &mdd_n
             for (const auto node: level->nodes) {
                 const auto needed_update_from_succ = node->needs_update_from_succ;
                 const auto needed_updates = node->needs_update_from_succ || node->needs_update_from_pred;
-                const auto is_updated_from_succ = update_node_from_succ(instance, *level, *node);
+                const auto is_updated_from_succ = update_node_from_succ(*level, *node);
                 is_still_changing |= is_updated_from_succ;
                 if (needed_update_from_succ) {
-                    is_still_changing |= filter_succ_edges_of_node(instance, *level, *node);
+                    is_still_changing |= filter_succ_edges_of_node(*level, *node);
                 }
                 if (needed_updates) {
-                    is_still_changing |= prune_node_from_level(instance, *level, node);
+                    is_still_changing |= prune_node_from_level(*level, node);
                 }
             }
             clear_level(*level, mdd_node_source);
         }
         for (const auto &root_level = mdd.levels.front(); const auto node: root_level->nodes) {
             const bool needs_update_from_succ = node->needs_update_from_succ;
-            is_still_changing |= update_node_from_succ(instance, *root_level, *node);
+            is_still_changing |= update_node_from_succ(*root_level, *node);
             if (needs_update_from_succ) {
-                is_still_changing |= filter_succ_edges_of_node(instance, *root_level, *node);
+                is_still_changing |= filter_succ_edges_of_node(*root_level, *node);
             }
         }
 
         std::erase_if(mdd.levels, [](const std::unique_ptr<level_type> &level) { return level->nodes.empty(); });
         int levels_depth = static_cast<int>(mdd.levels.size()) - 1;
-        instance.upper_bound = std::min(instance.upper_bound, levels_depth);
-        instance.upper_bound = std::min(instance.upper_bound,
+        temporaries::upper_bound = std::min(temporaries::upper_bound, levels_depth);
+        temporaries::upper_bound = std::min(temporaries::upper_bound,
                                         mdd.levels.front()->nodes.front()->upper_bound_down);
 
-        if (levels_depth > instance.upper_bound) {
-            for (const auto &level: mdd.levels | std::views::drop(instance.upper_bound + 1)) {
+        if (levels_depth > temporaries::upper_bound) {
+            for (const auto &level: mdd.levels | std::views::drop(temporaries::upper_bound + 1)) {
                 for (const auto node: level->nodes) {
                     mdd_node_source.clear_node(node);
                 }
             }
-            mdd.levels.resize(instance.upper_bound + 1);
+            mdd.levels.resize(temporaries::upper_bound + 1);
         }
 
         if (instance.shared_object != nullptr) {
-            instance.shared_object->upper_bound = instance.upper_bound;
+            instance.shared_object->upper_bound = temporaries::upper_bound;
         }
         is_changed |= is_still_changing;
     }
@@ -110,11 +110,11 @@ void clear_level(level_type &level, mdd_node_source &mdd_node_source) {
     }
 }
 
-inline bool update_node_from_succ(const instance &instance, const level_type &level, node &node) {
+inline bool update_node_from_succ(const level_type &level, node &node) {
     if (!node.needs_update_from_succ) {
         return false;
     }
-    return node.update_from_succs(level.depth, instance.lower_bound);
+    return node.update_from_succs(level.depth, temporaries::lower_bound);
 }
 
 inline bool update_node_from_pred(node &node, const int depth) {
@@ -124,16 +124,16 @@ inline bool update_node_from_pred(node &node, const int depth) {
     return node.update_from_preds(depth);
 }
 
-inline bool prune_node_from_level(const instance &instance, level_type &level, node *node) {
+inline bool prune_node_from_level(level_type &level, node *node) {
     const bool no_incoming_edges = node->edges_in.empty();
-    const bool is_insufficient_upper_bound = level.depth + node->upper_bound_down <= instance.lower_bound;
+    const bool is_insufficient_upper_bound = level.depth + node->upper_bound_down <= temporaries::lower_bound;
     temporaries::temp_character_set_1 = node->characters_on_paths_to_root;
     temporaries::temp_character_set_1 |= node->characters_on_paths_to_some_sink;
     temporaries::temp_character_set_2 = node->characters_on_all_paths_to_root;
     temporaries::temp_character_set_2 &= node->characters_on_all_paths_to_lower_bound_levels;
     if (no_incoming_edges
         || is_insufficient_upper_bound
-        || static_cast<int>(temporaries::temp_character_set_1.count()) <= instance.lower_bound
+        || static_cast<int>(temporaries::temp_character_set_1.count()) <= temporaries::lower_bound
         || temporaries::temp_character_set_2.any()
     ) {
         level.needs_pruning = true;
@@ -143,7 +143,7 @@ inline bool prune_node_from_level(const instance &instance, level_type &level, n
     return false;
 }
 
-inline bool filter_succ_edges_of_node(const instance &instance, const level_type &level, node &node) {
+inline bool filter_succ_edges_of_node(const level_type &level, node &node) {
     bool filtered_edge = false;
     int max_position_2 = INT_MAX;
     static auto succ_nodes = std::vector<struct node *>();
@@ -158,7 +158,7 @@ inline bool filter_succ_edges_of_node(const instance &instance, const level_type
         temporaries::temp_character_set_1 |= succ->characters_on_paths_to_some_sink;
         temporaries::temp_character_set_1.set(succ->match->character);
         const bool combined_characters_not_sufficient =
-                static_cast<int>(temporaries::temp_character_set_1.count()) <= instance.lower_bound;
+                static_cast<int>(temporaries::temp_character_set_1.count()) <= temporaries::lower_bound;
         temporaries::temp_character_set_2 = node.characters_on_all_paths_to_root;
         temporaries::temp_character_set_2 &= succ->characters_on_all_paths_to_lower_bound_levels;
         const bool repetition_free_conflict = temporaries::temp_character_set_2.any();
@@ -166,12 +166,12 @@ inline bool filter_succ_edges_of_node(const instance &instance, const level_type
         temporaries::temp_character_set_1.set(succ->match->character);
         temporaries::temp_character_set_1 &= ~node.characters_on_all_paths_to_root;
         const bool too_many_characters_already_taken =
-                level.depth + static_cast<int>(temporaries::temp_character_set_1.count()) <= instance.lower_bound;
+                level.depth + static_cast<int>(temporaries::temp_character_set_1.count()) <= temporaries::lower_bound;
         const bool is_dominated = dominated_by_some_available_but_unused_character(
             succ->match->extension.position_2,
             level.depth - static_cast<int>(node.characters_on_all_paths_to_root.count()) + 1);
         if (!node.characters_on_paths_to_some_sink.test(succ->match->character)
-            || level.depth + 1 + succ->upper_bound_down <= instance.lower_bound
+            || level.depth + 1 + succ->upper_bound_down <= temporaries::lower_bound
             || combined_characters_not_sufficient
             || repetition_free_conflict
             || succ->match->extension.position_2 > max_position_2

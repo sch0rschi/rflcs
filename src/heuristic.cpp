@@ -28,7 +28,7 @@ auto heuristic_solve(instance &instance) -> void {
     setup(instance);
 
     int lower_bound_before_round = 0;
-    instance.lower_bound = 0;
+    temporaries::lower_bound = 0;
 
     int number_of_bad_runs = 0;
     int const number_of_bad_runs_limit = static_cast<int>(instance.string_1.size() * instance.string_2.size())
@@ -37,14 +37,14 @@ auto heuristic_solve(instance &instance) -> void {
     boost::timer::progress_display progress_display(number_of_bad_runs_limit);
 
     const auto reset_limit = round(sqrt(number_of_bad_runs_limit));
-    while (instance.lower_bound < instance.upper_bound &&
-           (lower_bound_before_round < instance.lower_bound || number_of_bad_runs < number_of_bad_runs_limit)) {
-        lower_bound_before_round = instance.lower_bound;
+    while (temporaries::lower_bound < temporaries::upper_bound &&
+           (lower_bound_before_round < temporaries::lower_bound || number_of_bad_runs < number_of_bad_runs_limit)) {
+        lower_bound_before_round = temporaries::lower_bound;
 
         combine(instance, instance.graph->matches, true);
         combine(instance, instance.graph->reverse_matches, false);
 
-        if (lower_bound_before_round < instance.lower_bound) {
+        if (lower_bound_before_round < temporaries::lower_bound) {
             reduce_graph_while_heuristic(instance);
             number_of_bad_runs = 0;
             progress_display.restart(number_of_bad_runs_limit);
@@ -119,8 +119,8 @@ void combine(instance &instance, std::vector<rflcs_graph::match> &matches, const
                 current_match.heuristic_characters.set(current_match.character);
             }
 
-            if (instance.lower_bound < static_cast<int>(best_heuristic_score) - HEURISTIC_SOLUTION_DECREMENTER) {
-                instance.lower_bound = static_cast<int>(best_heuristic_score) - HEURISTIC_SOLUTION_DECREMENTER;
+            if (temporaries::lower_bound < static_cast<int>(best_heuristic_score) - HEURISTIC_SOLUTION_DECREMENTER) {
+                temporaries::lower_bound = static_cast<int>(best_heuristic_score) - HEURISTIC_SOLUTION_DECREMENTER;
                 set_heuristic_solution(instance, current_match, is_building_from_back);
             }
         }

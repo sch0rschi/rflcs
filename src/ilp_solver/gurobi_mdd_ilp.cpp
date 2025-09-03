@@ -41,7 +41,7 @@ void solve_gurobi_mdd_ilp(instance &instance) {
                     model.addConstr(node->gurobi_variable, GRB_LESS_EQUAL, preds);
                 }
             }
-            if (level->depth <= instance.lower_bound + 1) {
+            if (level->depth <= temporaries::lower_bound + 1) {
                 model.addConstr(level_node_sum, GRB_EQUAL, 1);
             } else {
                 model.addConstr(level_node_sum, GRB_LESS_EQUAL, 1);
@@ -55,18 +55,18 @@ void solve_gurobi_mdd_ilp(instance &instance) {
         for (const auto& character_sum : character_sums) {
             model.addConstr(character_sum, GRB_LESS_EQUAL, 1);
         }
-        model.addConstr(objective, GRB_GREATER_EQUAL, instance.lower_bound + 1);
+        model.addConstr(objective, GRB_GREATER_EQUAL, temporaries::lower_bound + 1);
         model.setObjective(objective, GRB_MAXIMIZE);
         model.optimize();
 
         auto result_status = model.get(GRB_IntAttr_Status);
         instance.is_valid_solution = result_status == GRB_OPTIMAL || result_status == GRB_INFEASIBLE;
         if (model.get(GRB_IntAttr_SolCount) > 0) {
-            instance.lower_bound = static_cast<int>(round(model.get(GRB_DoubleAttr_ObjVal)));
+            temporaries::lower_bound = static_cast<int>(round(model.get(GRB_DoubleAttr_ObjVal)));
             instance.mdd_ilp_upper_bound = static_cast<int>(round(model.get(GRB_DoubleAttr_ObjBound)));
             set_solution_from_ilp(instance);
         } else if (result_status == GRB_INFEASIBLE) {
-            instance.mdd_ilp_upper_bound = instance.lower_bound;
+            instance.mdd_ilp_upper_bound = temporaries::lower_bound;
         } else {
             instance.mdd_ilp_upper_bound = static_cast<int>(round(model.get(GRB_DoubleAttr_ObjBound)));
         }

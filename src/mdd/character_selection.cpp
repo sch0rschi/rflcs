@@ -39,7 +39,7 @@ void update_characters_ordered_by_importance_mdd(
     for (const auto split_character: characters_ordered_by_importance) {
         if (temporaries::chaining_numbers[split_character] > 1) {
             std::unique_ptr<mdd> mdd_character_selection = mdd::copy_mdd(reduction_mdd, mdd_node_source);
-            refine_mdd(instance, *mdd_character_selection, split_character, mdd_node_source);
+            refine_mdd(*mdd_character_selection, split_character, mdd_node_source);
             filter_mdd(instance, *mdd_character_selection, mdd_node_source);
             greedy_scores[split_character] = calculate_greedy_score(
                 *mdd_character_selection,

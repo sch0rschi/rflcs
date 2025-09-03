@@ -39,7 +39,7 @@ auto deactivate_matches(instance &instance) -> bool {
 
         match.extension.reversed->extension.combined_upper_bound = match.extension.combined_upper_bound;
 
-        if (match.extension.combined_upper_bound <= instance.lower_bound) {
+        if (match.extension.combined_upper_bound <= temporaries::lower_bound) {
             deactivated_a_match = true;
             match.extension.is_active = false;
             match.extension.reversed->extension.is_active = false;

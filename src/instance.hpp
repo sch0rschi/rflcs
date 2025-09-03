@@ -21,8 +21,6 @@ struct instance {
     long main_process_memory_consumption = 0;
     bool is_solving_forward = true;
     std::deque<Character> solution = std::deque<Character>();
-    int lower_bound = 0;
-    int upper_bound = 0;
     std::vector<Character> string_1 = std::vector<Character>();
     int_matrix next_occurrences_1 = int_matrix();
     std::vector<Character> string_2 = std::vector<Character>();
