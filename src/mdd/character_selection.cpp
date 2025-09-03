@@ -15,7 +15,7 @@ double calculate_greedy_score(const mdd &mdd, double initial_number_of_matches, 
 
 void update_characters_ordered_by_importance_mdd(
     std::vector<Character> &characters_ordered_by_importance,
-    instance &instance,
+    const instance &instance,
     const mdd &reduction_mdd,
     mdd_node_source &mdd_node_source,
     const character_counters_source &character_counters_source,
@@ -93,8 +93,8 @@ double calculate_greedy_score(const mdd &mdd,
 
     const double match_delta = initial_number_of_matches - static_cast<double>(matches.size());
     const double graph_edge_delta = initial_number_of_graph_edges - static_cast<double>(valid_edges.size());
-    return match_delta
-           * graph_edge_delta
+    return (1+match_delta)
+           * (1+graph_edge_delta)
            / number_of_mdd_nodes
            / number_of_mdd_edges
            / max_in_edges;
