@@ -59,7 +59,7 @@ void solve_gurobi_mdd_ilp(instance &instance) {
         model.setObjective(objective, GRB_MAXIMIZE);
         model.optimize();
 
-        auto result_status = model.get(GRB_IntAttr_Status);
+        const auto result_status = model.get(GRB_IntAttr_Status);
         instance.is_valid_solution = result_status == GRB_OPTIMAL || result_status == GRB_INFEASIBLE;
         if (model.get(GRB_IntAttr_SolCount) > 0) {
             temporaries::lower_bound = static_cast<int>(round(model.get(GRB_DoubleAttr_ObjVal)));

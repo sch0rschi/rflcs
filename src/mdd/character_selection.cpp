@@ -125,7 +125,7 @@ void chaining_numbers(const mdd &mdd, const character_counters_source &character
             }
         }
 
-        for (const auto &level = mdd.levels.at(level_index + 1); auto node: level->nodes) {
+        for (const auto &level = mdd.levels.at(level_index + 1); const auto node: level->nodes) {
             character_counters_source.return_counter(node->sequences_character_counter);
             node->sequences_character_counter = nullptr;
         }

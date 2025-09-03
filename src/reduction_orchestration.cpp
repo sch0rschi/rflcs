@@ -54,7 +54,7 @@ void reduce_graph_while_heuristic(instance &instance) {
             return;
         }
         is_improving = false;
-        is_improving |= calculate_simple_upper_bounds(instance);
+        is_improving |= calculate_simple_upper_bounds(*instance.graph);
         is_improving |= deactivate_matches(instance);
         reduce_graph(instance);
     }
@@ -77,13 +77,13 @@ void reduce_graph_pre_solver(instance &instance) {
         }
         is_improving = false;
         is_improving |= relax_by_fixed_character_rf_constraint(instance);
-        is_improving |= calculate_simple_upper_bounds(instance);
+        is_improving |= calculate_simple_upper_bounds(*instance.graph);
         is_improving |= deactivate_matches(instance);
         reduce_graph(instance);
         std::cout << "Repetition-Free Subset LCS Relaxation reduced to " << instance.active_matches << " matches = "
-                    << 100.0 * (1 - static_cast<double>(instance.active_matches)
-                                / static_cast<double>(instance.graph->matches.size() - 2)) << "%."
-                    << std::endl;
+                << 100.0 * (1 - static_cast<double>(instance.active_matches)
+                            / static_cast<double>(instance.graph->matches.size() - 2)) << "%."
+                << std::endl;
     }
 
     return reduce_graph_pre_solver_by_mdd(instance);
@@ -140,15 +140,15 @@ void filter_matches_by_flat_mdd(instance &instance) {
         match.extension.is_active = false;
         match.extension.reversed->extension.is_active = false;
     }
-    auto current_pointer = reinterpret_cast<int8_t *>(&instance.shared_object->flat_levels);
+    auto current_pointer = std::bit_cast<std::byte *>(&instance.shared_object->flat_levels);
 
     for (size_t level_index = 0; level_index < instance.shared_object->num_levels; ++level_index) {
-        const auto *flat_level = reinterpret_cast<struct flat_level *>(current_pointer);
+        const auto *flat_level = std::bit_cast<struct flat_level *>(current_pointer);
         current_pointer += sizeof(struct flat_level);
 
         for (size_t node_index = 0; node_index < flat_level->num_nodes; ++node_index) {
-            auto flat_node = reinterpret_cast<struct flat_node *>(current_pointer);
-            const auto match_ptr = reinterpret_cast<rflcs_graph::match *>(flat_node->match_ptr);
+            auto flat_node = std::bit_cast<struct flat_node *>(current_pointer);
+            const auto match_ptr = static_cast<rflcs_graph::match *>(flat_node->match_ptr);
             match_ptr->extension.is_active = flat_node->is_active;
             match_ptr->extension.reversed->extension.is_active = match_ptr->extension.is_active;
             current_pointer += sizeof(struct flat_node);
@@ -173,7 +173,7 @@ void handle_threads_for_mdd_reduction(instance &instance) {
         signal(SIGALRM, timeout_handler);
 
         itimerval timer{};
-        timer.it_value.tv_sec = std::max(1l, MDD_TIMEOUT_IN_SECONDS - static_cast<long>(get_elapsed_seconds(instance)));
+        timer.it_value.tv_sec = std::max(1L, MDD_TIMEOUT_IN_SECONDS - static_cast<long>(get_elapsed_seconds(instance)));
         timer.it_value.tv_usec = 0;
         timer.it_interval.tv_sec = 0;
         timer.it_interval.tv_usec = 0;
@@ -225,7 +225,7 @@ void handle_threads_for_mdd_reduction(instance &instance) {
     serialize_initial_mdd(*instance.mdd, instance.shared_object);
 }
 
-void timeout_handler(const int signal) {
+__attribute__((noreturn)) void timeout_handler(const int signal) {
     std::cout << "Child process timed out!\n";
     exit(signal);
 }
@@ -250,7 +250,7 @@ double get_elapsed_seconds(const instance &instance) {
 }
 
 long calculate_mdd_complexity(const mdd &mdd) {
-    auto counter_set = absl::flat_hash_set<rflcs_graph::match*>();
+    auto counter_set = absl::flat_hash_set<rflcs_graph::match *>();
     for (const auto &level: mdd.levels) {
         for (const auto node: level->nodes) {
             counter_set.insert(node->match);

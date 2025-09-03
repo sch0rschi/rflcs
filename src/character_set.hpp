@@ -4,7 +4,7 @@
 #include <bitset>
 
 struct Character_set : std::bitset<CHARACTER_SET_SIZE> {
-    Character_set() : std::bitset<CHARACTER_SET_SIZE>() {}
+    Character_set() = default;
 };
 
 #else

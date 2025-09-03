@@ -16,9 +16,9 @@ auto set_rf_relaxed_upper_bounds(std::vector<rflcs_graph::match>& matches,
                                  const std::vector<std::vector<std::pair<int, int>>>& contexts,
                                  int number_of_characters) -> bool;
 
-auto all_single_character_relaxation(instance& instance, std::vector<std::vector<std::pair<int, int>>>& upper_bound_redistributions) -> bool;
+auto all_single_character_relaxation(const instance& instance, std::vector<std::vector<std::pair<int, int>>>& upper_bound_redistributions) -> bool;
 
-auto selected_characters_rf_relaxation(instance& instance, std::vector<std::vector<std::pair<int, int>>>& upper_bound_redistributions) -> bool;
+auto selected_characters_rf_relaxation(const instance& instance, std::vector<std::vector<std::pair<int, int>>>& upper_bound_redistributions) -> bool;
 
 auto relax_by_fixed_character_rf_constraint(instance& instance) -> bool {
     auto upper_bound_redistributions = std::vector<std::vector<std::pair<int, int>>>(constants::alphabet_size);
@@ -27,7 +27,7 @@ auto relax_by_fixed_character_rf_constraint(instance& instance) -> bool {
     return found_improvement;
 }
 
-inline auto selected_characters_rf_relaxation(instance& instance, std::vector<std::vector<std::pair<int, int>>>& upper_bound_redistributions) -> bool {
+inline auto selected_characters_rf_relaxation(const instance& instance, std::vector<std::vector<std::pair<int, int>>>& upper_bound_redistributions) -> bool {
     auto found_improvement = false;
     for (int number_of_selected_characters = 2;
          number_of_selected_characters < std::min(constants::alphabet_size, static_cast<int>(log2(constants::alphabet_size)));
@@ -67,7 +67,7 @@ inline auto selected_characters_rf_relaxation(instance& instance, std::vector<st
     return found_improvement;
 }
 
-inline auto all_single_character_relaxation(instance& instance, std::vector<std::vector<std::pair<int, int>>>& upper_bound_redistributions) -> bool {
+inline auto all_single_character_relaxation(const instance& instance, std::vector<std::vector<std::pair<int, int>>>& upper_bound_redistributions) -> bool {
     auto found_improvement = false;
     auto still_improving = true;
     const std::vector<int> single_character_repetitions = get_single_character_repetitions(instance);

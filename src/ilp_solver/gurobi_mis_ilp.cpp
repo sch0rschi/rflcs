@@ -8,7 +8,7 @@
 #include "../config.hpp"
 #include "absl/container/flat_hash_map.h"
 
-void set_solution_from_graph(::instance &instance, const std::set<rflcs_graph::match *> &matches);
+void set_solution_from_graph(instance &instance, const std::set<rflcs_graph::match *> &matches);
 
 std::set<rflcs_graph::match *> get_active_matches(const instance &instance);
 
@@ -43,7 +43,7 @@ void solve_gurobi_mis_ilp(instance &instance) {
         set_repetition_free_constraint(model, matches);
         model.optimize();
 
-        auto result_status = model.get(GRB_IntAttr_Status);
+        const auto result_status = model.get(GRB_IntAttr_Status);
         instance.is_valid_solution = result_status == GRB_OPTIMAL || result_status == GRB_INFEASIBLE;
         if (model.get(GRB_IntAttr_SolCount) > 0) {
             temporaries::lower_bound = static_cast<int>(round(model.get(GRB_DoubleAttr_ObjVal)));

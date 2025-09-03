@@ -2,7 +2,6 @@
 
 #include "../graph/graph.hpp"
 
-#include <memory>
 #include <sstream>
 
 #include "../temporaries.hpp"
@@ -10,7 +9,6 @@
 
 struct node;
 
-// TODO: benchmark other containers
 typedef std::vector<node *> edges_type;
 
 struct node {

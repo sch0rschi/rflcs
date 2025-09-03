@@ -26,7 +26,7 @@ void set_successor_matches(const instance &instance,
                            const int_matrix &next_occurrences_2);
 
 void create_matches(std::vector<match> &matches,
-                    const ::instance &instance,
+                    const instance &instance,
                     const vector<Character> &string_1,
                     unsigned int number_of_matches,
                     const int_matrix &next_occurrences);
@@ -95,7 +95,7 @@ auto calculate_number_of_matches(const instance &instance) -> unsigned int {
 }
 
 void create_matches(std::vector<match> &matches,
-                    const ::instance &instance,
+                    const instance &instance,
                     const vector<Character> &string_1,
                     const unsigned int number_of_matches,
                     const int_matrix &next_occurrences) {

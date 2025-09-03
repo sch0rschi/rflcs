@@ -10,8 +10,7 @@
 #include <absl/container/flat_hash_set.h>
 #include <absl/container/flat_hash_map.h>
 
-std::unique_ptr<mdd> create_initial_mdd(const instance &instance, bool forward) {
-
+std::unique_ptr<mdd> create_initial_mdd(const instance &instance, const bool forward) {
     auto mdd = std::make_unique<struct mdd>();
     mdd->levels = levels_type();
 
@@ -31,8 +30,7 @@ std::unique_ptr<mdd> create_initial_mdd(const instance &instance, bool forward) 
     root_level.push_back(root_node);
 
     auto match_to_node_map = absl::flat_hash_map<rflcs_graph::match *, node *>();
-    while (!mdd->levels.back()->nodes.empty() &&
-           mdd->levels.back()->depth < temporaries::upper_bound) {
+    while (!mdd->levels.back()->nodes.empty() && mdd->levels.back()->depth<temporaries::upper_bound) {
         const auto &[current_nodes, current_depth, _p] = *mdd->levels.back();
         auto &[next_nodes, next_depth, _np] = *mdd->levels.emplace_back(std::make_unique<level_type>());
         next_depth = current_depth + 1;
@@ -42,20 +40,24 @@ std::unique_ptr<mdd> create_initial_mdd(const instance &instance, bool forward) 
             temporaries::int_vector_positions_2.clear();
             for (auto succ_match: pred_node->match->extension.succ_matches) {
                 const bool not_dominated = !dominated_by_some_available_but_unused_character(
-                        succ_match->extension.position_2, current_depth);
-                if (succ_match->character < constants::alphabet_size
-                    && next_depth <= succ_match->extension.reversed->upper_bound
-                    && succ_match->extension.position_2 < min_position_2
-                    && pred_node->characters_on_paths_to_some_sink.test(succ_match->character)
-                    && next_depth + succ_match->upper_bound > temporaries::lower_bound
+                    succ_match->extension.position_2, current_depth);
+                if (succ_match->character<constants::alphabet_size
+                                          && next_depth <= succ_match->extension.reversed->upper_bound
+                                          && succ_match->extension.position_2<min_position_2
+                                                                              && pred_node->
+                                                                              characters_on_paths_to_some_sink.test(
+                                                                                  succ_match->character)
+                                                                              && next_depth + succ_match->upper_bound>
+                    temporaries::lower_bound
                     && not_dominated
                     && are_enough_characters_available(temporaries::lower_bound,
                                                        next_depth,
-                                                       pred_node->match->extension.reversed->extension.available_characters,
+                                                       pred_node->match->extension.reversed->extension.
+                                                       available_characters,
                                                        succ_match->extension.available_characters)
-                        ) {
+                ) {
                     if (!pred_node->match->extension.reversed->extension.available_characters.test(
-                            succ_match->character)) {
+                        succ_match->character)) {
                         min_position_2 = std::min(min_position_2, succ_match->extension.position_2);
                     } else {
                         add_position_2_to_maybe_min_pos_2(succ_match->extension.position_2);
@@ -83,7 +85,7 @@ std::unique_ptr<mdd> create_initial_mdd(const instance &instance, bool forward) 
 }
 
 void prune_by_flat_mdd(shared_object *shared_object, const mdd &mdd, mdd_node_source &mdd_node_source) {
-    auto *current_pointer = reinterpret_cast<int8_t *>(&shared_object->flat_levels);
+    auto *current_pointer = std::bit_cast<std::byte *>(&shared_object->flat_levels);
 
     auto static valid_matches_sets = std::vector<absl::flat_hash_set<rflcs_graph::match *> >(mdd.levels.size());
     valid_matches_sets.resize(mdd.levels.size());
@@ -92,7 +94,8 @@ void prune_by_flat_mdd(shared_object *shared_object, const mdd &mdd, mdd_node_so
     }
 
     static auto valid_edges_sets =
-        std::vector<absl::flat_hash_set<std::pair<rflcs_graph::match *, rflcs_graph::match*> > >(mdd.levels.size());
+            std::vector<absl::flat_hash_set<std::pair<rflcs_graph::match *, rflcs_graph::match
+                *> > >(mdd.levels.size());
     valid_edges_sets.resize(mdd.levels.size());
     for (auto &valid_edges: valid_edges_sets) {
         valid_edges.clear();
@@ -101,20 +104,20 @@ void prune_by_flat_mdd(shared_object *shared_object, const mdd &mdd, mdd_node_so
     for (size_t level_index = 0; level_index < shared_object->num_levels; ++level_index) {
         auto &current_level_valid_matches = valid_matches_sets.at(level_index);
         auto &current_level_valid_edges = valid_edges_sets.at(level_index);
-        const auto *flat_level = reinterpret_cast<struct flat_level *>(current_pointer);
+        const auto *flat_level = std::bit_cast<struct flat_level *>(current_pointer);
         current_pointer += sizeof(struct flat_level);
 
         for (size_t node_index = 0; node_index < flat_level->num_nodes; ++node_index) {
-            auto flat_node = reinterpret_cast<struct flat_node *>(current_pointer);
-            auto *match = reinterpret_cast<rflcs_graph::match *>(flat_node->match_ptr);
-            if(flat_node->is_active) {
+            auto flat_node = std::bit_cast<struct flat_node *>(current_pointer);
+            auto *match = std::bit_cast<rflcs_graph::match *>(flat_node->match_ptr);
+            if (flat_node->is_active) {
                 current_level_valid_matches.insert(match);
             }
             current_pointer += sizeof(struct flat_node);
 
             for (size_t edge_index = 0; edge_index < flat_node->num_edges_out; ++edge_index) {
-                if(auto flat_edge = reinterpret_cast<struct flat_edge *>(current_pointer); flat_edge->is_active) {
-                    auto *to = reinterpret_cast<rflcs_graph::match *>(flat_edge->edge_node->match_ptr);
+                if (auto flat_edge = std::bit_cast<struct flat_edge *>(current_pointer); flat_edge->is_active) {
+                    auto *to = std::bit_cast<rflcs_graph::match *>(flat_edge->edge_node->match_ptr);
                     current_level_valid_edges.emplace(match, to);
                 }
                 current_pointer += sizeof(flat_edge);

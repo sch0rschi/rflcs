@@ -25,7 +25,7 @@ public:
     }
 
     ~character_counters_source() {
-        for (auto *counter: *cache) {
+        for (const auto *counter: *cache) {
             delete counter;
         }
         delete cache;

@@ -6,7 +6,7 @@
 
 #include "edge_utils.hpp"
 
-bool update_nodes_and_prune(instance &instance, mdd &mdd, mdd_node_source &mdd_node_source);
+bool update_nodes_and_prune(const instance &instance, mdd &mdd, mdd_node_source &mdd_node_source);
 
 bool update_node_from_succ(const level_type &level, node &node);
 
@@ -18,7 +18,7 @@ bool prune_node_from_level(level_type &level, node *node);
 
 void clear_level(level_type &level, mdd_node_source &mdd_node_source);
 
-void filter_mdd(instance &instance, mdd &mdd, mdd_node_source &mdd_node_source) {
+void filter_mdd(const instance &instance, mdd &mdd, mdd_node_source &mdd_node_source) {
     if (temporaries::lower_bound >= temporaries::upper_bound) {
         return;
     }
@@ -29,7 +29,7 @@ void filter_mdd(instance &instance, mdd &mdd, mdd_node_source &mdd_node_source) 
     }
 }
 
-bool update_nodes_and_prune(instance &instance, mdd &mdd, mdd_node_source &mdd_node_source) {
+bool update_nodes_and_prune(const instance &instance, mdd &mdd, mdd_node_source &mdd_node_source) {
     auto is_changed = false;
     auto is_still_changing = true;
 
@@ -198,7 +198,7 @@ void filter_flat_mdd(const instance &instance, const mdd &mdd, const bool is_rep
     valid_matches.clear();
     auto static valid_edges = absl::flat_hash_set<long>();
     valid_edges.clear();
-    auto *current_pointer = reinterpret_cast<int8_t *>(instance.shared_object);
+    auto *current_pointer = std::bit_cast<std::byte *>(instance.shared_object);
     current_pointer += sizeof(shared_object);
     for (size_t level_index = 0; level_index < instance.shared_object->num_levels; ++level_index) {
         auto static current_level_valid_matches = absl::flat_hash_set<rflcs_graph::match *>();
@@ -216,16 +216,16 @@ void filter_flat_mdd(const instance &instance, const mdd &mdd, const bool is_rep
             }
         }
 
-        const auto *flat_level = reinterpret_cast<struct flat_level *>(current_pointer);
+        const auto *flat_level = std::bit_cast<struct flat_level *>(current_pointer);
         current_pointer += sizeof(struct flat_level);
 
         for (size_t node_index = 0; node_index < flat_level->num_nodes; ++node_index) {
-            auto flat_node = reinterpret_cast<struct flat_node *>(current_pointer);
+            auto flat_node = std::bit_cast<struct flat_node *>(current_pointer);
             flat_node->is_active &=
                     current_level_valid_matches.contains(static_cast<rflcs_graph::match *>(flat_node->match_ptr));
             current_pointer += sizeof(struct flat_node);
             for (size_t edge_index = 0; edge_index < flat_node->num_edges_out; ++edge_index) {
-                auto flat_edge = reinterpret_cast<struct flat_edge *>(current_pointer);
+                auto flat_edge = std::bit_cast<struct flat_edge *>(current_pointer);
                 flat_edge->is_active &= current_level_valid_edges.contains(
                     match_pair_to_edge_long_encoding(
                         static_cast<const rflcs_graph::match *>(flat_node->match_ptr),
