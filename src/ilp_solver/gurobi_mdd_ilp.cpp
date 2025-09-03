@@ -24,7 +24,7 @@ void solve_gurobi_mdd_ilp(instance &instance) {
         auto model = GRBModel(env);
 
         auto objective = GRBLinExpr();
-        std::vector<GRBLinExpr> character_sums(instance.alphabet_size);
+        std::vector<GRBLinExpr> character_sums(constants::alphabet_size);
         const GRBLinExpr *previous_level_node_sum = nullptr;
         for (const auto &level : instance.mdd->levels | std::views::drop(1)) {
             auto level_node_sum = GRBLinExpr();

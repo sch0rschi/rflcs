@@ -35,7 +35,7 @@ void update_characters_ordered_by_importance_mdd(
     }
     const unsigned long initial_number_of_matches = matches_on_level.size();
 
-    auto greedy_scores = std::vector<double>(instance.alphabet_size);
+    auto greedy_scores = std::vector<double>(constants::alphabet_size);
     for (const auto split_character: characters_ordered_by_importance) {
         if (temporaries::chaining_numbers[split_character] > 1) {
             std::unique_ptr<mdd> mdd_character_selection = mdd::copy_mdd(reduction_mdd, mdd_node_source);

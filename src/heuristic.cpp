@@ -32,7 +32,7 @@ auto heuristic_solve(instance &instance) -> void {
 
     int number_of_bad_runs = 0;
     int const number_of_bad_runs_limit = static_cast<int>(instance.string_1.size() * instance.string_2.size())
-            / instance.alphabet_size;
+            / constants::alphabet_size;
     int reset_counter = 0;
     boost::timer::progress_display progress_display(number_of_bad_runs_limit);
 
@@ -67,7 +67,7 @@ void setup(const instance &instance) {
         extension.heuristic_previous_match = nullptr;
         extension.reversed->heuristic_characters = Character_set();
         extension.reversed->extension.heuristic_previous_match = nullptr;
-        if (character < instance.alphabet_size) {
+        if (character < constants::alphabet_size) {
             heuristic_characters.set(character);
             extension.reversed->heuristic_characters.set(character);
         }
@@ -79,7 +79,7 @@ void clear(const instance &instance) {
         if (extension.is_active) {
             heuristic_characters.reset();
             extension.reversed->heuristic_characters.reset();
-            if (character < instance.alphabet_size) {
+            if (character < constants::alphabet_size) {
                 heuristic_characters.set(character);
                 extension.reversed->heuristic_characters.set(character);
             }
@@ -88,7 +88,7 @@ void clear(const instance &instance) {
 }
 
 void combine(instance &instance, std::vector<rflcs_graph::match> &matches, const bool is_building_from_back) {
-    auto static candidate_matches = std::vector<rflcs_graph::match *>(instance.alphabet_size);
+    auto static candidate_matches = std::vector<rflcs_graph::match *>(constants::alphabet_size);
     for (auto &current_match: std::ranges::reverse_view(matches)) {
         if (current_match.extension.is_active
             && !current_match.dom_succ_matches.empty()) {
@@ -115,7 +115,7 @@ void combine(instance &instance, std::vector<rflcs_graph::match> &matches, const
             auto &chosen_match = *candidate_matches.at(uniform_distribution(instance.random));
             current_match.extension.heuristic_previous_match = &chosen_match;
             current_match.heuristic_characters = chosen_match.heuristic_characters;
-            if (current_match.character < instance.alphabet_size) {
+            if (current_match.character < constants::alphabet_size) {
                 current_match.heuristic_characters.set(current_match.character);
             }
 
@@ -134,7 +134,7 @@ set_heuristic_solution(instance &instance, const rflcs_graph::match &match, cons
     auto characters = std::set<int>();
 
     const auto *actual_match = &match;
-    while (actual_match != nullptr && actual_match->character < instance.alphabet_size) {
+    while (actual_match != nullptr && actual_match->character < constants::alphabet_size) {
         if (!characters.contains(actual_match->character)) {
             instance.solution.push_front(actual_match->character);
             characters.insert(actual_match->character);
@@ -143,7 +143,7 @@ set_heuristic_solution(instance &instance, const rflcs_graph::match &match, cons
     }
 
     actual_match = match.extension.reversed;
-    while (actual_match != nullptr && actual_match->character < instance.alphabet_size) {
+    while (actual_match != nullptr && actual_match->character < constants::alphabet_size) {
         if (!characters.contains(actual_match->character)) {
             instance.solution.push_back(actual_match->character);
             characters.insert(actual_match->character);

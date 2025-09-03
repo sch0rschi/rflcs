@@ -21,7 +21,7 @@ auto all_single_character_relaxation(instance& instance, std::vector<std::vector
 auto selected_characters_rf_relaxation(instance& instance, std::vector<std::vector<std::pair<int, int>>>& upper_bound_redistributions) -> bool;
 
 auto relax_by_fixed_character_rf_constraint(instance& instance) -> bool {
-    auto upper_bound_redistributions = std::vector<std::vector<std::pair<int, int>>>(instance.alphabet_size);
+    auto upper_bound_redistributions = std::vector<std::vector<std::pair<int, int>>>(constants::alphabet_size);
     auto found_improvement = all_single_character_relaxation(instance, upper_bound_redistributions);
     found_improvement |= selected_characters_rf_relaxation(instance, upper_bound_redistributions);
     return found_improvement;
@@ -30,7 +30,7 @@ auto relax_by_fixed_character_rf_constraint(instance& instance) -> bool {
 inline auto selected_characters_rf_relaxation(instance& instance, std::vector<std::vector<std::pair<int, int>>>& upper_bound_redistributions) -> bool {
     auto found_improvement = false;
     for (int number_of_selected_characters = 2;
-         number_of_selected_characters < std::min(instance.alphabet_size, static_cast<int>(log2(instance.alphabet_size)));
+         number_of_selected_characters < std::min(constants::alphabet_size, static_cast<int>(log2(constants::alphabet_size)));
          number_of_selected_characters++) {
         auto still_improving = true;
         while (still_improving) {
@@ -73,7 +73,7 @@ inline auto all_single_character_relaxation(instance& instance, std::vector<std:
     const std::vector<int> single_character_repetitions = get_single_character_repetitions(instance);
     while (still_improving) {
         still_improving = false;
-        for (int character = 0; character < instance.alphabet_size; character++) {
+        for (int character = 0; character < constants::alphabet_size; character++) {
             if (single_character_repetitions.at(character) > 1) {
                 upper_bound_redistributions.at(character).emplace_back(0, 1);
                 still_improving |= set_rf_relaxed_upper_bounds(instance.graph->matches, upper_bound_redistributions, 1);

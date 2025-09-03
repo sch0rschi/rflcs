@@ -57,9 +57,9 @@ void reduce_by_mdd(instance &instance) {
     instance.shared_object->number_of_refined_characters = 0;
 
     std::cout << "First character selection started." << std::endl;
-    auto characters_ordered_by_importance = std::vector<Character>(instance.alphabet_size);
+    auto characters_ordered_by_importance = std::vector<Character>(constants::alphabet_size);
     std::iota(characters_ordered_by_importance.begin(), characters_ordered_by_importance.end(), 0);
-    boost::timer::progress_display progress(instance.alphabet_size);
+    boost::timer::progress_display progress(constants::alphabet_size);
     update_characters_ordered_by_importance_mdd(characters_ordered_by_importance,
                                                 instance,
                                                 *mdd_reduction,
@@ -71,7 +71,7 @@ void reduce_by_mdd(instance &instance) {
     std::cout << "..." << std::endl;
 
     instance.shared_object->number_of_refined_characters = 0;
-    for (int refinement_character_index: std::views::iota(0, instance.alphabet_size)) {
+    for (int refinement_character_index: std::views::iota(0, constants::alphabet_size)) {
         if (is_power_of_2(refinement_character_index)) {
 #ifndef MDD_FREQUENT_SAVE_FEATURE
             filter_flat_mdd(instance, *mdd_reduction, true);

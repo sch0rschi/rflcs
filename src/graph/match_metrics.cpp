@@ -23,7 +23,7 @@ auto get_characters_ordered_by_importance(const instance& instance) -> std::vect
     /*
      * Take care of selected_counter_index and the comparison operators when changing the order for sorting!
      */
-    for (int character = 0; character < instance.alphabet_size; character++) {
+    for (int character = 0; character < constants::alphabet_size; character++) {
         if (lcs_scores.at(character) > 1) {
             characters_with_metrics.emplace_back(
                 character,
@@ -56,11 +56,11 @@ auto get_characters_ordered_by_importance(const instance& instance) -> std::vect
 }
 
 auto get_single_character_repetitions(const instance& instance) -> std::vector<int> {
-    instance.graph->matches.back().extension.repetition_counter = std::vector(instance.alphabet_size, 0);
+    instance.graph->matches.back().extension.repetition_counter = std::vector(constants::alphabet_size, 0);
     for (auto& [character, upper_bound, dom_succ_matches, _heur, extension]: instance.graph->matches
              | std::views::reverse | std::views::drop(1) | std::views::take(instance.graph->matches.size() - 2)) {
         if (extension.is_active) {
-            extension.repetition_counter = std::vector(instance.alphabet_size, 0);
+            extension.repetition_counter = std::vector(constants::alphabet_size, 0);
 
             for (auto* ancestor_match: dom_succ_matches) {
                 if (ancestor_match->extension.is_active) {
@@ -71,7 +71,7 @@ auto get_single_character_repetitions(const instance& instance) -> std::vector<i
             extension.repetition_counter.at(character) += 1;
         }
     }
-    auto lcs_scores = std::vector(instance.alphabet_size, 0);
+    auto lcs_scores = std::vector(constants::alphabet_size, 0);
     for (auto* dominating_match: instance.graph->matches.front().dom_succ_matches) {
         if (dominating_match->extension.is_active) {
             aggregate_pairwise_max_in_first_vector(lcs_scores, dominating_match->extension.repetition_counter);
@@ -91,7 +91,7 @@ inline void aggregate_pairwise_max_in_first_vector(std::vector<int>& repetition_
 }
 
 auto get_sums_of_combined_upper_bounds(const instance& instance) -> std::vector<int> {
-    auto sum_of_combined_upper_bounds = std::vector(instance.alphabet_size, 0);
+    auto sum_of_combined_upper_bounds = std::vector(constants::alphabet_size, 0);
     for (const auto& [character, upper_bound, _dom, _heur, extension]: instance.graph->matches
              | std::views::reverse | std::views::drop(1) | std::views::take(instance.graph->matches.size() - 2)) {
         if (extension.is_active) {
@@ -103,7 +103,7 @@ auto get_sums_of_combined_upper_bounds(const instance& instance) -> std::vector<
 
 
 auto get_active_match_counters(const instance& instance) -> std::vector<int> {
-    auto counters = std::vector(instance.alphabet_size, 0);
+    auto counters = std::vector(constants::alphabet_size, 0);
     for (const auto& [character, upper_bound, _dom, _heur, extension]: instance.graph->matches
              | std::views::reverse | std::views::drop(1) | std::views::take(instance.graph->matches.size() - 2)) {
         if (extension.is_active) {
@@ -114,7 +114,7 @@ auto get_active_match_counters(const instance& instance) -> std::vector<int> {
 }
 
 auto get_having_max_combined_upper_bound_counters(const instance& instance) -> std::vector<int> {
-    auto counters = std::vector(instance.alphabet_size, 0);
+    auto counters = std::vector(constants::alphabet_size, 0);
     auto max_combined_upper_bound = 0;
 
     for (const auto& [character, upper_bound, _dom, _heur, extension]: instance.graph->matches

@@ -43,7 +43,7 @@ std::unique_ptr<mdd> create_initial_mdd(const instance &instance, bool forward) 
             for (auto succ_match: pred_node->match->extension.succ_matches) {
                 const bool not_dominated = !dominated_by_some_available_but_unused_character(
                         succ_match->extension.position_2, current_depth);
-                if (succ_match->character < instance.alphabet_size
+                if (succ_match->character < constants::alphabet_size
                     && next_depth <= succ_match->extension.reversed->upper_bound
                     && succ_match->extension.position_2 < min_position_2
                     && pred_node->characters_on_paths_to_some_sink.test(succ_match->character)

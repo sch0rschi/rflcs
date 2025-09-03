@@ -44,17 +44,16 @@ auto main(const int argc, char **argv) -> int {
             return instance.input_validity_code;
         }
 
-        constants::alphabet_size = instance.alphabet_size;
         temporaries::temp_character_set_1 = Character_set();
         temporaries::temp_character_set_2 = Character_set();
         temporaries::old_characters_on_paths_to_some_sink = Character_set();
         temporaries::old_characters_on_all_paths_to_lower_bound_levels = Character_set();
         temporaries::old_characters_on_paths_to_root = Character_set();
         temporaries::old_characters_on_all_paths_to_root = Character_set();
-        temporaries::chaining_numbers = std::vector<int>(instance.alphabet_size);
-        temporaries::node_character_count = std::vector<long>(instance.alphabet_size);
-        temporaries::incoming_edge_character_count = std::vector<long>(instance.alphabet_size);
-        temporaries::outgoing_edge_character_count = std::vector<long>(instance.alphabet_size);
+        temporaries::chaining_numbers = std::vector<int>(constants::alphabet_size);
+        temporaries::node_character_count = std::vector<long>(constants::alphabet_size);
+        temporaries::incoming_edge_character_count = std::vector<long>(constants::alphabet_size);
+        temporaries::outgoing_edge_character_count = std::vector<long>(constants::alphabet_size);
         temporaries::int_vector_positions_2 = std::vector<int>();
 
         instance.start = std::chrono::system_clock::now();
@@ -125,9 +124,9 @@ void process_input(instance &instance, const int argc, char **argv) {
             std::cout << "Only instances with two strings are allowed." << std::endl;
             instance.input_validity_code = 1;
         } else {
-            instance.alphabet_size = parse_next_integer(input_file);
+            constants::alphabet_size = parse_next_integer(input_file);
             instance.lower_bound = 0;
-            instance.upper_bound = instance.alphabet_size;
+            instance.upper_bound = constants::alphabet_size;
             const auto string_1_length = parse_next_integer(input_file);
             parse_string(instance.string_1, input_file, string_1_length);
             const auto string_2_length = parse_next_integer(input_file);
@@ -233,8 +232,8 @@ void check_solution(instance &instance) {
             return;
         }
         characters.insert(character);
-        position_1 = instance.next_occurrences_1[position_1 * instance.alphabet_size + character];
-        position_2 = instance.next_occurrences_2[position_2 * instance.alphabet_size + character];
+        position_1 = instance.next_occurrences_1[position_1 * constants::alphabet_size + character];
+        position_2 = instance.next_occurrences_2[position_2 * constants::alphabet_size + character];
     }
     if (static_cast<int>(characters.size()) != instance.lower_bound) {
         std::cout << "Solution lower bound " << instance.lower_bound << " does not fit solution length of "

@@ -23,7 +23,6 @@ struct instance {
     std::deque<Character> solution = std::deque<Character>();
     int lower_bound = 0;
     int upper_bound = 0;
-    int alphabet_size = 0;
     std::vector<Character> string_1 = std::vector<Character>();
     int_matrix next_occurrences_1 = int_matrix();
     std::vector<Character> string_2 = std::vector<Character>();
@@ -38,7 +37,7 @@ struct instance {
     std::chrono::time_point<std::chrono::system_clock> end;
     int active_matches = INT_MAX;
     int input_validity_code = 0;
-    shared_object* shared_object;
+    shared_object* shared_object = nullptr;
 
     int reduction_upper_bound = 0;
 

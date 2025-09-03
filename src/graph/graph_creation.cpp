@@ -37,11 +37,11 @@ void create_graph(instance &instance) {
     auto reversed_string_2 = instance.string_2;
     ranges::reverse(reversed_string_2);
 
-    instance.next_occurrences_1 = create_next_occurrences(instance.alphabet_size, instance.string_1);
-    instance.next_occurrences_2 = create_next_occurrences(instance.alphabet_size, instance.string_2);
+    instance.next_occurrences_1 = create_next_occurrences(constants::alphabet_size, instance.string_1);
+    instance.next_occurrences_2 = create_next_occurrences(constants::alphabet_size, instance.string_2);
 
-    const auto reverse_next_occurrences_1 = create_next_occurrences(instance.alphabet_size, reversed_string_1);
-    const auto reverse_next_occurrences_2 = create_next_occurrences(instance.alphabet_size, reversed_string_2);
+    const auto reverse_next_occurrences_1 = create_next_occurrences(constants::alphabet_size, reversed_string_1);
+    const auto reverse_next_occurrences_2 = create_next_occurrences(constants::alphabet_size, reversed_string_2);
 
     unsigned int const number_of_matches = calculate_number_of_matches(instance);
 
@@ -85,10 +85,10 @@ void create_graph(instance &instance) {
 }
 
 auto calculate_number_of_matches(const instance &instance) -> unsigned int {
-    const auto occurrences_1 = count_occurrences(instance.alphabet_size, instance.string_1);
-    const auto occurrences_2 = count_occurrences(instance.alphabet_size, instance.string_2);
+    const auto occurrences_1 = count_occurrences(constants::alphabet_size, instance.string_1);
+    const auto occurrences_2 = count_occurrences(constants::alphabet_size, instance.string_2);
     unsigned int number_of_matches = 2;
-    for (int character = 0; character < instance.alphabet_size; character++) {
+    for (int character = 0; character < constants::alphabet_size; character++) {
         number_of_matches += occurrences_1->at(character) * occurrences_2->at(character);
     }
     return number_of_matches;
@@ -122,7 +122,7 @@ void create_matches(std::vector<match> &matches,
             extension.position_1 = position_1;
             extension.position_2 = position_2;
             if (position_2 < static_cast<int>(instance.string_2.size()) - 1) {
-                position_2 = next_occurrences[(position_2 + 1) * instance.alphabet_size + string_character];
+                position_2 = next_occurrences[(position_2 + 1) * constants::alphabet_size + string_character];
             } else {
                 position_2 = static_cast<int>(instance.string_2.size());
             }
@@ -184,11 +184,11 @@ void set_successor_matches(const instance &instance,
     const auto string_1_length = instance.string_1.size();
     const auto string_2_length = instance.string_2.size();
     for (auto &match: matches | std::views::take(matches.size() - 1)) {
-        match.extension.succ_matches.reserve(instance.alphabet_size);
-        for (int character = 0; character < instance.alphabet_size; character++) {
+        match.extension.succ_matches.reserve(constants::alphabet_size);
+        for (int character = 0; character < constants::alphabet_size; character++) {
             if (character != match.character) {
-                const auto next_position_1 = next_occurrences_1[match.extension.position_1 * instance.alphabet_size + character];
-                const auto next_position_2 = next_occurrences_2[match.extension.position_2 * instance.alphabet_size + character];
+                const auto next_position_1 = next_occurrences_1[match.extension.position_1 * constants::alphabet_size + character];
+                const auto next_position_2 = next_occurrences_2[match.extension.position_2 * constants::alphabet_size + character];
                 if (next_position_1 < static_cast<int>(string_1_length) &&
                     next_position_2 < static_cast<int>(string_2_length)) {
                     auto succ_match = match_matrix[next_position_1 * string_2_length + next_position_2];

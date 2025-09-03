@@ -32,7 +32,7 @@ void solve_enumeration(instance &instance) {
     auto *root_node = reinterpret_cast<flat_node *>(current_pointer);
 
     auto stack_vector = std::vector<flat_node *>();
-    stack_vector.reserve(instance.alphabet_size * instance.upper_bound);
+    stack_vector.reserve(constants::alphabet_size * instance.upper_bound);
 
     auto stack = stack_vector.data();
     int stack_pointer = -1;
