@@ -46,7 +46,7 @@ void reduce_by_mdd(instance &instance) {
 
     auto mdd_reduction = mdd::copy_mdd(*instance.mdd, *mdd_node_source);
     prune_by_flat_mdd(instance.shared_object, *mdd_reduction, *mdd_node_source);
-    filter_mdd(instance, *mdd_reduction, true, *mdd_node_source);
+    filter_mdd(instance, *mdd_reduction, *mdd_node_source);
     auto mdd_character_selection = mdd::copy_mdd(*mdd_reduction, *mdd_node_source);
 
     if (instance.lower_bound >= instance.upper_bound) {
@@ -60,11 +60,11 @@ void reduce_by_mdd(instance &instance) {
     auto characters_ordered_by_importance = std::vector<Character>(instance.alphabet_size);
     std::iota(characters_ordered_by_importance.begin(), characters_ordered_by_importance.end(), 0);
     boost::timer::progress_display progress(instance.alphabet_size);
-    get_characters_ordered_by_importance_mdd(instance,
-                                             *mdd_reduction,
-                                             *mdd_node_source,
-                                             *character_counters_source,
-                                             characters_ordered_by_importance, &progress);
+    update_characters_ordered_by_importance_mdd(characters_ordered_by_importance,
+                                                instance,
+                                                *mdd_reduction,
+                                                *mdd_node_source,
+                                                *character_counters_source, &progress);
     std::cout << "First character selection done." << std::endl;
     std::ranges::for_each(std::ranges::take_view(characters_ordered_by_importance, 20),
                           [](const int num) { std::cout << num << ", "; });
@@ -86,18 +86,18 @@ void reduce_by_mdd(instance &instance) {
                                               characters_ordered_by_importance.begin() + end);
 
             prune_by_flat_mdd(instance.shared_object, *mdd_character_selection, *mdd_node_source);
-            get_characters_ordered_by_importance_mdd(instance,
-                                                     *mdd_character_selection,
-                                                     *mdd_node_source,
-                                                     *character_counters_source,
-                                                     sub_characters,
-                                                     nullptr);
+            update_characters_ordered_by_importance_mdd(sub_characters,
+                                                        instance,
+                                                        *mdd_character_selection,
+                                                        *mdd_node_source,
+                                                        *character_counters_source,
+                                                        nullptr);
             std::ranges::copy(sub_characters,characters_ordered_by_importance.begin() + start);
         }
 
         auto split_character = characters_ordered_by_importance[refinement_character_index];
         refine_mdd(instance, *mdd_reduction, split_character, *mdd_node_source);
-        filter_mdd(instance, *mdd_reduction, true, *mdd_node_source);
+        filter_mdd(instance, *mdd_reduction, *mdd_node_source);
         instance.shared_object->number_of_refined_characters++;
         instance.shared_object->upper_bound =
                 std::min(instance.shared_object->upper_bound, mdd_reduction->levels.back()->depth);

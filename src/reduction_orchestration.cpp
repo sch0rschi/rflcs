@@ -91,10 +91,10 @@ void reduce_graph_pre_solver(instance &instance) {
 
 void reduce_graph_pre_solver_by_mdd(instance &instance) {
     auto forward_mdd = create_initial_mdd(instance, true);
-    filter_mdd(instance, *forward_mdd, true, *instance.mdd_node_source);
+    filter_mdd(instance, *forward_mdd, *instance.mdd_node_source);
     const long forward_mdd_complexity = calculate_mdd_complexity(*forward_mdd);
     auto backward_mdd = create_initial_mdd(instance, false);
-    filter_mdd(instance, *backward_mdd, true, *instance.mdd_node_source);
+    filter_mdd(instance, *backward_mdd, *instance.mdd_node_source);
     const long backward_mdd_complexity = calculate_mdd_complexity(*backward_mdd);
 
     instance.is_solving_forward = forward_mdd_complexity < backward_mdd_complexity;
@@ -221,7 +221,7 @@ void handle_threads_for_mdd_reduction(instance &instance) {
         return;
     }
     prune_by_flat_mdd(instance.shared_object, *instance.mdd, *instance.mdd_node_source);
-    filter_mdd(instance, *instance.mdd, true, *instance.mdd_node_source);
+    filter_mdd(instance, *instance.mdd, *instance.mdd_node_source);
     serialize_initial_mdd(*instance.mdd, instance.shared_object);
 }
 

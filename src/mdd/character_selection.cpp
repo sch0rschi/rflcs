@@ -13,12 +13,12 @@ void chaining_numbers(const mdd &mdd, const character_counters_source &character
 
 double calculate_greedy_score(const mdd &mdd, double initial_number_of_matches, double initial_number_of_graph_edges);
 
-void get_characters_ordered_by_importance_mdd(
+void update_characters_ordered_by_importance_mdd(
+    std::vector<Character> &characters_ordered_by_importance,
     instance &instance,
     const mdd &reduction_mdd,
     mdd_node_source &mdd_node_source,
     const character_counters_source &character_counters_source,
-    std::vector<Character> &characters_ordered_by_importance,
     boost::timer::progress_display *progress) {
     chaining_numbers(reduction_mdd, character_counters_source);
 
@@ -40,7 +40,7 @@ void get_characters_ordered_by_importance_mdd(
         if (temporaries::chaining_numbers[split_character] > 1) {
             std::unique_ptr<mdd> mdd_character_selection = mdd::copy_mdd(reduction_mdd, mdd_node_source);
             refine_mdd(instance, *mdd_character_selection, split_character, mdd_node_source);
-            filter_mdd(instance, *mdd_character_selection, true, mdd_node_source);
+            filter_mdd(instance, *mdd_character_selection, mdd_node_source);
             greedy_scores[split_character] = calculate_greedy_score(
                 *mdd_character_selection,
                 static_cast<double>(initial_number_of_matches),
