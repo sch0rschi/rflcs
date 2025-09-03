@@ -20,7 +20,6 @@ struct node {
     std::vector<int> *sequences_character_counter; // not counting match character
     edges_type edges_out = edges_type();
     edges_type edges_in = edges_type();
-    node *copy_helper;
     int upper_bound_down = INT_MAX / 4; // not including match character
     bool needs_update_from_pred = true;
     bool needs_update_from_succ = true;

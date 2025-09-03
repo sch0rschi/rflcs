@@ -82,7 +82,7 @@ public:
         return fresh_node;
     }
 
-    [[nodiscard]] node *get_copy_of_old_node_with_copy_helper(node *old_node) {
+    [[nodiscard]] node *get_copy_of_old_node_with_copy_helper(const node *old_node) {
         node *fresh_node;
         if (cache.empty()) {
             fresh_node = new_node();
@@ -104,9 +104,6 @@ public:
 
         fresh_node->needs_update_from_pred = false;
         fresh_node->needs_update_from_succ = false;
-
-        fresh_node->copy_helper = old_node;
-        old_node->copy_helper = fresh_node;
 
         return fresh_node;
     }
