@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include "../../constants.hpp"
 
 struct character_counters_source {
 private:
