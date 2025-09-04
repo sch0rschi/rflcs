@@ -29,14 +29,11 @@ void write_result_file(const instance &instance) {
         std::cerr << "Failed to open file for writing." << std::endl;
     }
 
-    std::chrono::duration<double> overall_runtime =
-            instance.reduction_end - instance.start
-            + instance.end - instance.mdd_ilp_end;
+    std::chrono::duration<double> overall_runtime = instance.end - instance.start;
     std::chrono::duration<double> heuristic_solution_runtime = instance.heuristic_solution_time - instance.start;
     std::chrono::duration<double> heuristic_runtime = instance.heuristic_end - instance.start;
     std::chrono::duration<double> mdd_runtime = instance.reduction_end - instance.heuristic_end;
-    std::chrono::duration<double> mdd_ilp_runtime = instance.mdd_ilp_end - instance.reduction_end;
-    std::chrono::duration<double> match_ilp_runtime = instance.end - instance.mdd_ilp_end;
+    std::chrono::duration<double> solver_runtime = instance.end - instance.reduction_end;
 
     out_file << "solved:\t" << std::boolalpha << instance.is_valid_solution << std::endl;
     out_file << "solution_length:\t" << temporaries::lower_bound << std::endl;
@@ -58,13 +55,7 @@ void write_result_file(const instance &instance) {
 
     out_file << "main_process_memory_consumption:\t" << instance.main_process_memory_consumption << std::endl;
 
-    out_file << "match_ilp_solution_length:\t" << instance.match_ilp_solution << std::endl;
-    out_file << "match_ilp_upper_bound:\t" << instance.match_ilp_upper_bound << std::endl;
-    out_file << "match_ilp_runtime:\t" << match_ilp_runtime.count() << std::endl;
-
-    out_file << "mdd_ilp_solution_length:\t" << instance.mdd_ilp_solution << std::endl;
-    out_file << "mdd_ilp_upper_bound:\t" << instance.mdd_ilp_upper_bound << std::endl;
-    out_file << "mdd_ilp_runtime:\t" << mdd_ilp_runtime.count() << std::endl;
+    out_file << "solver_runtime:\t" << solver_runtime.count() << std::endl;
 
     out_file << "solution:\t[";
     for (const auto character: instance.solution) {

@@ -15,8 +15,8 @@ using int_matrix = std::vector<int>;
 struct instance {
     std::string path;
     std::unique_ptr<rflcs_graph::graph> graph = nullptr;
-    std::unique_ptr<mdd> mdd;
-    std::unique_ptr<mdd_node_source> mdd_node_source;
+    std::unique_ptr<struct mdd> mdd;
+    std::unique_ptr<struct mdd_node_source> mdd_node_source;
     long mdd_memory_consumption = 0;
     long main_process_memory_consumption = 0;
     bool is_solving_forward = true;
@@ -35,15 +35,7 @@ struct instance {
     std::chrono::time_point<std::chrono::system_clock> end;
     int active_matches = INT_MAX;
     int input_validity_code = 0;
-    shared_object* shared_object = nullptr;
+    struct shared_object* shared_object = nullptr;
 
     int reduction_upper_bound = 0;
-
-    int match_ilp_upper_bound = 0;
-    int match_ilp_solution = 0;
-    std::chrono::time_point<std::chrono::system_clock> match_ilp_end;
-
-    int mdd_ilp_upper_bound = 0;
-    int mdd_ilp_solution = 0;
-    std::chrono::time_point<std::chrono::system_clock> mdd_ilp_end;
 };

@@ -60,12 +60,12 @@ void solve_gurobi_mis_ilp(instance &instance) {
         instance.is_valid_solution = result_status == GRB_OPTIMAL || result_status == GRB_INFEASIBLE;
         if (model.get(GRB_IntAttr_SolCount) > 0) {
             temporaries::lower_bound = static_cast<int>(round(model.get(GRB_DoubleAttr_ObjVal)));
-            instance.match_ilp_upper_bound = static_cast<int>(round(model.get(GRB_DoubleAttr_ObjBound)));
+            temporaries::upper_bound = temporaries::lower_bound;
             set_solution_from_graph(instance, matches, gurobi_variable_map);
         } else if (result_status == GRB_INFEASIBLE) {
-            instance.match_ilp_upper_bound = temporaries::lower_bound;
+            temporaries::upper_bound = temporaries::lower_bound;
         } else {
-            instance.match_ilp_upper_bound = static_cast<int>(round(model.get(GRB_DoubleAttr_ObjBound)));
+            temporaries::upper_bound = static_cast<int>(round(model.get(GRB_DoubleAttr_ObjBound)));
         }
     } catch (GRBException &e) {
         std::cout << "Error code = " << e.getErrorCode() << std::endl;
@@ -140,21 +140,19 @@ std::set<rflcs_graph::match *> get_active_matches(const instance &instance) {
 void set_solution_from_graph(instance &instance,
                              const std::set<rflcs_graph::match *> &matches,
                              const absl::flat_hash_map<rflcs_graph::match *, GRBVar> &gurobi_variable_map) {
-    if constexpr (SOLVER == MULTI || SOLVER == GUROBI_MIS) {
-        auto matches_in_solution = std::vector<rflcs_graph::match *>();
-        std::ranges::copy_if(matches, std::back_inserter(matches_in_solution),
-                             [gurobi_variable_map](const rflcs_graph::match *match) {
-                                 return static_cast<int>(round(gurobi_variable_map.at(match).get(GRB_DoubleAttr_X))) ==
-                                        1;
-                             });
+    auto matches_in_solution = std::vector<rflcs_graph::match *>();
+    std::ranges::copy_if(matches, std::back_inserter(matches_in_solution),
+                         [gurobi_variable_map](const rflcs_graph::match *match) {
+                             return static_cast<int>(round(gurobi_variable_map.at(match).get(GRB_DoubleAttr_X))) ==
+                                    1;
+                         });
 
-        std::ranges::sort(matches_in_solution, [](const rflcs_graph::match *m1, const rflcs_graph::match *m2) {
-            return m1->extension.position_1 < m2->extension.position_1;
-        });
+    std::ranges::sort(matches_in_solution, [](const rflcs_graph::match *m1, const rflcs_graph::match *m2) {
+        return m1->extension.position_1 < m2->extension.position_1;
+    });
 
-        instance.solution.clear();
-        for (const auto match_in_solution: matches_in_solution) {
-            instance.solution.push_back(match_in_solution->character);
-        }
+    instance.solution.clear();
+    for (const auto match_in_solution: matches_in_solution) {
+        instance.solution.push_back(match_in_solution->character);
     }
 }

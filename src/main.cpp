@@ -159,12 +159,6 @@ void reduction(instance &instance) {
 
 void solve(instance &instance) {
     if (temporaries::lower_bound >= temporaries::upper_bound) {
-        instance.mdd_ilp_end = std::chrono::system_clock::now();
-        instance.mdd_ilp_solution = instance.heuristic_solution_length;
-        instance.mdd_ilp_upper_bound = temporaries::upper_bound;
-        instance.match_ilp_end = std::chrono::system_clock::now();
-        instance.match_ilp_solution = instance.heuristic_solution_length;
-        instance.match_ilp_upper_bound = temporaries::lower_bound;
         instance.end = std::chrono::system_clock::now();
         instance.active_matches = 0;
         instance.is_valid_solution = true;
@@ -180,25 +174,20 @@ void solve(instance &instance) {
         }
     }
 
-    if constexpr (SOLVER == GUROBI_MDD || SOLVER == MULTI) {
-        temporaries::upper_bound = instance.reduction_upper_bound;
-        temporaries::lower_bound = instance.heuristic_solution_length;
+    if constexpr (SOLVER == GUROBI_MDD) {
         solve_gurobi_mdd_ilp(instance);
-        instance.mdd_ilp_upper_bound = std::min(instance.mdd_ilp_upper_bound, temporaries::upper_bound);
     }
-    instance.mdd_ilp_solution = temporaries::lower_bound;
-    instance.mdd_ilp_end = std::chrono::system_clock::now();
 
-    if constexpr (SOLVER == GUROBI_MIS || SOLVER == MULTI) {
-        temporaries::upper_bound = instance.reduction_upper_bound;
-        temporaries::lower_bound = instance.heuristic_solution_length;
+    if constexpr (SOLVER == GUROBI_MIS) {
         solve_gurobi_mis_ilp(instance);
-        instance.match_ilp_upper_bound = std::min(instance.match_ilp_upper_bound, temporaries::upper_bound);
     }
-    instance.match_ilp_end = std::chrono::system_clock::now();
-    instance.match_ilp_solution = temporaries::lower_bound;
-    temporaries::upper_bound = std::min(temporaries::upper_bound, instance.match_ilp_upper_bound);
-    instance.match_ilp_upper_bound = temporaries::upper_bound;
+
+    if constexpr (SOLVER == GUROBI_GRAPH)
+    {
+        solve_gurobi_graph_ilp(instance);
+    }
+
+
 
     if (int status; WIFEXITED(status)) {
         auto usage = rusage();

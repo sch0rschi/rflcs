@@ -67,12 +67,12 @@ void solve_gurobi_mdd_ilp(instance &instance) {
         instance.is_valid_solution = result_status == GRB_OPTIMAL || result_status == GRB_INFEASIBLE;
         if (model.get(GRB_IntAttr_SolCount) > 0) {
             temporaries::lower_bound = static_cast<int>(round(model.get(GRB_DoubleAttr_ObjVal)));
-            instance.mdd_ilp_upper_bound = static_cast<int>(round(model.get(GRB_DoubleAttr_ObjBound)));
+            temporaries::upper_bound = temporaries::lower_bound;
             set_solution_from_ilp(instance, gurobi_variable_map);
         } else if (result_status == GRB_INFEASIBLE) {
-            instance.mdd_ilp_upper_bound = temporaries::lower_bound;
+            temporaries::upper_bound = temporaries::lower_bound;
         } else {
-            instance.mdd_ilp_upper_bound = static_cast<int>(round(model.get(GRB_DoubleAttr_ObjBound)));
+            temporaries::upper_bound = static_cast<int>(round(model.get(GRB_DoubleAttr_ObjBound)));
         }
     } catch (GRBException &e) {
         std::cout << "Error code = " << e.getErrorCode() << std::endl;
@@ -81,17 +81,15 @@ void solve_gurobi_mdd_ilp(instance &instance) {
 }
 
 void set_solution_from_ilp(instance &instance, absl::flat_hash_map<node*, GRBVar>& gurobi_variable_map) {
-    if constexpr (SOLVER == GUROBI_MDD) {
-        instance.solution.clear();
-        for (const auto &level : instance.mdd->levels | std::views::drop(1)) {
-            for(const auto node : level->nodes) {
-                if (static_cast<int>(round(gurobi_variable_map.at(node).get(GRB_DoubleAttr_X))) == 1) {
-                    instance.solution.push_back(node->match->character);
-                }
+    instance.solution.clear();
+    for (const auto &level : instance.mdd->levels | std::views::drop(1)) {
+        for(const auto node : level->nodes) {
+            if (static_cast<int>(round(gurobi_variable_map.at(node).get(GRB_DoubleAttr_X))) == 1) {
+                instance.solution.push_back(node->match->character);
             }
         }
-        if (!instance.is_solving_forward) {
-            std::ranges::reverse(instance.solution);
-        }
+    }
+    if (!instance.is_solving_forward) {
+        std::ranges::reverse(instance.solution);
     }
 }

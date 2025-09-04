@@ -72,6 +72,7 @@ set(SOURCE_FILES
         src/graph/simple_upper_bounds.cpp
         src/ilp_solver/gurobi_mis_ilp.cpp
         src/ilp_solver/gurobi_mdd_ilp.cpp
+        src/ilp_solver/gurobi_graph_ilp.cpp
         src/mdd/character_bound_utils.cpp
         src/mdd/character_selection.cpp
         src/mdd/domination_utils.cpp

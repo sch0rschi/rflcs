@@ -17,6 +17,8 @@ namespace rflcs_graph {
         match* reversed;
         int combined_upper_bound = INT_MAX;
         std::vector<match *> succ_matches = std::vector<match *>();
+        std::vector<match *> pred_matches = std::vector<match *>();
+        std::vector<match *> dom_pred_matches = std::vector<match *>(); // incoming dominating edges from predecessors
         std::vector<int> rf_relaxed_upper_bounds = std::vector<int>();
         match* heuristic_previous_match;
         Character_set available_characters;
