@@ -43,14 +43,13 @@ void solve_gurobi_graph_ilp(instance& instance)
         absl::flat_hash_map<rflcs_graph::match*, GRBVar> gurobi_variable_map = create_gurobi_variables(model, matches);
         update_graph_by_mdd(instance, matches);
 
-        constexpr double zero = 0.0;
-        constexpr double one = 1.0;
-        constexpr char grb_binary = GRB_BINARY;
-        const std::string included_characters_name = "active_characters";
-
-        const auto included_characters = model.addVars(&zero, &one, &zero, &grb_binary, &included_characters_name,
-                                                       constants::alphabet_size);
+        auto included_characters = std::vector<GRBLinExpr>(constants::alphabet_size);
         std::vector<GRBLinExpr> character_sums(constants::alphabet_size);
+        for (int character = 0; character < constants::alphabet_size; character++) {
+            included_characters[character] = model.addVar(0.0, 1.0, 0, GRB_BINARY);
+            character_sums[character] = GRBLinExpr();
+        }
+
         for (auto match : matches)
         {
             if (match->character < constants::alphabet_size)
@@ -58,11 +57,12 @@ void solve_gurobi_graph_ilp(instance& instance)
                 character_sums[match->character] += gurobi_variable_map[match];
             }
         }
+
         auto objective = GRBLinExpr();
         for (int character = 0; character < constants::alphabet_size; character++)
         {
-            model.addConstr(included_characters[character], GRB_LESS_EQUAL, character_sums[character]);
             objective += included_characters[character];
+            model.addConstr(included_characters[character] <= character_sums[character]);
         }
         model.setObjective(objective, GRB_MAXIMIZE);
         model.addConstr(objective, GRB_GREATER_EQUAL, temporaries::lower_bound + 1);
