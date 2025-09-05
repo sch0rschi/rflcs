@@ -10,6 +10,10 @@
 
 #include "absl/container/flat_hash_set.h"
 
+absl::flat_hash_map<std::pair<rflcs_graph::match *, rflcs_graph::match *>, GRBVar> get_gurobi_edges_map(
+    GRBModel &model,
+    const absl::flat_hash_set<rflcs_graph::match *> &matches);
+
 void remove_duplicates(std::vector<rflcs_graph::match *> &matches);
 
 void remove_dominated(std::vector<rflcs_graph::match *> &matches);
@@ -36,56 +40,53 @@ void solve_gurobi_graph_ilp(instance &instance) {
 
         auto model = GRBModel(env);
 
-        absl::flat_hash_set<rflcs_graph::match *> matches = get_matches(instance);
-        absl::flat_hash_map<rflcs_graph::match *, GRBVar> gurobi_variable_map = create_gurobi_variables(model, matches);
+        auto matches = get_matches(instance);
         update_graph_by_mdd(instance, matches);
-
-        std::vector<GRBLinExpr> character_count(constants::alphabet_size);
-        for (auto const &[match, gurobi_variable]: gurobi_variable_map) {
-            if (match->character < constants::alphabet_size) {
-                character_count[match->character] += gurobi_variable;
-            }
-        }
-        for (int character = 0; character < constants::alphabet_size; character++) {
-            model.addConstr(character_count[character], GRB_LESS_EQUAL, 1);
-        }
+        auto gurobi_edges_map = get_gurobi_edges_map(model, matches);
 
         auto objective = GRBLinExpr();
-        for (auto const &[match, gurobi_variable]: gurobi_variable_map) {
-            if (match->character < constants::alphabet_size) {
-                objective += gurobi_variable;
+        auto incoming_edge_sum_for_character = std::vector<GRBLinExpr>(constants::alphabet_size);
+        auto outgoing_edge_sum_for_character = std::vector<GRBLinExpr>(constants::alphabet_size);
+        auto outgoing_edges_sum_root = GRBLinExpr();
+        for (auto const &[from_to, gurobi_variable]: gurobi_edges_map) {
+            auto from = from_to.first;
+            auto to = from_to.second;
+            objective += gurobi_variable;
+            incoming_edge_sum_for_character.at(to->character) += gurobi_variable;
+            if (from->character < constants::alphabet_size) {
+                outgoing_edge_sum_for_character.at(from->character) += gurobi_variable;
+            } else {
+                outgoing_edges_sum_root += gurobi_variable;
             }
         }
+        for (auto const& incoming_edge_sum : incoming_edge_sum_for_character) {
+            model.addConstr(incoming_edge_sum <= 1);
+        }
+        for (auto const& outgoing_edge_sum : outgoing_edge_sum_for_character) {
+            model.addConstr(outgoing_edge_sum <= 1);
+        }
+        model.addConstr(outgoing_edges_sum_root == 1);
+
+        auto incoming_edges_sum_for_match = absl::flat_hash_map<rflcs_graph::match*, GRBLinExpr>();
+        auto outgoing_edges_sum_for_match = absl::flat_hash_map<rflcs_graph::match*, GRBLinExpr>();
+        for (auto match : matches) {
+            incoming_edges_sum_for_match[match] = GRBLinExpr();
+            outgoing_edges_sum_for_match[match] = GRBLinExpr();
+        }
+        for (auto const &[from_to, variable]: gurobi_edges_map) {
+            auto from = from_to.first;
+            auto to = from_to.second;
+            incoming_edges_sum_for_match.at(to) += variable;
+            outgoing_edges_sum_for_match.at(from) += variable;
+        }
+        for (auto match : matches) {
+            if ( match->character < constants::alphabet_size ) {
+                model.addConstr(incoming_edges_sum_for_match.at(match) >= outgoing_edges_sum_for_match.at(match));
+            }
+        }
+
         model.setObjective(objective, GRB_MAXIMIZE);
         model.addConstr(objective, GRB_GREATER_EQUAL, temporaries::lower_bound + 1);
-
-        for (auto match: matches) {
-            for (auto succ_match_1: match->extension.succ_matches) {
-                for (auto succ_match_2: match->extension.succ_matches) {
-                    if (succ_match_1->extension.position_1 < succ_match_2->extension.position_1
-                        && succ_match_1->extension.position_2 > succ_match_2->extension.position_2) {
-                        model.addConstr(
-                            gurobi_variable_map.at(succ_match_1) + gurobi_variable_map.at(succ_match_2) <= 1);
-                    }
-                }
-            }
-
-            if (match->character < constants::alphabet_size) {
-                auto predecessor_sum = GRBLinExpr();
-                for (auto pred_match: match->extension.pred_matches) {
-                    predecessor_sum += gurobi_variable_map.at(pred_match);
-                }
-                model.addConstr(gurobi_variable_map.at(match), GRB_LESS_EQUAL, predecessor_sum);
-            }
-
-            if (match->extension.reversed->upper_bound <= temporaries::lower_bound) {
-                auto successor_sum = GRBLinExpr();
-                for (auto succ_match: match->extension.succ_matches) {
-                    successor_sum += gurobi_variable_map.at(succ_match);
-                }
-                model.addConstr(successor_sum, GRB_GREATER_EQUAL, gurobi_variable_map.at(match));
-            }
-        }
 
         model.optimize();
 
@@ -114,6 +115,18 @@ absl::flat_hash_set<rflcs_graph::match *> get_matches(const instance &instance) 
         }
     }
     return matches;
+}
+
+absl::flat_hash_map<std::pair<rflcs_graph::match *, rflcs_graph::match *>, GRBVar> get_gurobi_edges_map(
+    GRBModel &model,
+    const absl::flat_hash_set<rflcs_graph::match *> &matches) {
+    auto gurobi_edges_map = absl::flat_hash_map<std::pair<rflcs_graph::match *, rflcs_graph::match *>, GRBVar>();
+    for (auto match : matches) {
+        for (auto succ_match: match->extension.succ_matches) {
+            gurobi_edges_map[std::make_pair(match, succ_match)] = model.addVar(0.0, 1.0, 0, GRB_BINARY);
+        }
+    }
+    return gurobi_edges_map;
 }
 
 absl::flat_hash_map<rflcs_graph::match *, GRBVar> create_gurobi_variables(
