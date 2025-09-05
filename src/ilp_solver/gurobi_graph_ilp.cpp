@@ -40,45 +40,51 @@ void solve_gurobi_graph_ilp(instance &instance) {
         absl::flat_hash_map<rflcs_graph::match *, GRBVar> gurobi_variable_map = create_gurobi_variables(model, matches);
         update_graph_by_mdd(instance, matches);
 
-        std::vector<GRBLinExpr> character_sums(constants::alphabet_size);
-        std::vector<GRBVar> included_characters(constants::alphabet_size);
-
-        for (Character character = 0; character < constants::alphabet_size; ++character) {
-            included_characters[character] = model.addVar(0.0, 1.0, 0.0, GRB_BINARY);
-        }
-
-        for (auto match: matches) {
+        std::vector<GRBLinExpr> character_count(constants::alphabet_size);
+        for (auto const &[match, gurobi_variable]: gurobi_variable_map) {
             if (match->character < constants::alphabet_size) {
-                character_sums[match->character] += gurobi_variable_map[match];
+                character_count[match->character] += gurobi_variable;
             }
         }
-
         for (int character = 0; character < constants::alphabet_size; character++) {
-            model.addConstr(included_characters[character], GRB_LESS_EQUAL, character_sums[character]);
+            model.addConstr(character_count[character], GRB_LESS_EQUAL, 1);
         }
 
         auto objective = GRBLinExpr();
-        for (int character = 0; character < constants::alphabet_size; character++) {
-            objective += included_characters[character];
+        for (auto const &[match, gurobi_variable]: gurobi_variable_map) {
+            if (match->character < constants::alphabet_size) {
+                objective += gurobi_variable;
+            }
         }
-
         model.setObjective(objective, GRB_MAXIMIZE);
         model.addConstr(objective, GRB_GREATER_EQUAL, temporaries::lower_bound + 1);
 
         for (auto match: matches) {
+            for (auto succ_match_1: match->extension.succ_matches) {
+                for (auto succ_match_2: match->extension.succ_matches) {
+                    if (succ_match_1->extension.position_1 < succ_match_2->extension.position_1
+                        && succ_match_1->extension.position_2 > succ_match_2->extension.position_2) {
+                        model.addConstr(
+                            gurobi_variable_map.at(succ_match_1) + gurobi_variable_map.at(succ_match_2) <= 1);
+                    }
+                }
+            }
+
             if (match->character < constants::alphabet_size) {
                 auto predecessor_sum = GRBLinExpr();
-                for (auto pred_match: match->extension.dom_pred_matches) {
+                for (auto pred_match: match->extension.pred_matches) {
                     predecessor_sum += gurobi_variable_map.at(pred_match);
                 }
                 model.addConstr(gurobi_variable_map.at(match), GRB_LESS_EQUAL, predecessor_sum);
             }
 
-            auto successor_sum = GRBLinExpr();
-            for (auto &succ_match: match->dom_succ_matches) {
-                successor_sum += gurobi_variable_map.at(succ_match);
+            if (match->extension.reversed->upper_bound <= temporaries::lower_bound) {
+                auto successor_sum = GRBLinExpr();
+                for (auto succ_match: match->extension.succ_matches) {
+                    successor_sum += gurobi_variable_map.at(succ_match);
+                }
+                model.addConstr(successor_sum, GRB_GREATER_EQUAL, gurobi_variable_map.at(match));
             }
-            model.addConstr(successor_sum, GRB_LESS_EQUAL, 1);
         }
 
         model.optimize();
