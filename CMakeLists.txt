@@ -48,10 +48,19 @@ target_include_directories(boost_timer INTERFACE
 )
 add_subdirectory(external/abseil)
 
-if(DEFINED ENV{GUROBI_HOME} AND DEFINED ENV{GUROBI_LIB})
-    include_directories($ENV{GUROBI_HOME}/include)
+if(DEFINED ENV{GUROBI_HOME})
+    set(GUROBI_INCLUDE_DIR $ENV{GUROBI_HOME}/include)
+
+    find_library(GUROBI_LIBRARY
+            NAMES gurobi gurobi100 gurobi110 gurobi120 gurobi130
+            HINTS $ENV{GUROBI_HOME}/lib
+    )
+    find_library(GUROBI_API
+            NAMES libgurobi_c++.a
+            HINTS $ENV{GUROBI_HOME}/lib
+    )
 else()
-    message(FATAL_ERROR "GUROBI_HOME or GUROBI_LIB environment variable is not set")
+    message(FATAL_ERROR "GUROBI_HOME environment variable is not set")
 endif()
 
 #--------------#
@@ -89,13 +98,16 @@ set(SOURCE_FILES
 # Target Configuration Function #
 #-------------------------------#
 function(configure_rflcs_target target_name)
+
+    target_include_directories(${target_name} PRIVATE ${GUROBI_INCLUDE_DIR})
+
     target_link_libraries(${target_name}
             absl::flat_hash_map
             absl::flat_hash_set
             boost_dynamic_bitset
             boost_timer
-            $ENV{GUROBI_LIB}
-            $ENV{GUROBI_HOME}/lib/libgurobi_c++.a
+            ${GUROBI_LIBRARY}
+            ${GUROBI_API}
     )
 
     if(MDD_FREQUENT_SAVE_FEATURE)
