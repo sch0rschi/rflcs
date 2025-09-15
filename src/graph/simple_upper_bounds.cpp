@@ -29,7 +29,7 @@ bool calculate_simple_upper_bounds(rflcs_graph::graph &graph) {
 void setup_matches_for_simple_upper_bound(rflcs_graph::graph &graph) {
     graph.matches.back().upper_bound = 0;
     graph.reverse_matches.back().upper_bound = 0;
-    for (auto &[character, upper_bound, _dom, _heur, extension]: graph.matches) {
+    for (auto &[character, upper_bound, _dom, heuristic_characters, heuristic_previous, extension]: graph.matches) {
         extension.available_characters = Character_set();
         extension.reversed->extension.available_characters = Character_set();
     }
@@ -37,7 +37,7 @@ void setup_matches_for_simple_upper_bound(rflcs_graph::graph &graph) {
 
 bool set_simple_upper_bounds(std::vector<rflcs_graph::match> &matches) {
     auto is_improving = false;
-    for (auto &[character, upper_bound, dom_succ_matches, _heur, extension]: matches
+    for (auto &[character, upper_bound, dom_succ_matches, heuristic_characters, heuristic_previous, extension]: matches
                                                                              | std::views::reverse
                                                                              | active_match_filter) {
         auto max_succ_upper_bound = -1; // 1 gets added (=0) to root node

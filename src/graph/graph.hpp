@@ -3,7 +3,6 @@
 #include <climits>
 #include <vector>
 
-#include "gurobi_c++.h"
 #include "../character_set.hpp"
 #include "../character.hpp"
 
@@ -20,7 +19,6 @@ namespace rflcs_graph {
         std::vector<match *> pred_matches = std::vector<match *>();
         std::vector<match *> dom_pred_matches = std::vector<match *>(); // incoming dominating edges from predecessors
         std::vector<int> rf_relaxed_upper_bounds = std::vector<int>();
-        match* heuristic_previous_match;
         Character_set available_characters;
         std::vector<int> repetition_counter;
         int position_1;
@@ -34,6 +32,7 @@ namespace rflcs_graph {
         int upper_bound = INT_MAX; // including this character
         std::vector<match *> dom_succ_matches = std::vector<match *>();
         Character_set heuristic_characters;
+        match* heuristic_previous_match;
         match_extension extension;
     };
 

@@ -57,7 +57,7 @@ auto get_characters_ordered_by_importance(rflcs_graph::graph &graph) -> std::vec
 
 auto get_single_character_repetitions(rflcs_graph::graph &graph) -> std::vector<int> {
     graph.matches.back().extension.repetition_counter = std::vector(constants::alphabet_size, 0);
-    for (auto &[character, upper_bound, dom_succ_matches, _heur, extension]: graph.matches
+    for (auto &[character, upper_bound, dom_succ_matches, heuristic_characters, heuristic_previous, extension]: graph.matches
                                                                              | std::views::reverse | std::views::drop(1)
                                                                              | std::views::take(
                                                                                  graph.matches.size() - 2)) {
@@ -94,7 +94,7 @@ inline void aggregate_pairwise_max_in_first_vector(std::vector<int> &repetition_
 
 auto get_sums_of_combined_upper_bounds(const rflcs_graph::graph &graph) -> std::vector<int> {
     auto sum_of_combined_upper_bounds = std::vector(constants::alphabet_size, 0);
-    for (const auto &[character, upper_bound, _dom, _heur, extension]: graph.matches
+    for (const auto &[character, upper_bound, dom_succ_matches, heuristic_characters, heuristic_previous, extension]: graph.matches
                                                                        | std::views::reverse | std::views::drop(1) |
                                                                        std::views::take(
                                                                            graph.matches.size() - 2)) {
@@ -108,7 +108,7 @@ auto get_sums_of_combined_upper_bounds(const rflcs_graph::graph &graph) -> std::
 
 auto get_active_match_counters(const rflcs_graph::graph &graph) -> std::vector<int> {
     auto counters = std::vector(constants::alphabet_size, 0);
-    for (const auto &[character, upper_bound, _dom, _heur, extension]: graph.matches
+    for (const auto &[character, upper_bound, dom_succ_matches, heuristic_characters, heuristic_previous, extension]: graph.matches
                                                                        | std::views::reverse | std::views::drop(1) |
                                                                        std::views::take(
                                                                            graph.matches.size() - 2)) {
@@ -123,7 +123,7 @@ auto get_having_max_combined_upper_bound_counters(const rflcs_graph::graph &grap
     auto counters = std::vector(constants::alphabet_size, 0);
     auto max_combined_upper_bound = 0;
 
-    for (const auto &[character, upper_bound, _dom, _heur, extension]: graph.matches
+    for (const auto &[character, upper_bound, dom_succ_matches, heuristic_characters, heuristic_previous, extension]: graph.matches
                                                                        | std::views::reverse | std::views::drop(1) |
                                                                        std::views::take(
                                                                            graph.matches.size() - 2)) {
