@@ -45,10 +45,13 @@ public:
             fresh_node->characters_on_all_paths_to_lower_bound_levels.reset();
         }
         fresh_node->is_active = true;
-        fresh_node->match = &match;
+        fresh_node->associated_match = &match;
+        fresh_node->character = match.character;
+        fresh_node->position_1 = match.extension.position_1;
+        fresh_node->position_2 = match.extension.position_2;
 
-        fresh_node->characters_on_paths_to_root.set(fresh_node->match->character);
-        fresh_node->characters_on_all_paths_to_root.set(fresh_node->match->character);
+        fresh_node->characters_on_paths_to_root.set(fresh_node->character);
+        fresh_node->characters_on_all_paths_to_root.set(fresh_node->character);
         fresh_node->characters_on_paths_to_some_sink.reset(match.character);
 
         fresh_node->upper_bound_down = match.upper_bound;
@@ -74,7 +77,10 @@ public:
             fresh_node->characters_on_all_paths_to_lower_bound_levels = old_node.characters_on_all_paths_to_lower_bound_levels;
         }
         fresh_node->is_active = true;
-        fresh_node->match = old_node.match;
+        fresh_node->associated_match = old_node.associated_match;
+        fresh_node->character = old_node.character;
+        fresh_node->position_1 = old_node.position_1;
+        fresh_node->position_2 = old_node.position_2;
         fresh_node->upper_bound_down = old_node.upper_bound_down;
 
         fresh_node->needs_update_from_pred = true;
@@ -99,7 +105,10 @@ public:
             fresh_node->characters_on_all_paths_to_lower_bound_levels = old_node->characters_on_all_paths_to_lower_bound_levels;
         }
         fresh_node->is_active = true;
-        fresh_node->match = old_node->match;
+        fresh_node->associated_match = old_node->associated_match;
+        fresh_node->character = old_node->character;
+        fresh_node->position_1 = old_node->position_1;
+        fresh_node->position_2 = old_node->position_2;
         fresh_node->upper_bound_down = old_node->upper_bound_down;
 
         fresh_node->needs_update_from_pred = false;

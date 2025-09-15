@@ -74,7 +74,7 @@ Run Instructions
 Or, for a specific alphabet size (example 512):
 
 ```bash
-./rflcs_512 -i ./RFLCS_instances/type1/512_7reps.24
+./rflcs_512 -i ./RFLCS_instances/type1/512_8reps.24
 ```
 
 And all the type 1 512 characters with eight repetition:

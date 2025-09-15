@@ -12,7 +12,10 @@ struct node;
 typedef std::vector<node *> edges_type;
 
 struct node {
-    rflcs_graph::match *match = nullptr;
+    void *associated_match = nullptr;
+    Character character;
+    int position_1;
+    int position_2;
     Character_set characters_on_paths_to_root; // including match character
     Character_set characters_on_all_paths_to_root; // including match character
     Character_set characters_on_paths_to_some_sink; // not including match character
@@ -48,7 +51,7 @@ struct node {
 
 inline void node::clear() {
     this->is_active = false;
-    this->match = nullptr;
+    this->associated_match = nullptr;
     for (auto *pred: edges_in) {
         std::erase(pred->edges_out, this);
         pred->needs_update_from_succ = true;
@@ -93,8 +96,8 @@ inline bool node::update_from_preds(const int depth) {
         this->characters_on_all_paths_to_root &= pred->characters_on_all_paths_to_root;
     }
     this->characters_on_paths_to_root &= temporaries::temp_character_set_1;
-    this->characters_on_paths_to_root.set(this->match->character);
-    this->characters_on_all_paths_to_root.set(this->match->character);
+    this->characters_on_paths_to_root.set(this->character);
+    this->characters_on_all_paths_to_root.set(this->character);
     if (depth == static_cast<int>(this->characters_on_paths_to_root.count())) {
         this->characters_on_all_paths_to_root = this->characters_on_paths_to_root;
     }
@@ -143,10 +146,10 @@ inline bool node::update_from_succs(const int depth, const int lower_bound) {
     for (const auto succ: this->edges_out) {
         max_upper_bound_down_succ = std::max(max_upper_bound_down_succ, succ->upper_bound_down);
         temporaries::temp_character_set_1 |= succ->characters_on_paths_to_some_sink;
-        temporaries::temp_character_set_1.set(succ->match->character);
+        temporaries::temp_character_set_1.set(succ->character);
         temporaries::temp_character_set_2 = succ->characters_on_all_paths_to_lower_bound_levels;
         if (depth > 0 && depth <= lower_bound) {
-            temporaries::temp_character_set_2.set(succ->match->character);
+            temporaries::temp_character_set_2.set(succ->character);
         }
         this->characters_on_all_paths_to_lower_bound_levels &= temporaries::temp_character_set_2;
     }
@@ -199,7 +202,7 @@ inline void node::notify_preds_of_update() const {
 [[maybe_unused]] [[maybe_unused]] inline std::string node::to_string() const {
     std::stringstream string_stream;
     string_stream << this << "\t"
-            << this->match->character << "\t"
+            << this->character << "\t"
             << this->upper_bound_down << "\t"
             << this->edges_in.size() << "\t"
             << this->edges_out.size() << "\t";

@@ -17,7 +17,7 @@ size_t calculate_flat_array_size(const mdd& data) {
 }
 
 void serialize_initial_mdd(const mdd& mdd, shared_object* shared_object) {
-    auto level_node_to_match = std::map<std::pair<int, rflcs_graph::match*>, flat_node*>();
+    auto level_node_to_match = std::map<std::pair<int, void*>, flat_node*>();
     auto* current_pointer = std::bit_cast<std::byte *>(shared_object);
     shared_object->num_levels = mdd.levels.size();
     current_pointer += sizeof(struct shared_object);
@@ -30,12 +30,12 @@ void serialize_initial_mdd(const mdd& mdd, shared_object* shared_object) {
 
         for (const auto node : level->nodes) {
             auto flat_node = std::bit_cast<struct flat_node*>(current_pointer);
-            flat_node->match_ptr = node->match;
-            flat_node->character = node->match->character;
-            flat_node->position_2 = node->match->extension.position_2;
+            flat_node->match_ptr = node->associated_match;
+            flat_node->character = node->character;
+            flat_node->position_2 = node->position_2;
             flat_node->is_active = true;
             flat_node->num_edges_out = node->edges_out.size();
-            level_node_to_match.try_emplace(std::make_pair(level->depth, node->match), flat_node);
+            level_node_to_match.try_emplace(std::make_pair(level->depth, node->associated_match), flat_node);
             current_pointer += sizeof(struct flat_node);
             current_pointer += sizeof(flat_edge) * node->edges_out.size();
         }
@@ -52,7 +52,7 @@ void serialize_initial_mdd(const mdd& mdd, shared_object* shared_object) {
 
             for (const auto edge : node->edges_out) {
                 auto flat_edge = std::bit_cast<struct flat_edge*>(current_pointer);
-                flat_edge->edge_node = level_node_to_match[std::make_pair(level->depth + 1, edge->match)];
+                flat_edge->edge_node = level_node_to_match[std::make_pair(level->depth + 1, edge->associated_match)];
                 flat_edge->is_active = true;
                 current_pointer += sizeof(struct flat_edge);
             }

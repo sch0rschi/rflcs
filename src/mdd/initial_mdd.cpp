@@ -20,7 +20,10 @@ std::unique_ptr<mdd> create_initial_mdd(const instance &instance, const bool for
     const auto root_node = instance.mdd_node_source->new_node();
     root_node->is_active = true;
     auto &root_match = forward ? instance.graph->matches.front() : instance.graph->reverse_matches.front();
-    root_node->match = &root_match;
+    root_node->associated_match = &root_match;
+    root_node->character = root_match.character;
+    root_node->position_1 = root_match.extension.position_1;
+    root_node->position_2 = root_match.extension.position_2;
     root_node->characters_on_paths_to_root = Character_set();
     root_node->characters_on_all_paths_to_root = Character_set();
     root_node->characters_on_paths_to_some_sink = root_match.extension.available_characters;
@@ -38,7 +41,8 @@ std::unique_ptr<mdd> create_initial_mdd(const instance &instance, const bool for
         for (const auto pred_node: current_nodes) {
             int min_position_2 = INT_MAX;
             temporaries::int_vector_positions_2.clear();
-            for (auto succ_match: pred_node->match->extension.succ_matches) {
+            auto pred_node_match = static_cast<rflcs_graph::match*>(pred_node->associated_match);
+            for (auto succ_match: pred_node_match->extension.succ_matches) {
                 const bool not_dominated = !dominated_by_some_available_but_unused_character(
                     succ_match->extension.position_2, current_depth);
                 if (succ_match->character<constants::alphabet_size
@@ -52,11 +56,11 @@ std::unique_ptr<mdd> create_initial_mdd(const instance &instance, const bool for
                     && not_dominated
                     && are_enough_characters_available(temporaries::lower_bound,
                                                        next_depth,
-                                                       pred_node->match->extension.reversed->extension.
+                                                       pred_node_match->extension.reversed->extension.
                                                        available_characters,
                                                        succ_match->extension.available_characters)
                 ) {
-                    if (!pred_node->match->extension.reversed->extension.available_characters.test(
+                    if (!pred_node_match->extension.reversed->extension.available_characters.test(
                         succ_match->character)) {
                         min_position_2 = std::min(min_position_2, succ_match->extension.position_2);
                     } else {
@@ -87,15 +91,14 @@ std::unique_ptr<mdd> create_initial_mdd(const instance &instance, const bool for
 void prune_by_flat_mdd(shared_object *shared_object, const mdd &mdd, mdd_node_source &mdd_node_source) {
     auto *current_pointer = std::bit_cast<std::byte *>(&shared_object->flat_levels);
 
-    auto static valid_matches_sets = std::vector<absl::flat_hash_set<rflcs_graph::match *> >(mdd.levels.size());
+    auto static valid_matches_sets = std::vector<absl::flat_hash_set<void *> >(mdd.levels.size());
     valid_matches_sets.resize(mdd.levels.size());
     for (auto &valid_matches: valid_matches_sets) {
         valid_matches.clear();
     }
 
     static auto valid_edges_sets =
-            std::vector<absl::flat_hash_set<std::pair<rflcs_graph::match *, rflcs_graph::match
-                *> > >(mdd.levels.size());
+            std::vector<absl::flat_hash_set<std::pair<void *, void*> > >(mdd.levels.size());
     valid_edges_sets.resize(mdd.levels.size());
     for (auto &valid_edges: valid_edges_sets) {
         valid_edges.clear();
@@ -129,12 +132,12 @@ void prune_by_flat_mdd(shared_object *shared_object, const mdd &mdd, mdd_node_so
         const auto &current_valid_matches = valid_matches_sets.at(level->depth);
         const auto &current_valid_edges = valid_edges_sets.at(level->depth);
         for (std::vector nodes(level->nodes.begin(), level->nodes.end()); const auto node: nodes) {
-            if (!current_valid_matches.contains(node->match)) {
+            if (!current_valid_matches.contains(node->associated_match)) {
                 std::erase(level->nodes, node);
                 mdd_node_source.clear_node(node);
             } else {
                 for (std::vector succs(node->edges_out.begin(), node->edges_out.end()); const auto succ: succs) {
-                    if (!current_valid_edges.contains({node->match, succ->match})) {
+                    if (!current_valid_edges.contains({node->associated_match, succ->associated_match})) {
                         node->unlink_pred_from_succ(succ);
                     }
                 }

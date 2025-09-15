@@ -34,7 +34,7 @@ void solve_gurobi_mdd_ilp(instance &instance) {
             auto level_node_sum = GRBLinExpr();
             for(const auto node : level->nodes) {
                 gurobi_variable_map[node] = model.addVar(0.0, 1.0, 0, GRB_BINARY);
-                character_sums.at(node->match->character) += gurobi_variable_map.at(node);
+                character_sums.at(node->character) += gurobi_variable_map.at(node);
                 level_node_sum += gurobi_variable_map.at(node);
                 objective += gurobi_variable_map.at(node);
                 if(level->depth > 1) {
@@ -85,7 +85,7 @@ void set_solution_from_ilp(instance &instance, absl::flat_hash_map<node*, GRBVar
     for (const auto &level : instance.mdd->levels | std::views::drop(1)) {
         for(const auto node : level->nodes) {
             if (static_cast<int>(round(gurobi_variable_map.at(node).get(GRB_DoubleAttr_X))) == 1) {
-                instance.solution.push_back(node->match->character);
+                instance.solution.push_back(node->character);
             }
         }
     }

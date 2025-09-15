@@ -13,7 +13,7 @@
 absl::flat_hash_map<std::pair<rflcs_graph::match *, rflcs_graph::match *>, GRBVar> get_gurobi_edges_map(
     GRBModel &model,
     const absl::flat_hash_set<rflcs_graph::match *> &matches,
-    rflcs_graph::match* sink);
+    rflcs_graph::match *sink);
 
 void remove_duplicates(std::vector<rflcs_graph::match *> &matches);
 
@@ -43,7 +43,7 @@ void solve_gurobi_graph_ilp(instance &instance) {
 
         auto matches = get_matches(instance);
         rflcs_graph::match *root = nullptr;
-        for (auto match : matches) {
+        for (auto match: matches) {
             if (match->character >= constants::alphabet_size) {
                 root = match;
             }
@@ -75,18 +75,18 @@ void solve_gurobi_graph_ilp(instance &instance) {
                 outgoing_edge_sum_for_character.at(from->character) += gurobi_variable;
             }
         }
-        for (auto const& outgoing_edge_sum : outgoing_edge_sum_for_character) {
+        for (auto const &outgoing_edge_sum: outgoing_edge_sum_for_character) {
             model.addConstr(outgoing_edge_sum <= 1);
         }
-        for (auto const& incoming_edge_sum : incoming_edge_sum_for_character) {
+        for (auto const &incoming_edge_sum: incoming_edge_sum_for_character) {
             model.addConstr(incoming_edge_sum <= 1);
         }
         model.addConstr(outgoing_edges_sum_root == 1);
         model.addConstr(incoming_edges_sum_sink == 1);
 
-        auto incoming_edges_sum_for_match = absl::flat_hash_map<rflcs_graph::match*, GRBLinExpr>();
-        auto outgoing_edges_sum_for_match = absl::flat_hash_map<rflcs_graph::match*, GRBLinExpr>();
-        for (auto match : matches) {
+        auto incoming_edges_sum_for_match = absl::flat_hash_map<rflcs_graph::match *, GRBLinExpr>();
+        auto outgoing_edges_sum_for_match = absl::flat_hash_map<rflcs_graph::match *, GRBLinExpr>();
+        for (auto match: matches) {
             incoming_edges_sum_for_match[match] = GRBLinExpr();
             outgoing_edges_sum_for_match[match] = GRBLinExpr();
         }
@@ -100,8 +100,8 @@ void solve_gurobi_graph_ilp(instance &instance) {
                 outgoing_edges_sum_for_match.at(from) += variable;
             }
         }
-        for (auto match : matches) {
-            if ( match != root && match != sink ) {
+        for (auto match: matches) {
+            if (match != root && match != sink) {
                 model.addConstr(outgoing_edges_sum_for_match.at(match) <= incoming_edges_sum_for_match.at(match));
             }
         }
@@ -134,7 +134,7 @@ absl::flat_hash_set<rflcs_graph::match *> get_matches(const instance &instance) 
     auto matches = absl::flat_hash_set<rflcs_graph::match *>();
     for (const auto &level: instance.mdd->levels) {
         for (const auto node: level->nodes) {
-            matches.insert(node->match);
+            matches.insert(static_cast<rflcs_graph::match *>(node->associated_match));
         }
     }
     return matches;
@@ -143,9 +143,9 @@ absl::flat_hash_set<rflcs_graph::match *> get_matches(const instance &instance) 
 absl::flat_hash_map<std::pair<rflcs_graph::match *, rflcs_graph::match *>, GRBVar> get_gurobi_edges_map(
     GRBModel &model,
     const absl::flat_hash_set<rflcs_graph::match *> &matches,
-    rflcs_graph::match* sink) {
+    rflcs_graph::match *sink) {
     auto gurobi_edges_map = absl::flat_hash_map<std::pair<rflcs_graph::match *, rflcs_graph::match *>, GRBVar>();
-    for (auto match : matches) {
+    for (auto match: matches) {
         for (auto succ_match: match->extension.succ_matches) {
             gurobi_edges_map[std::make_pair(match, succ_match)] = model.addVar(0.0, 1.0, 0, GRB_BINARY);
         }
@@ -173,9 +173,9 @@ void update_graph_by_mdd(const instance &instance, absl::flat_hash_set<rflcs_gra
 
     for (const auto &level: instance.mdd->levels) {
         for (const auto &node: level->nodes) {
-            const auto match = node->match;
+            const auto match = static_cast<rflcs_graph::match *>(node->associated_match);
             for (const auto succ_node: node->edges_out) {
-                auto succ_match = succ_node->match;
+                auto *succ_match = static_cast<rflcs_graph::match *>(succ_node->associated_match);
                 match->dom_succ_matches.push_back(succ_match);
                 match->extension.succ_matches.push_back(succ_match);
             }

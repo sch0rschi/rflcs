@@ -64,7 +64,7 @@ inline void split_node(node *node_yes_no,
     std::ranges::copy(node_yes_no->edges_out, edges_out_copy.begin());
     for (const auto succ: edges_out_copy) {
         node_no_maybe->link_pred_to_succ(succ);
-        if (succ->characters_on_all_paths_to_lower_bound_levels.test(split_character) || succ->match->character == split_character) {
+        if (succ->characters_on_all_paths_to_lower_bound_levels.test(split_character) || succ->character == split_character) {
             node_yes_no->unlink_pred_from_succ(succ);
         }
     }

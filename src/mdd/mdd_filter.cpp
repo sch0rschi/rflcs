@@ -78,7 +78,7 @@ bool update_nodes_and_prune(shared_object *shared_object, mdd &mdd, mdd_node_sou
         int levels_depth = static_cast<int>(mdd.levels.size()) - 1;
         temporaries::upper_bound = std::min(temporaries::upper_bound, levels_depth);
         temporaries::upper_bound = std::min(temporaries::upper_bound,
-                                        mdd.levels.front()->nodes.front()->upper_bound_down);
+                                            mdd.levels.front()->nodes.front()->upper_bound_down);
 
         if (levels_depth > temporaries::upper_bound) {
             for (const auto &level: mdd.levels | std::views::drop(temporaries::upper_bound + 1)) {
@@ -150,43 +150,43 @@ inline bool filter_succ_edges_of_node(const level_type &level, node &node) {
     succ_nodes.resize(node.edges_out.size());
     std::ranges::copy(node.edges_out, succ_nodes.begin());
     std::ranges::sort(succ_nodes, [](const auto node1, const auto node2) {
-        return node1->match->extension.position_1 < node2->match->extension.position_1;
+        return node1->position_1 < node2->position_1;
     });
     temporaries::int_vector_positions_2.clear();
     for (const auto succ: succ_nodes) {
         temporaries::temp_character_set_1 = node.characters_on_paths_to_root;
         temporaries::temp_character_set_1 |= succ->characters_on_paths_to_some_sink;
-        temporaries::temp_character_set_1.set(succ->match->character);
+        temporaries::temp_character_set_1.set(succ->character);
         const bool combined_characters_not_sufficient =
                 static_cast<int>(temporaries::temp_character_set_1.count()) <= temporaries::lower_bound;
         temporaries::temp_character_set_2 = node.characters_on_all_paths_to_root;
         temporaries::temp_character_set_2 &= succ->characters_on_all_paths_to_lower_bound_levels;
         const bool repetition_free_conflict = temporaries::temp_character_set_2.any();
         temporaries::temp_character_set_1 = succ->characters_on_paths_to_some_sink;
-        temporaries::temp_character_set_1.set(succ->match->character);
+        temporaries::temp_character_set_1.set(succ->character);
         temporaries::temp_character_set_1 &= ~node.characters_on_all_paths_to_root;
         const bool too_many_characters_already_taken =
                 level.depth + static_cast<int>(temporaries::temp_character_set_1.count()) <= temporaries::lower_bound;
         const bool is_dominated = dominated_by_some_available_but_unused_character(
-            succ->match->extension.position_2,
+            succ->position_2,
             level.depth - static_cast<int>(node.characters_on_all_paths_to_root.count()) + 1);
-        if (!node.characters_on_paths_to_some_sink.test(succ->match->character)
+        if (!node.characters_on_paths_to_some_sink.test(succ->character)
             || level.depth + 1 + succ->upper_bound_down <= temporaries::lower_bound
             || combined_characters_not_sufficient
             || repetition_free_conflict
-            || succ->match->extension.position_2 > max_position_2
+            || succ->position_2 > max_position_2
             || is_dominated
             || too_many_characters_already_taken
-            || node.characters_on_all_paths_to_root.test(succ->match->character)
+            || node.characters_on_all_paths_to_root.test(succ->character)
         ) {
             node.unlink_pred_from_succ(succ);
             node.needs_update_from_succ = true;
             filtered_edge = true;
         } else {
-            if (!node.characters_on_paths_to_root.test(succ->match->character)) {
-                max_position_2 = std::min(max_position_2, succ->match->extension.position_2);
+            if (!node.characters_on_paths_to_root.test(succ->character)) {
+                max_position_2 = std::min(max_position_2, succ->position_2);
             }
-            add_position_2_to_maybe_min_pos_2(succ->match->extension.position_2);
+            add_position_2_to_maybe_min_pos_2(succ->position_2);
         }
     }
     return filtered_edge;
@@ -194,23 +194,26 @@ inline bool filter_succ_edges_of_node(const level_type &level, node &node) {
 
 void filter_flat_mdd(const instance &instance, const mdd &mdd, const bool is_reporting) {
     instance.shared_object->num_levels = mdd.levels.size();
-    auto static valid_matches = absl::flat_hash_set<rflcs_graph::match *>();
+    auto static valid_matches = absl::flat_hash_set<void *>();
     valid_matches.clear();
     auto static valid_edges = absl::flat_hash_set<long>();
     valid_edges.clear();
     auto *current_pointer = std::bit_cast<std::byte *>(instance.shared_object);
     current_pointer += sizeof(shared_object);
     for (size_t level_index = 0; level_index < instance.shared_object->num_levels; ++level_index) {
-        auto static current_level_valid_matches = absl::flat_hash_set<rflcs_graph::match *>();
+        auto static current_level_valid_matches = absl::flat_hash_set<void *>();
         current_level_valid_matches.clear();
         auto static current_level_valid_edges = absl::flat_hash_set<long>();
         current_level_valid_edges.clear();
 
         for (const auto node: mdd.levels.at(level_index)->nodes) {
-            current_level_valid_matches.emplace(node->match);
-            valid_matches.emplace(node->match);
+            current_level_valid_matches.emplace(node->associated_match);
+            valid_matches.emplace(node->associated_match);
             for (const auto to: node->edges_out) {
-                long pair_long_encoding = match_pair_to_edge_long_encoding(node->match, to->match);
+                long pair_long_encoding = match_pair_to_edge_long_encoding(
+                    static_cast<rflcs_graph::match *>(node->associated_match),
+                    static_cast<rflcs_graph::match *>(to->associated_match)
+                );
                 current_level_valid_edges.emplace(pair_long_encoding);
                 valid_edges.emplace(pair_long_encoding);
             }

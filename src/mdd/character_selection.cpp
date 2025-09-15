@@ -22,14 +22,17 @@ void update_characters_ordered_by_importance_mdd(
     boost::timer::progress_display *progress) {
     chaining_numbers(reduction_mdd, character_counters_source);
 
-    auto matches_on_level = absl::flat_hash_set<rflcs_graph::match *>();
+    auto matches_on_level = absl::flat_hash_set<void *>();
     auto static valid_edges = absl::flat_hash_set<long>();
     valid_edges.clear();
     for (auto const &level: reduction_mdd.levels | std::ranges::views::drop(1)) {
         for (const auto node: level->nodes) {
-            matches_on_level.insert(node->match);
+            matches_on_level.insert(node->associated_match);
             for (auto const &succ: node->edges_out) {
-                valid_edges.insert(match_pair_to_edge_long_encoding(node->match, succ->match));
+                valid_edges.insert(match_pair_to_edge_long_encoding(
+                        static_cast<rflcs_graph::match *>(node->associated_match),
+                        static_cast<rflcs_graph::match *>(succ->associated_match))
+                );
             }
         }
     }
@@ -66,8 +69,8 @@ double calculate_greedy_score(const mdd &mdd,
                               const double initial_number_of_graph_edges
 ) {
     auto number_of_mdd_nodes = 0.0;
-    auto static matches_on_level = absl::flat_hash_set<rflcs_graph::match *>();
-    auto static matches = absl::flat_hash_set<rflcs_graph::match *>();
+    auto static matches_on_level = absl::flat_hash_set<void *>();
+    auto static matches = absl::flat_hash_set<void *>();
     matches.clear();
     auto static valid_edges = absl::flat_hash_set<long>();
     valid_edges.clear();
@@ -76,12 +79,15 @@ double calculate_greedy_score(const mdd &mdd,
     for (const auto &level: mdd.levels | std::ranges::views::drop(1)) {
         matches_on_level.clear();
         for (const auto node: level->nodes) {
-            matches_on_level.insert(node->match);
+            matches_on_level.insert(node->associated_match);
             number_of_mdd_nodes++;
             number_of_mdd_edges += static_cast<double>(node->edges_in.size());
             max_in_edges = std::max(max_in_edges, static_cast<double>(node->edges_in.size()));
             for (const auto *succ: node->edges_out) {
-                valid_edges.insert(match_pair_to_edge_long_encoding(node->match, succ->match));
+                valid_edges.insert(match_pair_to_edge_long_encoding(
+                        static_cast<rflcs_graph::match *>(node->associated_match),
+                        static_cast<rflcs_graph::match *>(succ->associated_match))
+                );
             }
         }
     }
@@ -93,8 +99,8 @@ double calculate_greedy_score(const mdd &mdd,
 
     const double match_delta = initial_number_of_matches - static_cast<double>(matches.size());
     const double graph_edge_delta = initial_number_of_graph_edges - static_cast<double>(valid_edges.size());
-    return (1+match_delta)
-           * (1+graph_edge_delta)
+    return (1 + match_delta)
+           * (1 + graph_edge_delta)
            / number_of_mdd_nodes
            / number_of_mdd_edges
            / max_in_edges;
@@ -104,7 +110,7 @@ void chaining_numbers(const mdd &mdd, const character_counters_source &character
     for (const auto node: mdd.levels.back()->nodes) {
         node->sequences_character_counter = character_counters_source.get_counter();
         std::ranges::fill(*node->sequences_character_counter, 0);
-        node->sequences_character_counter->at(node->match->character) = 1;
+        node->sequences_character_counter->at(node->character) = 1;
     }
 
     for (int level_index = static_cast<int>(mdd.levels.size()) - 2; level_index >= 0; level_index--) {
@@ -119,9 +125,9 @@ void chaining_numbers(const mdd &mdd, const character_counters_source &character
                     [](const int first, const int second) {
                         return std::max(first, second);
                     });
-                node->sequences_character_counter->at(succ->match->character) = std::max(
-                    node->sequences_character_counter->at(succ->match->character),
-                    succ->sequences_character_counter->at(succ->match->character) + 1);
+                node->sequences_character_counter->at(succ->character) = std::max(
+                    node->sequences_character_counter->at(succ->character),
+                    succ->sequences_character_counter->at(succ->character) + 1);
             }
         }
 
