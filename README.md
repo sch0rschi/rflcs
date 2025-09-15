@@ -24,14 +24,22 @@ It uses Gurobi as the ILP backend.
 
 ## Environment Variables
 
-Before building, make sure the following environment variables are set and CMake can access them:
+Before building, make sure the following environment variable is set and CMake can access them:
 
 | Variable      | Description                                   | Example                                                                                                        |
 |---------------|-----------------------------------------------|----------------------------------------------------------------------------------------------------------------|
 | `GUROBI_HOME` | Root path to Gurobi installation              | `/opt/gurobi1200/linux64` or `/Library/gurobi1201/macos_universal2`                                            |
-| `GUROBI_LIB`  | Path to Gurobi library                        | `/opt/gurobi1200/linux64/lib/libgurobi120.so` or `/Library/gurobi1201/macos_universal2/lib/libgurobi120.dylib` |
 
 ---
+
+## Getting the project
+
+Because this project has git submodules the correct way to clone is by considering the submodules.
+
+```bash
+git clone --recurse-submodules https://github.com/sch0rschi/rflcs
+cd rflcs
+```
 
 ## Build Instructions
 
@@ -39,12 +47,6 @@ Before building, make sure the following environment variables are set and CMake
 
 ALPHABET_SIZES: List of alphabet sizes to build executables for, e.g., 16;32;64;512. If empty, a single dynamic target rflcs is built.
 MDD_FREQUENT_SAVE_FEATURE: Enable (ON) or disable (OFF) frequent writebacks during the MDD phase (default ON, is slower).
-
-
-```bash
-git clone --recurse-submodules https://github.com/sch0rschi/rflcs
-cd rflcs
-```
 
 Build the Project
 Example: Build with alphabet size 512 and disable frequent MDD save
@@ -89,8 +91,7 @@ find ./RFLCS_instances/type1/512_8reps.* -type f -exec ./rflcs_512 -i {} \;
 
 This project includes third-party libraries under the following licenses:
 
-Boost — Boost Software License 1.0
-
-Abseil — Apache License 2.0
+- Boost — Boost Software License 1.0
+- Abseil — Apache License 2.0
 
 These are compatible with the GPLv3 license under which this project is released.
