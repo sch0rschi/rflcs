@@ -32,7 +32,7 @@ void solve_gurobi_graph_ilp(instance &instance) {
         auto env = GRBEnv(true);
 
         env.start();
-        env.set(GRB_DoubleParam_TimeLimit, SOLVER_TIMEOUT_IN_SECONDS);
+        env.set(GRB_DoubleParam_TimeLimit, constants::solver_timeout);
         env.set(GRB_IntParam_LogToConsole, 1);
         env.set(GRB_IntParam_Threads, 1);
         env.set(GRB_IntParam_MIPFocus, GRB_MIPFOCUS_BESTBOUND); // focus on upper bound

@@ -25,7 +25,6 @@ add_compile_options(
 #--------------------#
 # External Libraries #
 #--------------------#
-add_library(boost_timer INTERFACE)
 add_library(boost_dynamic_bitset INTERFACE)
 target_include_directories(boost_dynamic_bitset INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/assert/include
@@ -43,12 +42,38 @@ target_include_directories(boost_dynamic_bitset INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/type_traits/include
 )
 
+add_library(boost_timer INTERFACE)
 target_include_directories(boost_timer INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/timer/include
 )
 
-target_include_directories(boost_program_options INTERFACE
+file(GLOB BOOST_PROGRAM_OPTIONS_SRC
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/program_options/src/*.cpp
+)
+add_library(boost_program_options STATIC ${BOOST_PROGRAM_OPTIONS_SRC})
+
+target_include_directories(boost_program_options PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/program_options/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/assert/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/any/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/bind/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/config/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/container/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/container_hash/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/core/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/detail/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/function/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/iterator/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/lexical_cast/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/mp11/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/mpl/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/move/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/throw_exception/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/type_index/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/smart_ptr/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/static_assert/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/tokenizer/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/type_traits/include
 )
 
 add_subdirectory(external/abseil)
@@ -150,5 +175,4 @@ else()
     message(STATUS "Alphabet size:         dynamic")
 endif()
 message(STATUS "Gurobi include dir:    $ENV{GUROBI_HOME}/include")
-message(STATUS "Gurobi lib:            $ENV{GUROBI_LIB}")
 message(STATUS "===================================================")

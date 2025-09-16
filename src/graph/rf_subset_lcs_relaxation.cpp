@@ -4,7 +4,7 @@
 #include "header/match_metrics.hpp"
 #include "graph.hpp"
 
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset.hpp>
 #include <climits>
 #include <cmath>
 #include <algorithm>

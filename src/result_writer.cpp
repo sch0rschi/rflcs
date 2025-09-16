@@ -6,25 +6,15 @@
 
 double calculate_reduction(const instance &instance);
 
-void replace_instances_with_results_folder(std::string &str, const std::string &from, const std::string &to) {
-    if (const size_t start_pos = str.find(from); start_pos != std::string::npos) {
-        str.replace(start_pos, from.length(), to);
-    }
-}
-
 void write_result_file(const instance &instance) {
-    std::string file_name = instance.path;
 
-    replace_instances_with_results_folder(file_name, "RFLCS_instances", "results");
-    file_name += ".out";
-
-    std::filesystem::path path(file_name);
+    std::filesystem::path path(instance.input_path);
 
     if (std::filesystem::path dir = path.parent_path(); !dir.empty() && !exists(dir)) {
         create_directories(dir);
     }
 
-    std::ofstream out_file(file_name);
+    std::ofstream out_file(instance.input_path);
     if (!out_file) {
         std::cerr << "Failed to open file for writing." << std::endl;
     }

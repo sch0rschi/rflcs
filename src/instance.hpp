@@ -13,7 +13,8 @@
 using int_matrix = std::vector<int>;
 
 struct instance {
-    std::string path;
+    std::string input_path;
+    std::string output_path;
     std::unique_ptr<rflcs_graph::graph> graph = nullptr;
     std::unique_ptr<struct mdd> mdd;
     std::unique_ptr<struct mdd_node_source> mdd_node_source;

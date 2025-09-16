@@ -46,3 +46,36 @@
 [submodule "external/boost/program_options"]
 	path = external/boost/program_options
 	url = https://github.com/boostorg/program_options.git
+[submodule "external/boost/any"]
+	path = external/boost/any
+	url = https://github.com/boostorg/any.git
+[submodule "external/boost/type_index"]
+	path = external/boost/type_index
+	url = https://github.com/boostorg/type_index.git
+[submodule "external/boost/function"]
+	path = external/boost/function
+	url = https://github.com/boostorg/function.git
+[submodule "external/boost/bind"]
+	path = external/boost/bind
+	url = https://github.com/boostorg/bind.git
+[submodule "external/boost/lexical_cast"]
+	path = external/boost/lexical_cast
+	url = https://github.com/boostorg/lexical_cast.git
+[submodule "external/boost/container"]
+	path = external/boost/container
+	url = https://github.com/boostorg/container.git
+[submodule "external/boost/smart_ptr"]
+	path = external/boost/smart_ptr
+	url = https://github.com/boostorg/smart_ptr.git
+[submodule "external/boost/detail"]
+	path = external/boost/detail
+	url = https://github.com/boostorg/detail.git
+[submodule "external/boost/iterator"]
+	path = external/boost/iterator
+	url = https://github.com/boostorg/iterator.git
+[submodule "external/boost/mpl"]
+	path = external/boost/mpl
+	url = https://github.com/boostorg/mpl.git
+[submodule "external/boost/tokenizer"]
+	path = external/boost/tokenizer
+	url = https://github.com/boostorg/tokenizer.git

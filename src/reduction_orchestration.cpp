@@ -118,7 +118,7 @@ void reduce_graph_pre_solver_by_mdd(instance &instance) {
            && !instance.shared_object->is_mdd_reduction_complete) {
         const double seconds_since_start = get_elapsed_seconds(instance);
 
-        if (seconds_since_start > MDD_TIMEOUT_IN_SECONDS) {
+        if (seconds_since_start > constants::reduction_timeout) {
             filter_matches_by_flat_mdd(instance);
             return;
         }
@@ -173,7 +173,7 @@ void handle_threads_for_mdd_reduction(instance &instance) {
         signal(SIGALRM, timeout_handler);
 
         itimerval timer{};
-        timer.it_value.tv_sec = std::max(1L, MDD_TIMEOUT_IN_SECONDS - static_cast<long>(get_elapsed_seconds(instance)));
+        timer.it_value.tv_sec = std::max(1L, constants::reduction_timeout - static_cast<long>(get_elapsed_seconds(instance)));
         timer.it_value.tv_usec = 0;
         timer.it_interval.tv_sec = 0;
         timer.it_interval.tv_usec = 0;

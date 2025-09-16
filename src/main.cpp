@@ -17,6 +17,7 @@
 #include <iomanip>
 #include <memory>
 #include <sys/resource.h>
+#include <boost/program_options.hpp>
 
 auto parse_next_integer(std::ifstream &input_file) -> int;
 
@@ -30,15 +31,42 @@ void reduction(instance &instance);
 
 void solve(instance &instance);
 
-void process_input(instance &instance, int argc, char **argv);
+void process_input(instance &instance);
 
 void solve_enumeration(instance &instance);
 
+std::string &replace_instances_with_results_folder(std::string path);
+
 auto main(const int argc, char **argv) -> int {
     try {
+        auto command_line_description = boost::program_options::options_description("Allowed options");
+        command_line_description.add_options()
+                ("help,h", "Show this help message")
+                ("input,i", boost::program_options::value<std::string>()->default_value("../RFLCS_instances/type1/512_8reps.24"), "Input file path")
+                ("output,o", boost::program_options::value<std::string>(), "Output file path")
+                ("reductiontimeout,r", boost::program_options::value<int>()->default_value(1800), "Reduction timeout [s]")
+                ("solvertimeout,s", boost::program_options::value<int>()->default_value(1800), "Solver timeout [s]");
+
+        boost::program_options::variables_map vm;
+        boost::program_options::store(boost::program_options::parse_command_line(argc, argv, command_line_description), vm);
+        boost::program_options::notify(vm);
+
+        if (vm.contains("help")) {
+            std::cout << command_line_description << "\n";
+            return 0;
+        }
+
         instance instance;
 
-        process_input(instance, argc, argv);
+        instance.input_path = vm["input"].as<std::string>();
+        instance.output_path =
+                vm.contains("output")
+                    ? vm["output"].as<std::string>()
+                    : replace_instances_with_results_folder(instance.input_path);
+        constants::reduction_timeout = vm["reductiontimeout"].as<int>();
+        constants::solver_timeout = vm["solvertimeout"].as<int>();
+
+        process_input(instance);
 
         if (instance.input_validity_code != 0) {
             return instance.input_validity_code;
@@ -99,24 +127,11 @@ auto main(const int argc, char **argv) -> int {
     }
 }
 
-void process_input(instance &instance, const int argc, char **argv) {
-    std::string path;
-    switch (getopt(argc, argv, "i:")) {
-        case 'i':
-            path = optarg;
-            break;
-        case -1:
-            path = default_path;
-            break;
-        default:
-            path = "";
-            break;
-    }
+void process_input(instance &instance) {
 
-    std::ifstream input_file(path);
-    instance.path = path;
+    std::ifstream input_file(instance.input_path);
 
-    std::cout << "solving file: " << instance.path << std::endl;
+    std::cout << "solving file: " << instance.input_path << std::endl;
     std::flush(std::cout);
 
     if (input_file.is_open()) {
@@ -133,7 +148,7 @@ void process_input(instance &instance, const int argc, char **argv) {
             parse_string(instance.string_2, input_file, string_2_length);
         }
     } else {
-        std::cout << "Cannot find input file: " << path << "." << std::endl;
+        std::cout << "Cannot find input file: " << instance.input_path << "." << std::endl;
         instance.input_validity_code = 1;
     }
 
@@ -182,11 +197,9 @@ void solve(instance &instance) {
         solve_gurobi_mis_ilp(instance);
     }
 
-    if constexpr (SOLVER == GUROBI_GRAPH)
-    {
+    if constexpr (SOLVER == GUROBI_GRAPH) {
         solve_gurobi_graph_ilp(instance);
     }
-
 
 
     if (int status; WIFEXITED(status)) {
@@ -251,4 +264,13 @@ auto parse_next_integer(std::ifstream &input_file) -> Character {
         return std::stoi(file_entry);
     }
     exit(1);
+}
+
+std::string &replace_instances_with_results_folder(std::string path) {
+    const std::string from = "RFLCS_instances";
+    const std::string to = "results";
+    if (const size_t start_pos = path.find(from); start_pos != std::string::npos) {
+        path.replace(start_pos, from.length(), to);
+    }
+    return path.append(".out");
 }

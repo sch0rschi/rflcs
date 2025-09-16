@@ -5,7 +5,7 @@
 #include <sstream>
 
 #include "../temporaries.hpp"
-#include "boost/dynamic_bitset/dynamic_bitset.hpp"
+#include <boost/dynamic_bitset.hpp>
 
 struct node;
 
