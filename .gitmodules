@@ -43,3 +43,6 @@
 [submodule "external/boost/mp11"]
 	path = external/boost/mp11
 	url = https://github.com/boostorg/mp11.git
+[submodule "external/boost/program_options"]
+	path = external/boost/program_options
+	url = https://github.com/boostorg/program_options.git

@@ -46,6 +46,11 @@ target_include_directories(boost_dynamic_bitset INTERFACE
 target_include_directories(boost_timer INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/timer/include
 )
+
+target_include_directories(boost_program_options INTERFACE
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/program_options/include
+)
+
 add_subdirectory(external/abseil)
 
 if(DEFINED ENV{GUROBI_HOME})
@@ -106,6 +111,7 @@ function(configure_rflcs_target target_name)
             absl::flat_hash_set
             boost_dynamic_bitset
             boost_timer
+            boost_program_options
             ${GUROBI_LIBRARY}
             ${GUROBI_API}
     )
