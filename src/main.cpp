@@ -6,83 +6,48 @@
 #include "instance.hpp"
 #include "reduction_orchestration.hpp"
 #include "result_writer.hpp"
+#include "input_processing.hpp"
 
 #include <iostream>
 #include <fstream>
-#include <string>
 #include <chrono>
 #include <set>
 #include <unistd.h>
 #include <vector>
 #include <iomanip>
-#include <memory>
 #include <sys/resource.h>
-#include <boost/program_options.hpp>
 
-auto parse_next_integer(std::ifstream &input_file) -> int;
+#include "solver/sequence_enumeration_solver.hpp"
 
-void parse_string(std::vector<Character> &character_sequence, std::ifstream &input_file, int string_length);
-
-void check_solution(instance &instance);
+void initialize_temporaries();
 
 void heuristic(instance &instance);
+
+void print_heuristic_stats(const instance &instance);
 
 void reduction(instance &instance);
 
 void solve(instance &instance);
 
-void process_input(instance &instance);
+void check_solution(instance &instance);
 
-void solve_enumeration(instance &instance);
+void print_result_stats(const instance &instance);
 
-std::string &replace_instances_with_results_folder(std::string path);
-
-auto main(const int argc, char **argv) -> int {
+int main(const int argc, char **argv) {
     try {
-        auto command_line_description = boost::program_options::options_description("Allowed options");
-        command_line_description.add_options()
-                ("help,h", "Show this help message")
-                ("input,i", boost::program_options::value<std::string>()->default_value("../RFLCS_instances/type1/512_8reps.24"), "Input file path")
-                ("output,o", boost::program_options::value<std::string>(), "Output file path")
-                ("reductiontimeout,r", boost::program_options::value<int>()->default_value(1800), "Reduction timeout [s]")
-                ("solvertimeout,s", boost::program_options::value<int>()->default_value(1800), "Solver timeout [s]");
-
-        boost::program_options::variables_map vm;
-        boost::program_options::store(boost::program_options::parse_command_line(argc, argv, command_line_description), vm);
-        boost::program_options::notify(vm);
-
-        if (vm.contains("help")) {
-            std::cout << command_line_description << "\n";
-            return 0;
-        }
-
         instance instance;
 
-        instance.input_path = vm["input"].as<std::string>();
-        instance.output_path =
-                vm.contains("output")
-                    ? vm["output"].as<std::string>()
-                    : replace_instances_with_results_folder(instance.input_path);
-        constants::reduction_timeout = vm["reductiontimeout"].as<int>();
-        constants::solver_timeout = vm["solvertimeout"].as<int>();
-
-        process_input(instance);
-
-        if (instance.input_validity_code != 0) {
-            return instance.input_validity_code;
+        if (const auto cla_processing_status_code = process_command_line_arguments(argc, argv, instance);
+            cla_processing_status_code != SUCCESS) {
+            return 1;
         }
 
-        temporaries::temp_character_set_1 = Character_set();
-        temporaries::temp_character_set_2 = Character_set();
-        temporaries::old_characters_on_paths_to_some_sink = Character_set();
-        temporaries::old_characters_on_all_paths_to_lower_bound_levels = Character_set();
-        temporaries::old_characters_on_paths_to_root = Character_set();
-        temporaries::old_characters_on_all_paths_to_root = Character_set();
-        temporaries::chaining_numbers = std::vector<int>(constants::alphabet_size);
-        temporaries::node_character_count = std::vector<long>(constants::alphabet_size);
-        temporaries::incoming_edge_character_count = std::vector<long>(constants::alphabet_size);
-        temporaries::outgoing_edge_character_count = std::vector<long>(constants::alphabet_size);
-        temporaries::int_vector_positions_2 = std::vector<int>();
+        if (const auto ipf_processing_status_code = process_input(instance);
+            ipf_processing_status_code != SUCCESS) {
+            return 1;
+        }
+
+        initialize_temporaries();
 
         instance.start = std::chrono::system_clock::now();
         create_graph(instance);
@@ -90,11 +55,7 @@ auto main(const int argc, char **argv) -> int {
         heuristic(instance);
         instance.heuristic_solution_length = temporaries::lower_bound;
         instance.heuristic_end = std::chrono::system_clock::now();
-        const std::chrono::duration<double> heuristic_elapsed_seconds = instance.heuristic_end - instance.start;
-        std::cout << std::fixed << std::setprecision(2)
-                << "Heuristic finished in " << heuristic_elapsed_seconds.count() << "s." << std::endl;
-
-        instance.mdd_node_source = std::make_unique<mdd_node_source>();
+        print_heuristic_stats(instance);
 
         reduction(instance);
         instance.reduction_end = std::chrono::system_clock::now();
@@ -103,22 +64,10 @@ auto main(const int argc, char **argv) -> int {
         solve(instance);
         instance.end = std::chrono::system_clock::now();
         temporaries::upper_bound = std::max(temporaries::upper_bound, temporaries::lower_bound);
-
         check_solution(instance);
-        write_result_file(instance);
 
-        const std::chrono::duration<double> solve_elapsed_seconds = instance.end - instance.reduction_end;
-        const std::chrono::duration<double> elapsed_seconds = instance.end - instance.start;
-        std::cout << std::fixed << std::setprecision(2)
-                << solve_elapsed_seconds.count() << "\t"
-                << temporaries::lower_bound << "\t"
-                << (instance.is_valid_solution ? "true" : "false") << "\t"
-                << elapsed_seconds.count() << "\t"
-                << "found solution: [";
-        for (const auto character: instance.solution) {
-            std::cout << character << ", ";
-        }
-        std::cout << "]" << std::endl;
+        write_result_file(instance);
+        print_result_stats(instance);
 
         return 0;
     } catch (std::exception &e) {
@@ -127,38 +76,30 @@ auto main(const int argc, char **argv) -> int {
     }
 }
 
-void process_input(instance &instance) {
-
-    std::ifstream input_file(instance.input_path);
-
-    std::cout << "solving file: " << instance.input_path << std::endl;
-    std::flush(std::cout);
-
-    if (input_file.is_open()) {
-        if (int const number_of_strings = parse_next_integer(input_file); 2 != number_of_strings) {
-            std::cout << "Only instances with two strings are allowed." << std::endl;
-            instance.input_validity_code = 1;
-        } else {
-            constants::alphabet_size = parse_next_integer(input_file);
-            temporaries::upper_bound = constants::alphabet_size;
-            temporaries::lower_bound = 0;
-            const auto string_1_length = parse_next_integer(input_file);
-            parse_string(instance.string_1, input_file, string_1_length);
-            const auto string_2_length = parse_next_integer(input_file);
-            parse_string(instance.string_2, input_file, string_2_length);
-        }
-    } else {
-        std::cout << "Cannot find input file: " << instance.input_path << "." << std::endl;
-        instance.input_validity_code = 1;
-    }
-
-    input_file.close();
+void initialize_temporaries() {
+    temporaries::temp_character_set_1 = Character_set();
+    temporaries::temp_character_set_2 = Character_set();
+    temporaries::old_characters_on_paths_to_some_sink = Character_set();
+    temporaries::old_characters_on_all_paths_to_lower_bound_levels = Character_set();
+    temporaries::old_characters_on_paths_to_root = Character_set();
+    temporaries::old_characters_on_all_paths_to_root = Character_set();
+    temporaries::chaining_numbers = std::vector<int>(constants::alphabet_size);
+    temporaries::node_character_count = std::vector<long>(constants::alphabet_size);
+    temporaries::incoming_edge_character_count = std::vector<long>(constants::alphabet_size);
+    temporaries::outgoing_edge_character_count = std::vector<long>(constants::alphabet_size);
+    temporaries::int_vector_positions_2 = std::vector<int>();
 }
 
 void heuristic(instance &instance) {
     std::cout << "Heuristic started." << std::endl;
     std::flush(std::cout);
     heuristic_solve(instance);
+}
+
+void print_heuristic_stats(const instance &instance) {
+    const std::chrono::duration<double> heuristic_elapsed_seconds = instance.heuristic_end - instance.start;
+    std::cout << std::fixed << std::setprecision(2)
+            << "Heuristic finished in " << heuristic_elapsed_seconds.count() << "s." << std::endl;
 }
 
 void reduction(instance &instance) {
@@ -250,27 +191,24 @@ void check_solution(instance &instance) {
     }
 }
 
-void parse_string(std::vector<Character> &character_sequence, std::ifstream &input_file, const int string_length) {
-    character_sequence.resize(string_length);
-    for (int i = 0; i < string_length; i++) {
-        character_sequence.at(i) = parse_next_integer(input_file);
-    }
-}
+void print_result_stats(const instance &instance) {
+    const std::chrono::duration<double> reduction_seconds = instance.reduction_end - instance.start;
+    const std::chrono::duration<double> solver_seconds = instance.end - instance.reduction_end;
+    const std::chrono::duration<double> total_seconds = instance.end - instance.start;
 
-auto parse_next_integer(std::ifstream &input_file) -> Character {
-    if (input_file.good()) {
-        std::string file_entry; // NOLINT(*-const-correctness)
-        input_file >> file_entry;
-        return std::stoi(file_entry);
-    }
-    exit(1);
-}
+    std::print("Total runtime: {:.2f}s = {:.2f}s + {:.2f}s\t",
+        total_seconds.count(),
+        reduction_seconds.count(),
+        solver_seconds.count());
+    std::print("bounds: {}/{}\t", temporaries::upper_bound, temporaries::lower_bound);
+    std::print("solved: {}\t", instance.is_valid_solution ? "true" : "false");
 
-std::string &replace_instances_with_results_folder(std::string path) {
-    const std::string from = "RFLCS_instances";
-    const std::string to = "results";
-    if (const size_t start_pos = path.find(from); start_pos != std::string::npos) {
-        path.replace(start_pos, from.length(), to);
+    std::print("found solution: [");
+    for (size_t i = 0; i < instance.solution.size(); ++i) {
+        std::print("{}", instance.solution[i]);
+        if (i + 1 < instance.solution.size()) {
+            std::print(", ");
+        }
     }
-    return path.append(".out");
+    std::print("]\n");
 }

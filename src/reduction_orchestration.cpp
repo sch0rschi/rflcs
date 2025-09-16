@@ -86,6 +86,7 @@ void reduce_graph_pre_solver(instance &instance) {
                 << std::endl;
     }
 
+    instance.mdd_node_source = std::make_unique<mdd_node_source>();
     return reduce_graph_pre_solver_by_mdd(instance);
 }
 

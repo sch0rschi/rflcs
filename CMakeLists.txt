@@ -122,6 +122,8 @@ set(SOURCE_FILES
         src/mdd/mdd_reduction.cpp
         src/mdd/mdd_refinement.cpp
         src/solver/sequence_enumeration_solver.cpp
+        src/input_processing.cpp
+        src/input_processing.hpp
 )
 
 #-------------------------------#

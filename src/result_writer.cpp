@@ -8,22 +8,22 @@ double calculate_reduction(const instance &instance);
 
 void write_result_file(const instance &instance) {
 
-    std::filesystem::path path(instance.input_path);
+    const std::filesystem::path path(instance.output_path);
 
-    if (std::filesystem::path dir = path.parent_path(); !dir.empty() && !exists(dir)) {
+    if (const std::filesystem::path dir = path.parent_path(); !dir.empty() && !exists(dir)) {
         create_directories(dir);
     }
 
-    std::ofstream out_file(instance.input_path);
+    std::ofstream out_file(instance.output_path);
     if (!out_file) {
         std::cerr << "Failed to open file for writing." << std::endl;
     }
 
-    std::chrono::duration<double> overall_runtime = instance.end - instance.start;
-    std::chrono::duration<double> heuristic_solution_runtime = instance.heuristic_solution_time - instance.start;
-    std::chrono::duration<double> heuristic_runtime = instance.heuristic_end - instance.start;
-    std::chrono::duration<double> mdd_runtime = instance.reduction_end - instance.heuristic_end;
-    std::chrono::duration<double> solver_runtime = instance.end - instance.reduction_end;
+    const std::chrono::duration<double> overall_runtime = instance.end - instance.start;
+    const std::chrono::duration<double> heuristic_solution_runtime = instance.heuristic_solution_time - instance.start;
+    const std::chrono::duration<double> heuristic_runtime = instance.heuristic_end - instance.start;
+    const std::chrono::duration<double> mdd_runtime = instance.reduction_end - instance.heuristic_end;
+    const std::chrono::duration<double> solver_runtime = instance.end - instance.reduction_end;
 
     out_file << "solved:\t" << std::boolalpha << instance.is_valid_solution << std::endl;
     out_file << "solution_length:\t" << temporaries::lower_bound << std::endl;
