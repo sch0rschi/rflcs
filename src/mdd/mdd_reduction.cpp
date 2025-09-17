@@ -76,14 +76,10 @@ void reduce_by_mdd(instance &instance) {
 #ifndef MDD_FREQUENT_SAVE_FEATURE
             filter_flat_mdd(instance, *mdd_reduction, true);
 #endif
-            const auto start = std::clamp(refinement_character_index,
-                                          0,
-                                          static_cast<int>(characters_ordered_by_importance.size()));
-            const auto end = std::clamp(3 * refinement_character_index,
-                                        0,
-                                        static_cast<int>(characters_ordered_by_importance.size()));
-            auto sub_characters = std::vector(characters_ordered_by_importance.begin() + start,
-                                              characters_ordered_by_importance.begin() + end);
+            auto range = characters_ordered_by_importance
+            | std::views::drop(refinement_character_index)
+            | std::views::take(2 * refinement_character_index);
+            auto sub_characters = std::vector(range.begin(), range.end());
 
             prune_by_flat_mdd(instance.shared_object, *mdd_character_selection, *mdd_node_source);
             update_characters_ordered_by_importance_mdd(sub_characters,
@@ -92,7 +88,7 @@ void reduce_by_mdd(instance &instance) {
                                                         *mdd_node_source,
                                                         *character_counters_source,
                                                         nullptr);
-            std::ranges::copy(sub_characters,characters_ordered_by_importance.begin() + start);
+            std::ranges::copy(sub_characters,characters_ordered_by_importance.begin() + refinement_character_index);
         }
 
         auto split_character = characters_ordered_by_importance[refinement_character_index];
