@@ -1,8 +1,6 @@
-#include "config.hpp"
 #include "temporaries.hpp"
 #include "graph/header/graph_creation.hpp"
 #include "heuristic.hpp"
-#include "ilp_solver/ilp_solvers.hpp"
 #include "instance.hpp"
 #include "reduction_orchestration.hpp"
 #include "result_writer.hpp"
@@ -18,6 +16,10 @@
 #include <sys/resource.h>
 
 #include "solver/sequence_enumeration_solver.hpp"
+#ifdef ILP_FEATURE
+#include "ilp_solver/ilp_solvers.hpp"
+#endif
+
 
 void initialize_temporaries();
 
@@ -123,13 +125,14 @@ void solve(instance &instance) {
 
     std::cout << "Solver is running." << std::endl;
 
-    if constexpr (SOLVER == ENUMERATION) {
+    if (instance.shared_object->is_mdd_reduction_complete) {
         solve_enumeration(instance);
         if (!instance.is_solving_forward) {
             std::ranges::reverse(instance.solution);
         }
     }
 
+#ifdef ILP_FEATURE
     if constexpr (SOLVER == GUROBI_MDD) {
         solve_gurobi_mdd_ilp(instance);
     }
@@ -141,7 +144,7 @@ void solve(instance &instance) {
     if constexpr (SOLVER == GUROBI_GRAPH) {
         solve_gurobi_graph_ilp(instance);
     }
-
+#endif
 
     if (int status; WIFEXITED(status)) {
         auto usage = rusage();
@@ -197,9 +200,9 @@ void print_result_stats(const instance &instance) {
     const std::chrono::duration<double> total_seconds = instance.end - instance.start;
 
     std::print("Total runtime: {:.2f}s = {:.2f}s + {:.2f}s\t",
-        total_seconds.count(),
-        reduction_seconds.count(),
-        solver_seconds.count());
+               total_seconds.count(),
+               reduction_seconds.count(),
+               solver_seconds.count());
     std::print("bounds: {}/{}\t", temporaries::upper_bound, temporaries::lower_bound);
     std::print("solved: {}\t", instance.is_valid_solution ? "true" : "false");
 

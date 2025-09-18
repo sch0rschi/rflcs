@@ -22,13 +22,17 @@ It uses Gurobi as the ILP backend.
 
 ---
 
-## Environment Variables
+## ILP Solver (optional)
 
-Before building, make sure the following environment variable is set and CMake can access them:
+If you want to use Gurobi optimizer after an incomplete MDD reduction,
+then before building, make sure the following environment variable is set and CMake can access them:
 
 | Variable      | Description                                   | Example                                                                                                        |
 |---------------|-----------------------------------------------|----------------------------------------------------------------------------------------------------------------|
 | `GUROBI_HOME` | Root path to Gurobi installation              | `/opt/gurobi1200/linux64` or `/Library/gurobi1201/macos_universal2`                                            |
+
+If the variable is not set, of the build parameter ILP_FEATURE=OFF is set, 
+then the ilp feature is excluded from the build.
 
 ---
 
@@ -45,8 +49,9 @@ cd rflcs
 
 ### Build Configuration Options
 
-ALPHABET_SIZES: List of alphabet sizes to build executables for, e.g., 16;32;64;512. If empty, a single dynamic target rflcs is built.
-MDD_FREQUENT_SAVE_FEATURE: Enable (ON) or disable (OFF) frequent writebacks during the MDD phase (default ON, is slower).
+- ALPHABET_SIZES: List of alphabet sizes to build executables for, e.g., 16;32;64;512. If empty, a single dynamic target rflcs is built.
+- MDD_FREQUENT_SAVE_FEATURE: Enable (ON) or disable (OFF) frequent writebacks during the MDD phase (default ON, is slower).
+- ILP_FEATURE: Enable the ILP optimization feature (default ON).
 
 Build the Project
 Example: Build with alphabet size 512 and disable frequent MDD save

@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 23)
 # Build Options #
 #---------------#
 option(MDD_FREQUENT_SAVE_FEATURE "Enable frequent writebacks while in MDD phase (slow)" ON)
+option(ILP_FEATURE "Enable ILP feature" ON)
 set(ALPHABET_SIZES "" CACHE STRING "List of alphabet sizes to build executables for(e.g. 16;32;64)")
 
 #----------------#
@@ -78,20 +79,23 @@ target_include_directories(boost_program_options PUBLIC
 
 add_subdirectory(external/abseil)
 
-if(DEFINED ENV{GUROBI_HOME})
-    set(GUROBI_INCLUDE_DIR $ENV{GUROBI_HOME}/include)
+if (ILP_FEATURE)
+    if(DEFINED ENV{GUROBI_HOME})
+        set(GUROBI_INCLUDE_DIR $ENV{GUROBI_HOME}/include)
 
-    find_library(GUROBI_LIBRARY
-            NAMES gurobi gurobi100 gurobi110 gurobi120 gurobi130
-            HINTS $ENV{GUROBI_HOME}/lib
-    )
-    find_library(GUROBI_API
-            NAMES libgurobi_c++.a
-            HINTS $ENV{GUROBI_HOME}/lib
-    )
-else()
-    message(FATAL_ERROR "GUROBI_HOME environment variable is not set")
-endif()
+        find_library(GUROBI_LIBRARY
+                NAMES gurobi gurobi100 gurobi110 gurobi120 gurobi130
+                HINTS $ENV{GUROBI_HOME}/lib
+        )
+        find_library(GUROBI_API
+                NAMES libgurobi_c++.a
+                HINTS $ENV{GUROBI_HOME}/lib
+        )
+    else()
+        set(ILP_FEATURE OFF)
+        message(WARNING "GUROBI_HOME environment variable is not set, ILP feature deactivated.")
+    endif()
+endif ()
 
 #--------------#
 # Source Files #
@@ -109,9 +113,6 @@ set(SOURCE_FILES
         src/graph/reduce_graph.cpp
         src/graph/rf_subset_lcs_relaxation.cpp
         src/graph/simple_upper_bounds.cpp
-        src/ilp_solver/gurobi_mis_ilp.cpp
-        src/ilp_solver/gurobi_mdd_ilp.cpp
-        src/ilp_solver/gurobi_graph_ilp.cpp
         src/mdd/character_bound_utils.cpp
         src/mdd/character_selection.cpp
         src/mdd/domination_utils.cpp
@@ -125,6 +126,14 @@ set(SOURCE_FILES
         src/input_processing.cpp
         src/input_processing.hpp
 )
+
+if(ILP_FEATURE)
+    list(APPEND SOURCE_FILES
+            src/ilp_solver/gurobi_mis_ilp.cpp
+            src/ilp_solver/gurobi_mdd_ilp.cpp
+            src/ilp_solver/gurobi_graph_ilp.cpp
+    )
+endif()
 
 #-------------------------------#
 # Target Configuration Function #
@@ -176,5 +185,8 @@ if(ALPHABET_SIZES)
 else()
     message(STATUS "Alphabet size:         dynamic")
 endif()
-message(STATUS "Gurobi include dir:    $ENV{GUROBI_HOME}/include")
+message(STATUS "ILP feature:           ${ILP_FEATURE}")
+if (ILP_FEATURE)
+    message(STATUS "Gurobi include dir:    $ENV{GUROBI_HOME}/include")
+endif ()
 message(STATUS "===================================================")
