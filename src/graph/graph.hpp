@@ -32,7 +32,7 @@ namespace rflcs_graph {
         int upper_bound = INT_MAX; // including this character
         std::vector<match *> dom_succ_matches = std::vector<match *>();
         Character_set heuristic_characters;
-        match* heuristic_previous_match;
+        match* heuristic_successor_match;
         match_extension extension;
     };
 
