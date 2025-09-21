@@ -59,8 +59,8 @@ void create_graph(instance &instance) {
     for (unsigned long i = 0; i < instance.graph->matches.size(); i++) {
         auto &match = instance.graph->matches.at(i);
         auto &reverse_match = instance.graph->reverse_matches.at(number_of_matches - i - 1);
-        match.extension.reversed = &reverse_match;
-        reverse_match.extension.reversed = &match;
+        match.reversed = &reverse_match;
+        reverse_match.reversed = &match;
     }
 
     set_successor_matches(instance,
@@ -73,11 +73,11 @@ void create_graph(instance &instance) {
                           reverse_next_occurrences_2);
 
     auto match_counter = 0;
-    for (auto &[character, upper_bound, _dom, heuristic_characters, heuristic_previous, extension]: instance.graph->matches) {
-        extension.match_id = match_counter++;
+    for (auto &[MATCH_BINDINGS()]: instance.graph->matches) {
+        extension->match_id = match_counter++;
     }
-    for (auto &[character, upper_bound, _dom, heuristic_characters, heuristic_previous, extension]: instance.graph->reverse_matches) {
-        extension.match_id = match_counter++;
+    for (auto &[MATCH_BINDINGS()]: instance.graph->reverse_matches) {
+        extension->match_id = match_counter++;
     }
 
     setup_matches_for_simple_upper_bound(*instance.graph);
@@ -99,27 +99,27 @@ void create_matches(std::vector<match> &matches,
                     const unsigned int number_of_matches,
                     const int_matrix &next_occurrences) {
     matches.resize(number_of_matches);
-    for (auto &[character, upper_bound, _dom, heuristic_characters, heuristic_previous, extension]: matches) {
-        extension = match_extension();
+    for (auto &[MATCH_BINDINGS()] : matches) {
+        extension = new match_extension();
     }
-    auto &[root_character, root_upper_bound, _dom_root, _heur_root, _heur_root_prev, root_extension] = matches.front();
-    root_extension.position_1 = 0;
+    auto &[MATCH_BINDINGS(root_)] = matches.front();
+    root_extension->position_1 = 0;
     root_character = SHRT_MAX;
-    root_extension.position_2 = 0;
-    auto &[leaf_character, leaf_upper_bound, _dom_leaf, _heur_leaf, _heur_leaf_prev, leaf_extension] = matches.back();
-    leaf_extension.position_1 = static_cast<int>(instance.string_1.size());
+    root_extension->position_2 = 0;
+    auto &[MATCH_BINDINGS(leaf_)] = matches.back();
+    leaf_extension->position_1 = static_cast<int>(instance.string_1.size());
     leaf_character = SHRT_MAX;
-    leaf_extension.position_2 = static_cast<int>(instance.string_2.size());
+    leaf_extension->position_2 = static_cast<int>(instance.string_2.size());
 
     unsigned int match_counter = 1;
     for (int position_1 = 0; position_1 < static_cast<int>(instance.string_1.size()); position_1++) {
         const auto string_character = string_1.at(position_1);
         const auto start_position_2 = next_occurrences[string_character];
         for (int position_2 = start_position_2; position_2 < static_cast<int>(instance.string_2.size()); match_counter++) {
-            auto &[character, upper_bound, _dom, heuristic_characters, heuristic_previous, extension] = matches.at(match_counter);
+            auto &[MATCH_BINDINGS()] = matches.at(match_counter);
             character = string_character;
-            extension.position_1 = position_1;
-            extension.position_2 = position_2;
+            extension->position_1 = position_1;
+            extension->position_2 = position_2;
             if (position_2 < static_cast<int>(instance.string_2.size()) - 1) {
                 position_2 = next_occurrences[(position_2 + 1) * constants::alphabet_size + string_character];
             } else {
@@ -132,7 +132,7 @@ void create_matches(std::vector<match> &matches,
 std::vector<match*> create_match_matrix(const instance &instance, vector<match> &matches) {
     auto match_matrix = std::vector<match*>(instance.string_1.size() * instance.string_2.size());
     for (auto &match: matches | std::views::drop(1) | std::views::take(matches.size() - 2)) {
-        match_matrix[match.extension.position_1 * instance.string_2.size() + match.extension.position_2] = &match;
+        match_matrix[match.extension->position_1 * instance.string_2.size() + match.extension->position_2] = &match;
     }
     return match_matrix;
 }
@@ -183,42 +183,42 @@ void set_successor_matches(const instance &instance,
     const auto string_1_length = instance.string_1.size();
     const auto string_2_length = instance.string_2.size();
     for (auto &match: matches | std::views::take(matches.size() - 1)) {
-        match.extension.succ_matches.reserve(constants::alphabet_size);
+        match.extension->succ_matches.reserve(constants::alphabet_size);
         for (int character = 0; character < constants::alphabet_size; character++) {
             if (character != match.character) {
-                const auto next_position_1 = next_occurrences_1[match.extension.position_1 * constants::alphabet_size + character];
-                const auto next_position_2 = next_occurrences_2[match.extension.position_2 * constants::alphabet_size + character];
+                const auto next_position_1 = next_occurrences_1[match.extension->position_1 * constants::alphabet_size + character];
+                const auto next_position_2 = next_occurrences_2[match.extension->position_2 * constants::alphabet_size + character];
                 if (next_position_1 < static_cast<int>(string_1_length) &&
                     next_position_2 < static_cast<int>(string_2_length)) {
                     auto succ_match = match_matrix[next_position_1 * string_2_length + next_position_2];
-                    match.extension.succ_matches.push_back(succ_match);
+                    match.extension->succ_matches.push_back(succ_match);
                 }
             }
         }
-        match.extension.succ_matches.shrink_to_fit();
+        match.extension->succ_matches.shrink_to_fit();
 
         static auto succ_matches_copy = vector<struct match *>(string_1_length);
         std::ranges::fill(succ_matches_copy, nullptr);
-        for (const auto succ_match: match.extension.succ_matches) {
-            succ_matches_copy[succ_match->extension.position_1] = succ_match;
+        for (const auto succ_match: match.extension->succ_matches) {
+            succ_matches_copy[succ_match->extension->position_1] = succ_match;
         }
 
         auto succ_match_counter = 0;
         for (const auto succ_match: succ_matches_copy | std::views::filter([](auto *succ_match_filter) {
             return succ_match_filter != nullptr;
         })) {
-            match.extension.succ_matches.at(succ_match_counter) = succ_match;
+            match.extension->succ_matches.at(succ_match_counter) = succ_match;
             succ_match_counter++;
         }
 
         match.dom_succ_matches.reserve(succ_match_counter);
         int smallest_position_2 = static_cast<int>(string_2_length) + 1;
-        std::ranges::copy_if(match.extension.succ_matches, std::back_inserter(match.dom_succ_matches),
+        std::ranges::copy_if(match.extension->succ_matches, std::back_inserter(match.dom_succ_matches),
                              [&smallest_position_2](const struct match *dominating_match_candidate) {
                                  const bool is_dominating =
-                                         dominating_match_candidate->extension.position_2 < smallest_position_2;
+                                         dominating_match_candidate->extension->position_2 < smallest_position_2;
                                  smallest_position_2 = std::min(smallest_position_2,
-                                                                dominating_match_candidate->extension.position_2);
+                                                                dominating_match_candidate->extension->position_2);
                                  return is_dominating;
                              });
         match.dom_succ_matches.shrink_to_fit();
@@ -229,9 +229,9 @@ void set_successor_matches(const instance &instance,
 }
 
 auto manhattan_distance_comparator(const match &first, const match &second) -> bool {
-    const auto first_distance = first.extension.position_1 + first.extension.position_2;
-    if (const auto second_distance = second.extension.position_1 + second.extension.position_2; first_distance != second_distance) {
+    const auto first_distance = first.extension->position_1 + first.extension->position_2;
+    if (const auto second_distance = second.extension->position_1 + second.extension->position_2; first_distance != second_distance) {
         return first_distance < second_distance;
     }
-    return first.extension.position_1 < second.extension.position_1;
+    return first.extension->position_1 < second.extension->position_1;
 }

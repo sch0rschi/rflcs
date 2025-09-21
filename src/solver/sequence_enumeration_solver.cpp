@@ -17,11 +17,11 @@ void solve_enumeration(instance &instance) {
             std::sort(edges, edges + flat_node->num_edges_out, [](const flat_edge &edge_1, const flat_edge &edge_2) {
                 const auto match_1 = static_cast<rflcs_graph::match *>(edge_1.edge_node->match_ptr);
                 const auto match_2 = static_cast<rflcs_graph::match *>(edge_2.edge_node->match_ptr);
-                return std::tie(match_1->extension.position_1,
-                                match_1->extension.position_2)
+                return std::tie(match_1->extension->position_1,
+                                match_1->extension->position_2)
                        <
-                       std::tie(match_2->extension.position_1,
-                                match_2->extension.position_2);
+                       std::tie(match_2->extension->position_1,
+                                match_2->extension->position_2);
             });
             current_pointer += flat_node->num_edges_out * sizeof(flat_edge);
         }

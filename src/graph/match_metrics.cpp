@@ -56,27 +56,27 @@ auto get_characters_ordered_by_importance(rflcs_graph::graph &graph) -> std::vec
 }
 
 auto get_single_character_repetitions(rflcs_graph::graph &graph) -> std::vector<int> {
-    graph.matches.back().extension.repetition_counter = std::vector(constants::alphabet_size, 0);
-    for (auto &[character, upper_bound, dom_succ_matches, heuristic_characters, heuristic_previous, extension]: graph.matches
-                                                                             | std::views::reverse | std::views::drop(1)
-                                                                             | std::views::take(
-                                                                                 graph.matches.size() - 2)) {
-        if (extension.is_active) {
-            extension.repetition_counter = std::vector(constants::alphabet_size, 0);
+    graph.matches.back().extension->repetition_counter = std::vector(constants::alphabet_size, 0);
+    for (auto &[MATCH_BINDINGS()]: graph.matches
+                                   | std::views::reverse
+                                   | std::views::drop(1)
+                                   | std::views::take(graph.matches.size() - 2)) {
+        if (is_active) {
+            extension->repetition_counter = std::vector(constants::alphabet_size, 0);
 
-            for (auto *ancestor_match: dom_succ_matches) {
-                if (ancestor_match->extension.is_active) {
-                    aggregate_pairwise_max_in_first_vector(extension.repetition_counter,
-                                                           ancestor_match->extension.repetition_counter);
+            for (const auto *ancestor_match: dom_succ_matches) {
+                if (ancestor_match->is_active) {
+                    aggregate_pairwise_max_in_first_vector(extension->repetition_counter,
+                                                           ancestor_match->extension->repetition_counter);
                 }
             }
-            extension.repetition_counter.at(character) += 1;
+            extension->repetition_counter.at(character) += 1;
         }
     }
     auto lcs_scores = std::vector(constants::alphabet_size, 0);
     for (auto *dominating_match: graph.matches.front().dom_succ_matches) {
-        if (dominating_match->extension.is_active) {
-            aggregate_pairwise_max_in_first_vector(lcs_scores, dominating_match->extension.repetition_counter);
+        if (dominating_match->is_active) {
+            aggregate_pairwise_max_in_first_vector(lcs_scores, dominating_match->extension->repetition_counter);
         }
     }
     return lcs_scores;
@@ -94,12 +94,12 @@ inline void aggregate_pairwise_max_in_first_vector(std::vector<int> &repetition_
 
 auto get_sums_of_combined_upper_bounds(const rflcs_graph::graph &graph) -> std::vector<int> {
     auto sum_of_combined_upper_bounds = std::vector(constants::alphabet_size, 0);
-    for (const auto &[character, upper_bound, dom_succ_matches, heuristic_characters, heuristic_previous, extension]: graph.matches
-                                                                       | std::views::reverse | std::views::drop(1) |
-                                                                       std::views::take(
-                                                                           graph.matches.size() - 2)) {
-        if (extension.is_active) {
-            sum_of_combined_upper_bounds.at(character) += extension.combined_upper_bound;
+    for (const auto &[MATCH_BINDINGS()]: graph.matches
+                                         | std::views::reverse
+                                         | std::views::drop(1)
+                                         | std::views::take(graph.matches.size() - 2)) {
+        if (is_active) {
+            sum_of_combined_upper_bounds.at(character) += extension->combined_upper_bound;
         }
     }
     return sum_of_combined_upper_bounds;
@@ -108,11 +108,11 @@ auto get_sums_of_combined_upper_bounds(const rflcs_graph::graph &graph) -> std::
 
 auto get_active_match_counters(const rflcs_graph::graph &graph) -> std::vector<int> {
     auto counters = std::vector(constants::alphabet_size, 0);
-    for (const auto &[character, upper_bound, dom_succ_matches, heuristic_characters, heuristic_previous, extension]: graph.matches
-                                                                       | std::views::reverse | std::views::drop(1) |
-                                                                       std::views::take(
-                                                                           graph.matches.size() - 2)) {
-        if (extension.is_active) {
+    for (const auto &[MATCH_BINDINGS()]: graph.matches
+                                         | std::views::reverse
+                                         | std::views::drop(1)
+                                         | std::views::take(graph.matches.size() - 2)) {
+        if (is_active) {
             counters.at(character) += 1;
         }
     }
@@ -123,16 +123,16 @@ auto get_having_max_combined_upper_bound_counters(const rflcs_graph::graph &grap
     auto counters = std::vector(constants::alphabet_size, 0);
     auto max_combined_upper_bound = 0;
 
-    for (const auto &[character, upper_bound, dom_succ_matches, heuristic_characters, heuristic_previous, extension]: graph.matches
-                                                                       | std::views::reverse | std::views::drop(1) |
-                                                                       std::views::take(
-                                                                           graph.matches.size() - 2)) {
-        if (extension.is_active) {
-            if (extension.combined_upper_bound > max_combined_upper_bound) {
-                max_combined_upper_bound = extension.combined_upper_bound;
+    for (const auto &[MATCH_BINDINGS()]: graph.matches
+                                         | std::views::reverse
+                                         | std::views::drop(1)
+                                         | std::views::take(graph.matches.size() - 2)) {
+        if (is_active) {
+            if (extension->combined_upper_bound > max_combined_upper_bound) {
+                max_combined_upper_bound = extension->combined_upper_bound;
                 std::ranges::fill(counters, 0);
             }
-            if (extension.combined_upper_bound == max_combined_upper_bound) {
+            if (extension->combined_upper_bound == max_combined_upper_bound) {
                 counters.at(character) += 1;
             }
         }

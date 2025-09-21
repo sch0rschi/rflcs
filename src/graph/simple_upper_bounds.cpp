@@ -11,13 +11,13 @@ bool calculate_simple_upper_bounds(rflcs_graph::graph &graph) {
 
     int upper_bound = 0;
     for (const auto *dominating_match: graph.matches.front().dom_succ_matches) {
-        if (dominating_match->extension.is_active) {
+        if (dominating_match->is_active) {
             upper_bound = std::max(upper_bound, dominating_match->upper_bound);
         }
     }
     int reverse_upper_bound = 0;
     for (const auto *dominating_match: graph.reverse_matches.front().dom_succ_matches) {
-        if (dominating_match->extension.is_active) {
+        if (dominating_match->is_active) {
             reverse_upper_bound = std::max(reverse_upper_bound, dominating_match->upper_bound);
         }
     }
@@ -29,25 +29,23 @@ bool calculate_simple_upper_bounds(rflcs_graph::graph &graph) {
 void setup_matches_for_simple_upper_bound(rflcs_graph::graph &graph) {
     graph.matches.back().upper_bound = 0;
     graph.reverse_matches.back().upper_bound = 0;
-    for (auto &[character, upper_bound, _dom, heuristic_characters, heuristic_previous, extension]: graph.matches) {
-        extension.available_characters = Character_set();
-        extension.reversed->extension.available_characters = Character_set();
+    for (auto &[MATCH_BINDINGS()]: graph.matches) {
+        extension->available_characters = Character_set();
+        reversed->extension->available_characters = Character_set();
     }
 }
 
 bool set_simple_upper_bounds(std::vector<rflcs_graph::match> &matches) {
     auto is_improving = false;
-    for (auto &[character, upper_bound, dom_succ_matches, heuristic_characters, heuristic_previous, extension]: matches
-                                                                             | std::views::reverse
-                                                                             | active_match_filter) {
+    for (auto &[MATCH_BINDINGS()]: matches | std::views::reverse | active_match_filter) {
         auto max_succ_upper_bound = -1; // 1 gets added (=0) to root node
         if (character != SHRT_MAX) {
-            extension.available_characters.reset();
-            extension.available_characters.set(character);
+            extension->available_characters.reset();
+            extension->available_characters.set(character);
         }
         for (const auto *potential_match: dom_succ_matches) {
-            if (potential_match->extension.is_active) {
-                extension.available_characters |= potential_match->extension.available_characters;
+            if (potential_match->is_active) {
+                extension->available_characters |= potential_match->extension->available_characters;
                 max_succ_upper_bound = std::max(max_succ_upper_bound, potential_match->upper_bound);
             }
         }
@@ -55,13 +53,13 @@ bool set_simple_upper_bounds(std::vector<rflcs_graph::match> &matches) {
         upper_bound = std::min({
             upper_bound,
             max_succ_upper_bound + 1,
-            static_cast<int>(extension.available_characters.count())
+            static_cast<int>(extension->available_characters.count())
         });
         is_improving |= upper_bound < previous_upper_bound;
     }
     for (const auto *potential_match: matches.front().dom_succ_matches) {
-        if (potential_match->extension.is_active) {
-            matches.front().extension.available_characters |= potential_match->extension.available_characters;
+        if (potential_match->is_active) {
+            matches.front().extension->available_characters |= potential_match->extension->available_characters;
         }
     }
     return is_improving;

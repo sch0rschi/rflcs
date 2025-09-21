@@ -26,7 +26,7 @@ auto reduce_graph(rflcs_graph::graph &graph) -> void {
 
 auto reduce_edges(std::vector<rflcs_graph::match> &matches) -> void {
     for (auto &current_match: matches) {
-        if (current_match.extension.is_active) {
+        if (current_match.is_active) {
             reduce_succ_edges(current_match);
             reduce_dominating_succ_edges(matches.back(), current_match);
         }
@@ -47,7 +47,7 @@ auto reduce_dominating_succ_edges(
 }
 
 auto reduce_succ_edges(rflcs_graph::match &current_match) -> void {
-    std::erase_if(current_match.extension.succ_matches,
+    std::erase_if(current_match.extension->succ_matches,
                   [&current_match](const rflcs_graph::match *succ_match) {
                       return bad_edge(current_match, *succ_match);
                   });
@@ -56,17 +56,17 @@ auto reduce_succ_edges(rflcs_graph::match &current_match) -> void {
 inline auto bad_edge(
     const rflcs_graph::match &current_match,
     const rflcs_graph::match &target_match) -> bool {
-    if (!target_match.extension.is_active) {
+    if (!target_match.is_active) {
         return true;
     }
-    if (current_match.extension.reversed->upper_bound + target_match.upper_bound <= temporaries::lower_bound) {
+    if (current_match.reversed->upper_bound + target_match.upper_bound <= temporaries::lower_bound) {
         return true;
     }
-    if (current_match.extension.reversed->upper_bound < target_match.extension.transient_match_domination_number) {
+    if (current_match.reversed->upper_bound < target_match.extension->transient_match_domination_number) {
         return true;
     }
-    temporaries::temp_character_set_1 = current_match.extension.reversed->extension.available_characters;
-    temporaries::temp_character_set_1 |= target_match.extension.available_characters;
+    temporaries::temp_character_set_1 = current_match.reversed->extension->available_characters;
+    temporaries::temp_character_set_1 |= target_match.extension->available_characters;
     return static_cast<int>(temporaries::temp_character_set_1.count()) <= temporaries::lower_bound;
 }
 

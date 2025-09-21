@@ -62,27 +62,27 @@ auto heuristic_solve(instance &instance) -> void {
 }
 
 void setup(const instance &instance) {
-    for (auto &[character, upper_bound, _dom, heuristic_characters, heuristic_previous, extension]: instance.graph->
+    for (auto &[MATCH_BINDINGS()]: instance.graph->
          matches) {
         heuristic_characters = Character_set();
-        heuristic_previous = nullptr;
-        extension.reversed->heuristic_characters = Character_set();
-        extension.reversed->heuristic_successor_match = nullptr;
+        heuristic_successor_match = nullptr;
+        reversed->heuristic_characters = Character_set();
+        reversed->heuristic_successor_match = nullptr;
         if (character < constants::alphabet_size) {
             heuristic_characters.set(character);
-            extension.reversed->heuristic_characters.set(character);
+            reversed->heuristic_characters.set(character);
         }
     }
 }
 
 void clear(const instance &instance) {
-    for (auto &[character, upper_bound, _dom, heuristic_characters, heuristic_previous, extension]: instance.graph->matches) {
-        if (extension.is_active) {
+    for (auto &[character, upper_bound, _dom, heuristic_characters, heuristic_previous, reversed, extension, is_active]: instance.graph->matches) {
+        if (is_active) {
             heuristic_characters.reset();
-            extension.reversed->heuristic_characters.reset();
+            reversed->heuristic_characters.reset();
             if (character < constants::alphabet_size) {
                 heuristic_characters.set(character);
-                extension.reversed->heuristic_characters.set(character);
+                reversed->heuristic_characters.set(character);
             }
         }
     }
@@ -90,14 +90,14 @@ void clear(const instance &instance) {
 
 void combine(instance &instance, std::vector<rflcs_graph::match> &matches, const bool is_building_from_back) {
     auto static candidate_matches = std::vector<rflcs_graph::match *>(constants::alphabet_size);
-    for (auto &current_match: std::ranges::reverse_view(matches)) {
-        if (current_match.extension.is_active
+    for (auto &current_match: matches | std::views::reverse) {
+        if (current_match.is_active
             && !current_match.dom_succ_matches.empty()) {
             int position = 0;
             unsigned long best_heuristic_score = 0;
             for (auto *potential_match: current_match.dom_succ_matches) {
-                if (potential_match->extension.is_active) {
-                    temporaries::temp_character_set_1 = current_match.extension.reversed->heuristic_characters;
+                if (potential_match->is_active) {
+                    temporaries::temp_character_set_1 = current_match.reversed->heuristic_characters;
                     temporaries::temp_character_set_1 |= potential_match->heuristic_characters;
                     if (unsigned long const heuristic_score = temporaries::temp_character_set_1.count();
                         heuristic_score > best_heuristic_score) {
@@ -143,7 +143,7 @@ set_heuristic_solution(instance &instance, const rflcs_graph::match &match, cons
         actual_match = actual_match->heuristic_successor_match;
     }
 
-    actual_match = match.extension.reversed;
+    actual_match = match.reversed;
     while (actual_match != nullptr && actual_match->character < constants::alphabet_size) {
         if (!characters.contains(actual_match->character)) {
             instance.solution.push_back(actual_match->character);

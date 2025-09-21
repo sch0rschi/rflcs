@@ -138,8 +138,8 @@ void reduce_graph_pre_solver_by_mdd(instance &instance) {
 
 void filter_matches_by_flat_mdd(instance &instance) {
     for (auto &match: instance.graph->matches) {
-        match.extension.is_active = false;
-        match.extension.reversed->extension.is_active = false;
+        match.is_active = false;
+        match.reversed->is_active = false;
     }
     auto current_pointer = std::bit_cast<std::byte *>(&instance.shared_object->flat_levels);
 
@@ -150,17 +150,17 @@ void filter_matches_by_flat_mdd(instance &instance) {
         for (size_t node_index = 0; node_index < flat_level->num_nodes; ++node_index) {
             auto flat_node = std::bit_cast<struct flat_node *>(current_pointer);
             const auto match_ptr = static_cast<rflcs_graph::match *>(flat_node->match_ptr);
-            match_ptr->extension.is_active = flat_node->is_active;
-            match_ptr->extension.reversed->extension.is_active = match_ptr->extension.is_active;
+            match_ptr->is_active = flat_node->is_active;
+            match_ptr->reversed->is_active = match_ptr->is_active;
             current_pointer += sizeof(struct flat_node);
             current_pointer += flat_node->num_edges_out * sizeof(flat_edge);
         }
     }
-    instance.graph->matches.front().extension.is_active = false;
-    instance.graph->matches.back().extension.is_active = false;
+    instance.graph->matches.front().is_active = false;
+    instance.graph->matches.back().is_active = false;
     instance.active_matches = static_cast<int>(std::ranges::count_if(
         instance.graph->matches,
-        [](const auto &match) { return match.extension.is_active; }
+        [](const auto &match) { return match.is_active; }
     ));
 }
 

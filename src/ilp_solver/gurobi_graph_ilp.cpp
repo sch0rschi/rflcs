@@ -146,10 +146,10 @@ absl::flat_hash_map<std::pair<rflcs_graph::match *, rflcs_graph::match *>, GRBVa
     rflcs_graph::match *sink) {
     auto gurobi_edges_map = absl::flat_hash_map<std::pair<rflcs_graph::match *, rflcs_graph::match *>, GRBVar>();
     for (auto match: matches) {
-        for (auto succ_match: match->extension.succ_matches) {
+        for (auto succ_match: match->extension->succ_matches) {
             gurobi_edges_map[std::make_pair(match, succ_match)] = model.addVar(0.0, 1.0, 0, GRB_BINARY);
         }
-        if (match->extension.reversed->upper_bound > temporaries::lower_bound) {
+        if (match->reversed->upper_bound > temporaries::lower_bound) {
             gurobi_edges_map[std::make_pair(match, sink)] = model.addVar(0.0, 1.0, 0, GRB_BINARY);
         }
     }
@@ -168,7 +168,7 @@ absl::flat_hash_map<rflcs_graph::match *, GRBVar> create_gurobi_variables(
 void update_graph_by_mdd(const instance &instance, absl::flat_hash_set<rflcs_graph::match *> &matches) {
     for (const auto &match: matches) {
         match->dom_succ_matches.clear();
-        match->extension.succ_matches.clear();
+        match->extension->succ_matches.clear();
     }
 
     for (const auto &level: instance.mdd->levels) {
@@ -177,7 +177,7 @@ void update_graph_by_mdd(const instance &instance, absl::flat_hash_set<rflcs_gra
             for (const auto succ_node: node->edges_out) {
                 auto *succ_match = static_cast<rflcs_graph::match *>(succ_node->associated_match);
                 match->dom_succ_matches.push_back(succ_match);
-                match->extension.succ_matches.push_back(succ_match);
+                match->extension->succ_matches.push_back(succ_match);
             }
         }
     }
@@ -185,15 +185,15 @@ void update_graph_by_mdd(const instance &instance, absl::flat_hash_set<rflcs_gra
     for (auto &match: matches) {
         remove_duplicates(match->dom_succ_matches);
         remove_dominated(match->dom_succ_matches);
-        remove_duplicates(match->extension.succ_matches);
+        remove_duplicates(match->extension->succ_matches);
     }
 
     for (auto &match: matches) {
         for (const auto dom_succ_match: match->dom_succ_matches) {
-            dom_succ_match->extension.dom_pred_matches.push_back(match);
+            dom_succ_match->extension->dom_pred_matches.push_back(match);
         }
-        for (const auto succ_match: match->extension.succ_matches) {
-            succ_match->extension.pred_matches.push_back(match);
+        for (const auto succ_match: match->extension->succ_matches) {
+            succ_match->extension->pred_matches.push_back(match);
         }
     }
 }
@@ -206,15 +206,15 @@ void remove_duplicates(std::vector<rflcs_graph::match *> &matches) {
 
 void remove_dominated(std::vector<rflcs_graph::match *> &matches) {
     std::ranges::sort(matches, [](const rflcs_graph::match *m1, const rflcs_graph::match *m2) {
-        return m1->extension.position_1 < m2->extension.position_1;
+        return m1->extension->position_1 < m2->extension->position_1;
     });
     const auto matches_copy = matches;
     matches.clear();
     int max_position_2 = INT_MAX;
     for (auto match: matches_copy) {
-        if (match->extension.position_2 < max_position_2) {
+        if (match->extension->position_2 < max_position_2) {
             matches.push_back(match);
-            max_position_2 = match->extension.position_2;
+            max_position_2 = match->extension->position_2;
         }
     }
 }

@@ -52,8 +52,8 @@ protected:
 
                 for (auto solution_match_1: solution_matches) {
                     for (auto solution_match_2: solution_matches) {
-                        if (solution_match_1->extension.position_1 < solution_match_2->extension.position_1 &&
-                            solution_match_1->extension.position_2 > solution_match_2->extension.position_2) {
+                        if (solution_match_1->extension->position_1 < solution_match_2->extension->position_1 &&
+                            solution_match_1->extension->position_2 > solution_match_2->extension->position_2) {
                             GRBLinExpr expr = gurobi_variable_map.at(solution_match_1) + gurobi_variable_map.at(solution_match_2);
                             addLazy(expr <= 1.0);
                         }
@@ -118,9 +118,9 @@ void set_common_sub_sequence_constraint(
     for (const auto match1: matches) {
         for (const auto match2: matches) {
             if (std::abs(match1->upper_bound - match2->upper_bound) < temporaries::upper_bound - temporaries::lower_bound
-                && std::abs(match1->extension.reversed->upper_bound - match2->extension.reversed->upper_bound) < temporaries::upper_bound - temporaries::lower_bound
-                && match1->extension.position_1 < match2->extension.position_1
-                && match1->extension.position_2 > match2->extension.position_2) {
+                && std::abs(match1->reversed->upper_bound - match2->reversed->upper_bound) < temporaries::upper_bound - temporaries::lower_bound
+                && match1->extension->position_1 < match2->extension->position_1
+                && match1->extension->position_2 > match2->extension->position_2) {
                 auto conflict = GRBLinExpr();
                 conflict += gurobi_variable_map.at(match1);
                 conflict += gurobi_variable_map.at(match2);
@@ -170,7 +170,7 @@ std::set<rflcs_graph::match *> get_active_matches(const instance &instance) {
     auto matches = std::set<rflcs_graph::match *>();
     for (auto &match: instance.graph->matches | std::ranges::views::drop(1) |
                       std::ranges::views::take(instance.graph->matches.size() - 2)) {
-        if (match.extension.is_active) {
+        if (match.is_active) {
             matches.insert(&match);
         }
     }
@@ -188,7 +188,7 @@ void set_solution_from_graph(instance &instance,
                          });
 
     std::ranges::sort(matches_in_solution, [](const rflcs_graph::match *m1, const rflcs_graph::match *m2) {
-        return m1->extension.position_1 < m2->extension.position_1;
+        return m1->extension->position_1 < m2->extension->position_1;
     });
 
     instance.solution.clear();
