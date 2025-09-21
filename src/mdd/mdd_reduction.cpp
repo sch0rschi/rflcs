@@ -42,7 +42,6 @@ void add_counts(const mdd &mdd_reduction, std::vector<long> &time_series_node_co
 
 void reduce_by_mdd(instance &instance) {
     const auto mdd_node_source = std::make_unique<struct mdd_node_source>();
-    const auto character_counters_source = std::make_unique<struct character_counters_source>();
 
     auto mdd_reduction = mdd::copy_mdd(*instance.mdd, *mdd_node_source);
     prune_by_flat_mdd(instance.shared_object, *mdd_reduction, *mdd_node_source);
@@ -64,7 +63,7 @@ void reduce_by_mdd(instance &instance) {
                                                 instance,
                                                 *mdd_reduction,
                                                 *mdd_node_source,
-                                                *character_counters_source, &progress);
+                                                &progress);
     std::cout << "First character selection done." << std::endl;
     std::ranges::for_each(std::ranges::take_view(characters_ordered_by_importance, 20),
                           [](const int num) { std::cout << num << ", "; });
@@ -86,7 +85,6 @@ void reduce_by_mdd(instance &instance) {
                                                         instance,
                                                         *mdd_character_selection,
                                                         *mdd_node_source,
-                                                        *character_counters_source,
                                                         nullptr);
             std::ranges::copy(sub_characters,characters_ordered_by_importance.begin() + refinement_character_index);
         }
