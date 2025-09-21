@@ -1,81 +1,108 @@
 [submodule "external/abseil"]
 	path = external/abseil
 	url = https://github.com/abseil/abseil-cpp.git
+	branch = master
 [submodule "external/boost/dynamic_bitset"]
 	path = external/boost/dynamic_bitset
 	url = https://github.com/boostorg/dynamic_bitset.git
+	branch = develop
 [submodule "external/boost/timer"]
 	path = external/boost/timer
 	url = https://github.com/boostorg/timer.git
+	branch = develop
 [submodule "external/boost/config"]
 	path = external/boost/config
 	url = https://github.com/boostorg/config.git
+	branch = develop
 [submodule "external/boost/core"]
 	path = external/boost/core
 	url = https://github.com/boostorg/core.git
+	branch = develop
 [submodule "external/boost/static_assert"]
 	path = external/boost/static_assert
 	url = https://github.com/boostorg/static_assert.git
+	branch = develop
 [submodule "external/boost/assert"]
 	path = external/boost/assert
 	url = https://github.com/boostorg/assert.git
+	branch = develop
 [submodule "external/boost/integer"]
 	path = external/boost/integer
 	url = https://github.com/boostorg/integer.git
+	branch = develop
 [submodule "external/boost/type_traits"]
 	path = external/boost/type_traits
 	url = https://github.com/boostorg/type_traits.git
+	branch = develop
 [submodule "external/boost/functional"]
 	path = external/boost/functional
 	url = https://github.com/boostorg/functional.git
+	branch = develop
 [submodule "external/boost/move"]
 	path = external/boost/move
 	url = https://github.com/boostorg/move.git
+	branch = develop
 [submodule "external/boost/throw_exception"]
 	path = external/boost/throw_exception
 	url = https://github.com/boostorg/throw_exception.git
+	branch = develop
 [submodule "external/boost/container_hash"]
 	path = external/boost/container_hash
 	url = https://github.com/boostorg/container_hash.git
+	branch = develop
 [submodule "external/boost/describe"]
 	path = external/boost/describe
 	url = https://github.com/boostorg/describe.git
+	branch = develop
 [submodule "external/boost/mp11"]
 	path = external/boost/mp11
 	url = https://github.com/boostorg/mp11.git
+	branch = develop
 [submodule "external/boost/program_options"]
 	path = external/boost/program_options
 	url = https://github.com/boostorg/program_options.git
+	branch = develop
 [submodule "external/boost/any"]
 	path = external/boost/any
 	url = https://github.com/boostorg/any.git
+	branch = develop
 [submodule "external/boost/type_index"]
 	path = external/boost/type_index
 	url = https://github.com/boostorg/type_index.git
+	branch = develop
 [submodule "external/boost/function"]
 	path = external/boost/function
 	url = https://github.com/boostorg/function.git
+	branch = develop
 [submodule "external/boost/bind"]
 	path = external/boost/bind
 	url = https://github.com/boostorg/bind.git
+	branch = develop
 [submodule "external/boost/lexical_cast"]
 	path = external/boost/lexical_cast
 	url = https://github.com/boostorg/lexical_cast.git
+	branch = develop
 [submodule "external/boost/container"]
 	path = external/boost/container
 	url = https://github.com/boostorg/container.git
+	branch = develop
 [submodule "external/boost/smart_ptr"]
 	path = external/boost/smart_ptr
 	url = https://github.com/boostorg/smart_ptr.git
+	branch = develop
 [submodule "external/boost/detail"]
 	path = external/boost/detail
 	url = https://github.com/boostorg/detail.git
+	branch = develop
 [submodule "external/boost/iterator"]
 	path = external/boost/iterator
 	url = https://github.com/boostorg/iterator.git
+	branch = develop
 [submodule "external/boost/mpl"]
 	path = external/boost/mpl
 	url = https://github.com/boostorg/mpl.git
+	branch = develop
 [submodule "external/boost/tokenizer"]
 	path = external/boost/tokenizer
 	url = https://github.com/boostorg/tokenizer.git
+	branch = develop
