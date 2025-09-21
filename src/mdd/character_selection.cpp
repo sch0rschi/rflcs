@@ -107,38 +107,32 @@ double calculate_greedy_score(const mdd &mdd,
 }
 
 void chaining_numbers(const mdd &mdd, const character_counters_source &character_counters_source) {
+    absl::flat_hash_map<node*, std::vector<int>> sequences_character_counter;
     for (const auto node: mdd.levels.back()->nodes) {
-        node->sequences_character_counter = character_counters_source.get_counter();
-        std::ranges::fill(*node->sequences_character_counter, 0);
-        node->sequences_character_counter->at(node->character) = 1;
+        sequences_character_counter[node] = std::vector<int>(constants::alphabet_size);
+        std::ranges::fill(sequences_character_counter[node], 0);
+        sequences_character_counter[node].at(node->character) = 1;
     }
 
     for (int level_index = static_cast<int>(mdd.levels.size()) - 2; level_index >= 0; level_index--) {
         for (const auto &level = mdd.levels.at(level_index); const auto node: level->nodes) {
-            node->sequences_character_counter = character_counters_source.get_counter();
-            std::ranges::fill(*node->sequences_character_counter, 0);
+            sequences_character_counter[node] = std::vector<int>(constants::alphabet_size);
+            std::ranges::fill(sequences_character_counter[node], 0);
             for (const auto succ: node->edges_out) {
                 std::ranges::transform(
-                    *node->sequences_character_counter,
-                    *succ->sequences_character_counter,
-                    node->sequences_character_counter->begin(),
+                    sequences_character_counter[node],
+                    sequences_character_counter[succ],
+                    sequences_character_counter[node].begin(),
                     [](const int first, const int second) {
                         return std::max(first, second);
                     });
-                node->sequences_character_counter->at(succ->character) = std::max(
-                    node->sequences_character_counter->at(succ->character),
-                    succ->sequences_character_counter->at(succ->character) + 1);
+                sequences_character_counter[node].at(succ->character) = std::max(
+                    sequences_character_counter[node].at(succ->character),
+                    sequences_character_counter[succ].at(succ->character) + 1);
             }
-        }
-
-        for (const auto &level = mdd.levels.at(level_index + 1); const auto node: level->nodes) {
-            character_counters_source.return_counter(node->sequences_character_counter);
-            node->sequences_character_counter = nullptr;
         }
     }
 
     const auto root = *mdd.levels.front()->nodes.begin();
-    temporaries::chaining_numbers = *root->sequences_character_counter;
-    character_counters_source.return_counter(root->sequences_character_counter);
-    root->sequences_character_counter = nullptr;
+    temporaries::chaining_numbers = sequences_character_counter[root];
 }

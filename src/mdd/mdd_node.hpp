@@ -20,7 +20,6 @@ struct node {
     Character_set characters_on_all_paths_to_root; // including match character
     Character_set characters_on_paths_to_some_sink; // not including match character
     Character_set characters_on_all_paths_to_lower_bound_levels; // not including match character
-    std::vector<int> *sequences_character_counter; // not counting match character
     edges_type edges_out = edges_type();
     edges_type edges_in = edges_type();
     int upper_bound_down = INT_MAX / 4; // not including match character
