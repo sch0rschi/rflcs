@@ -2,7 +2,6 @@
 
 #include "mdd_node_source.hpp"
 #include "mdd_levels.hpp"
-#include "header/character_counters_source.hpp"
 
 #include <memory>
 

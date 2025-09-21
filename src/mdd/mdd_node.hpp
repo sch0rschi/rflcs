@@ -12,16 +12,16 @@ struct node;
 typedef std::vector<node *> edges_type;
 
 struct node {
-    void *associated_match = nullptr;
-    Character character;
-    int position_1;
-    int position_2;
     Character_set characters_on_paths_to_root; // including match character
     Character_set characters_on_all_paths_to_root; // including match character
     Character_set characters_on_paths_to_some_sink; // not including match character
     Character_set characters_on_all_paths_to_lower_bound_levels; // not including match character
     edges_type edges_out = edges_type();
     edges_type edges_in = edges_type();
+    void *associated_match = nullptr;
+    Character character;
+    int position_1;
+    int position_2;
     int upper_bound_down = INT_MAX / 4; // not including match character
     bool needs_update_from_pred = true;
     bool needs_update_from_succ = true;

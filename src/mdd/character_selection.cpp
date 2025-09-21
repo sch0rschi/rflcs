@@ -9,7 +9,7 @@
 
 #include "edge_utils.hpp"
 
-void chaining_numbers(const mdd &mdd, const character_counters_source &character_counters_source);
+void chaining_numbers(const mdd &mdd);
 
 double calculate_greedy_score(const mdd &mdd, double initial_number_of_matches, double initial_number_of_graph_edges);
 
@@ -18,9 +18,8 @@ void update_characters_ordered_by_importance_mdd(
     const instance &instance,
     const mdd &reduction_mdd,
     mdd_node_source &mdd_node_source,
-    const character_counters_source &character_counters_source,
     boost::timer::progress_display *progress) {
-    chaining_numbers(reduction_mdd, character_counters_source);
+    chaining_numbers(reduction_mdd);
 
     auto matches_on_level = absl::flat_hash_set<void *>();
     auto static valid_edges = absl::flat_hash_set<long>();
@@ -106,7 +105,7 @@ double calculate_greedy_score(const mdd &mdd,
            / max_in_edges;
 }
 
-void chaining_numbers(const mdd &mdd, const character_counters_source &character_counters_source) {
+void chaining_numbers(const mdd &mdd) {
     absl::flat_hash_map<node*, std::vector<int>> sequences_character_counter;
     for (const auto node: mdd.levels.back()->nodes) {
         sequences_character_counter[node] = std::vector<int>(constants::alphabet_size);
