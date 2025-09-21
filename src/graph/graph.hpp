@@ -6,14 +6,17 @@
 #include "../character_set.hpp"
 #include "../character.hpp"
 
+#define MATCH_BINDINGS(P) \
+P##character, P##upper_bound, P##dom_succ_matches, \
+P##heuristic_characters, P##heuristic_successor_match, \
+P##reversed, P##extension, P##is_active
+
 namespace rflcs_graph {
 
     struct match;
 
     struct match_extension {
-        bool is_active = true;
         int match_id;
-        match* reversed;
         int combined_upper_bound = INT_MAX;
         std::vector<match *> succ_matches = std::vector<match *>();
         std::vector<match *> pred_matches = std::vector<match *>();
@@ -33,7 +36,9 @@ namespace rflcs_graph {
         std::vector<match *> dom_succ_matches = std::vector<match *>();
         Character_set heuristic_characters;
         match* heuristic_successor_match;
-        match_extension extension;
+        match* reversed;
+        match_extension* extension;
+        bool is_active = true;
     };
 
     struct graph {
@@ -42,6 +47,6 @@ namespace rflcs_graph {
     };
 
     inline auto position_1_comparator(const match* first, const match* second) -> bool {
-        return first->extension.position_1 < second->extension.position_1;
+        return first->extension->position_1 < second->extension->position_1;
     }
 }

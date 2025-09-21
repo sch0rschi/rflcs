@@ -32,23 +32,23 @@ public:
         node *fresh_node;
         if (cache.empty()) {
             fresh_node = new_node();
-            fresh_node->characters_on_paths_to_root = match.extension.reversed->extension.available_characters;
+            fresh_node->characters_on_paths_to_root = match.reversed->extension->available_characters;
             fresh_node->characters_on_all_paths_to_root = Character_set();
-            fresh_node->characters_on_paths_to_some_sink = match.extension.available_characters;
+            fresh_node->characters_on_paths_to_some_sink = match.extension->available_characters;
             fresh_node->characters_on_all_paths_to_lower_bound_levels = Character_set();
         } else {
             fresh_node = cache.back();
             cache.pop_back();
-            fresh_node->characters_on_paths_to_root = match.extension.reversed->extension.available_characters;
+            fresh_node->characters_on_paths_to_root = match.reversed->extension->available_characters;
             fresh_node->characters_on_all_paths_to_root.reset();
-            fresh_node->characters_on_paths_to_some_sink = match.extension.available_characters;
+            fresh_node->characters_on_paths_to_some_sink = match.extension->available_characters;
             fresh_node->characters_on_all_paths_to_lower_bound_levels.reset();
         }
         fresh_node->is_active = true;
         fresh_node->associated_match = &match;
         fresh_node->character = match.character;
-        fresh_node->position_1 = match.extension.position_1;
-        fresh_node->position_2 = match.extension.position_2;
+        fresh_node->position_1 = match.extension->position_1;
+        fresh_node->position_2 = match.extension->position_2;
 
         fresh_node->characters_on_paths_to_root.set(fresh_node->character);
         fresh_node->characters_on_all_paths_to_root.set(fresh_node->character);

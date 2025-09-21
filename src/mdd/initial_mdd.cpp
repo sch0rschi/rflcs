@@ -22,11 +22,11 @@ std::unique_ptr<mdd> create_initial_mdd(const instance &instance, const bool for
     auto &root_match = forward ? instance.graph->matches.front() : instance.graph->reverse_matches.front();
     root_node->associated_match = &root_match;
     root_node->character = root_match.character;
-    root_node->position_1 = root_match.extension.position_1;
-    root_node->position_2 = root_match.extension.position_2;
+    root_node->position_1 = root_match.extension->position_1;
+    root_node->position_2 = root_match.extension->position_2;
     root_node->characters_on_paths_to_root = Character_set();
     root_node->characters_on_all_paths_to_root = Character_set();
-    root_node->characters_on_paths_to_some_sink = root_match.extension.available_characters;
+    root_node->characters_on_paths_to_some_sink = root_match.extension->available_characters;
     root_node->characters_on_all_paths_to_lower_bound_levels = Character_set();
     root_node->upper_bound_down = temporaries::upper_bound;
 
@@ -42,12 +42,12 @@ std::unique_ptr<mdd> create_initial_mdd(const instance &instance, const bool for
             int min_position_2 = INT_MAX;
             temporaries::int_vector_positions_2.clear();
             auto pred_node_match = static_cast<rflcs_graph::match*>(pred_node->associated_match);
-            for (auto succ_match: pred_node_match->extension.succ_matches) {
+            for (auto succ_match: pred_node_match->extension->succ_matches) {
                 const bool not_dominated = !dominated_by_some_available_but_unused_character(
-                    succ_match->extension.position_2, current_depth);
+                    succ_match->extension->position_2, current_depth);
                 if (succ_match->character<constants::alphabet_size
-                                          && next_depth <= succ_match->extension.reversed->upper_bound
-                                          && succ_match->extension.position_2<min_position_2
+                                          && next_depth <= succ_match->reversed->upper_bound
+                                          && succ_match->extension->position_2<min_position_2
                                                                               && pred_node->
                                                                               characters_on_paths_to_some_sink.test(
                                                                                   succ_match->character)
@@ -56,17 +56,17 @@ std::unique_ptr<mdd> create_initial_mdd(const instance &instance, const bool for
                     && not_dominated
                     && are_enough_characters_available(temporaries::lower_bound,
                                                        next_depth,
-                                                       pred_node_match->extension.reversed->extension.
+                                                       pred_node_match->reversed->extension->
                                                        available_characters,
-                                                       succ_match->extension.available_characters)
+                                                       succ_match->extension->available_characters)
                 ) {
-                    if (!pred_node_match->extension.reversed->extension.available_characters.test(
+                    if (!pred_node_match->reversed->extension->available_characters.test(
                         succ_match->character)) {
-                        min_position_2 = std::min(min_position_2, succ_match->extension.position_2);
+                        min_position_2 = std::min(min_position_2, succ_match->extension->position_2);
                     } else {
-                        add_position_2_to_maybe_min_pos_2(succ_match->extension.position_2);
+                        add_position_2_to_maybe_min_pos_2(succ_match->extension->position_2);
                     }
-                    if (succ_match->extension.is_active) {
+                    if (succ_match->is_active) {
                         node *succ_node;
                         if (match_to_node_map.contains(succ_match)) {
                             succ_node = match_to_node_map.at(succ_match);

@@ -92,29 +92,29 @@ inline auto set_rf_relaxed_upper_bounds(std::vector<rflcs_graph::match>& matches
                                         const int number_of_characters) -> bool {
     const auto width = 1 << number_of_characters;
 
-    auto& reverse_root_rf_relaxed_upper_bounds = matches.back().extension.rf_relaxed_upper_bounds;
+    auto& reverse_root_rf_relaxed_upper_bounds = matches.back().extension->rf_relaxed_upper_bounds;
     reverse_root_rf_relaxed_upper_bounds.resize(width);
     std::ranges::fill(reverse_root_rf_relaxed_upper_bounds, INT_MIN);
     reverse_root_rf_relaxed_upper_bounds.front() = 0;
 
     auto improved = false;
 
-    for (auto &[character, upper_bound, dom_succ_matches, heuristic_characters, heuristic_previous, extension]: matches | std::views::reverse | std::views::drop(1) | std::views::take(matches.size() - 2)) {
-        if (extension.is_active) {
-            extension.available_characters.reset();
-            extension.available_characters.set(character);
+    for (auto &[MATCH_BINDINGS()]: matches | std::views::reverse | std::views::drop(1) | std::views::take(matches.size() - 2)) {
+        if (is_active) {
+            extension->available_characters.reset();
+            extension->available_characters.set(character);
 
             // setup rf relaxed bounds
-            auto& current_upper_bounds = extension.rf_relaxed_upper_bounds;
+            auto& current_upper_bounds = extension->rf_relaxed_upper_bounds;
             current_upper_bounds.resize(width);
             std::ranges::fill(current_upper_bounds, 0);
 
             // max from predecessors upper_bounds
             for (const auto* potential_match: dom_succ_matches) {
-                if (potential_match->extension.is_active) {
-                    extension.available_characters |= potential_match->extension.available_characters;
+                if (potential_match->is_active) {
+                    extension->available_characters |= potential_match->extension->available_characters;
                     std::ranges::transform(current_upper_bounds,
-                              potential_match->extension.rf_relaxed_upper_bounds,
+                              potential_match->extension->rf_relaxed_upper_bounds,
                               current_upper_bounds.begin(),
                               [](auto current, auto potential) {
                                   return std::max(current, potential);
@@ -136,15 +136,15 @@ inline auto set_rf_relaxed_upper_bounds(std::vector<rflcs_graph::match>& matches
             }
 
             // upper_bound is monotonic decreasing
-            std::ranges::transform(extension.rf_relaxed_upper_bounds,
-                                   extension.rf_relaxed_upper_bounds.begin(),
+            std::ranges::transform(extension->rf_relaxed_upper_bounds,
+                                   extension->rf_relaxed_upper_bounds.begin(),
                                    [upper_bound](const auto relaxed_upper_bound) -> int {
                                        return std::min(upper_bound, relaxed_upper_bound);
                                    });
 
             const auto previous_upper_bound = upper_bound;
             upper_bound = *std::ranges::max_element(current_upper_bounds);
-            upper_bound = std::min(upper_bound, static_cast<int>(extension.available_characters.count()));
+            upper_bound = std::min(upper_bound, static_cast<int>(extension->available_characters.count()));
             improved |= upper_bound < previous_upper_bound;
         }
     }
