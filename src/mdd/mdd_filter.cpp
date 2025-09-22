@@ -146,14 +146,16 @@ inline bool prune_node_from_level(level_type &level, node *node) {
 inline bool filter_succ_edges_of_node(const level_type &level, node &node) {
     bool filtered_edge = false;
     int max_position_2 = INT_MAX;
-    static auto succ_nodes = std::vector<struct node *>();
-    succ_nodes.resize(node.edges_out.size());
+    static auto succ_nodes = std::vector<struct node *>(constants::alphabet_size);
     std::ranges::copy(node.edges_out, succ_nodes.begin());
-    std::ranges::sort(succ_nodes, [](const auto node1, const auto node2) {
-        return node1->position_1 < node2->position_1;
-    });
-    temporaries::int_vector_positions_2.clear();
-    for (const auto succ: succ_nodes) {
+    std::ranges::sort(succ_nodes.begin(), succ_nodes.begin() + node.edges_out.size(),
+                          [](const auto node1, const auto node2) {
+                              return node1->position_1 < node2->position_1;
+                          });
+    int min_positions_2_size = 0;
+    static auto min_positions_2 = std::vector<int>(constants::alphabet_size);
+    const int domination_threshold = level.depth - static_cast<int>(node.characters_on_all_paths_to_root.count()) + 1;
+    for (const auto succ: succ_nodes | std::views::take(node.edges_out.size())) {
         temporaries::temp_character_set_1 = node.characters_on_paths_to_root;
         temporaries::temp_character_set_1 |= succ->characters_on_paths_to_some_sink;
         temporaries::temp_character_set_1.set(succ->character);
@@ -169,7 +171,9 @@ inline bool filter_succ_edges_of_node(const level_type &level, node &node) {
                 level.depth + static_cast<int>(temporaries::temp_character_set_1.count()) <= temporaries::lower_bound;
         const bool is_dominated = dominated_by_some_available_but_unused_character(
             succ->position_2,
-            level.depth - static_cast<int>(node.characters_on_all_paths_to_root.count()) + 1);
+            domination_threshold,
+            min_positions_2,
+            min_positions_2_size);
         if (!node.characters_on_paths_to_some_sink.test(succ->character)
             || level.depth + 1 + succ->upper_bound_down <= temporaries::lower_bound
             || combined_characters_not_sufficient
@@ -186,7 +190,7 @@ inline bool filter_succ_edges_of_node(const level_type &level, node &node) {
             if (!node.characters_on_paths_to_root.test(succ->character)) {
                 max_position_2 = std::min(max_position_2, succ->position_2);
             }
-            add_position_2_to_maybe_min_pos_2(succ->position_2);
+            add_position_2_to_maybe_min_pos_2(min_positions_2, succ->position_2, min_positions_2_size, domination_threshold);
         }
     }
     return filtered_edge;

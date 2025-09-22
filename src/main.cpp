@@ -89,7 +89,6 @@ void initialize_temporaries() {
     temporaries::node_character_count = std::vector<long>(constants::alphabet_size);
     temporaries::incoming_edge_character_count = std::vector<long>(constants::alphabet_size);
     temporaries::outgoing_edge_character_count = std::vector<long>(constants::alphabet_size);
-    temporaries::int_vector_positions_2 = std::vector<int>();
 }
 
 void heuristic(instance &instance) {

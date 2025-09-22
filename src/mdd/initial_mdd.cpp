@@ -40,11 +40,12 @@ std::unique_ptr<mdd> create_initial_mdd(const instance &instance, const bool for
         match_to_node_map.clear();
         for (const auto pred_node: current_nodes) {
             int min_position_2 = INT_MAX;
-            temporaries::int_vector_positions_2.clear();
             auto pred_node_match = static_cast<rflcs_graph::match*>(pred_node->associated_match);
+            int min_positions_2_size = 0;
+            static auto min_positions_2 = std::vector<int>(constants::alphabet_size);
             for (auto succ_match: pred_node_match->extension->succ_matches) {
                 const bool not_dominated = !dominated_by_some_available_but_unused_character(
-                    succ_match->extension->position_2, current_depth);
+                    succ_match->extension->position_2, current_depth, min_positions_2, min_positions_2_size);
                 if (succ_match->character<constants::alphabet_size
                                           && next_depth <= succ_match->reversed->upper_bound
                                           && succ_match->extension->position_2<min_position_2
@@ -64,7 +65,7 @@ std::unique_ptr<mdd> create_initial_mdd(const instance &instance, const bool for
                         succ_match->character)) {
                         min_position_2 = std::min(min_position_2, succ_match->extension->position_2);
                     } else {
-                        add_position_2_to_maybe_min_pos_2(succ_match->extension->position_2);
+                        add_position_2_to_maybe_min_pos_2(min_positions_2, succ_match->extension->position_2, min_positions_2_size, current_depth);
                     }
                     if (succ_match->is_active) {
                         node *succ_node;
