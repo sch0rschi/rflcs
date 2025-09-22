@@ -145,7 +145,7 @@ inline bool prune_node_from_level(level_type &level, node *node) {
 
 inline bool filter_succ_edges_of_node(const level_type &level, node &node) {
     bool filtered_edge = false;
-    int max_position_2 = INT_MAX;
+    int max_position_2 = std::numeric_limits<int>::max();
     static auto succ_nodes = std::vector<struct node *>(constants::alphabet_size);
     std::ranges::copy(node.edges_out, succ_nodes.begin());
     std::ranges::sort(succ_nodes.begin(), succ_nodes.begin() + node.edges_out.size(),

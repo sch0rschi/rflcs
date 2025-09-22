@@ -36,11 +36,11 @@ struct flat_level {
 };
 
 struct shared_object {
-    int upper_bound = INT_MAX;
-    int active_match_count = INT_MAX;
+    int upper_bound = std::numeric_limits<int>::max();
+    int active_match_count = std::numeric_limits<int>::max();
     int number_of_refined_characters = 0;
     int refinement_round = 1;
     bool is_mdd_reduction_complete = false;
-    size_t num_levels = INT_MAX;
+    size_t num_levels = std::numeric_limits<int>::max();
     flat_level flat_levels[];
 };

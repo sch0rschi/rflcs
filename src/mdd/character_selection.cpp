@@ -92,7 +92,7 @@ double calculate_greedy_score(const mdd &mdd,
     }
 
     if (number_of_mdd_nodes == 0 || number_of_mdd_edges == 0) {
-        return MAXFLOAT;
+        return std::numeric_limits<double>::max();
     }
 
 

@@ -34,7 +34,7 @@ struct instance {
     std::chrono::time_point<std::chrono::system_clock> heuristic_end;
     std::chrono::time_point<std::chrono::system_clock> reduction_end;
     std::chrono::time_point<std::chrono::system_clock> end;
-    int active_matches = INT_MAX;
+    int active_matches = std::numeric_limits<int>::max();
     int input_validity_code = 0;
     struct shared_object* shared_object = nullptr;
 
