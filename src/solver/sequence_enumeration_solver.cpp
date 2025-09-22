@@ -63,7 +63,7 @@ void solve_enumeration(instance &instance) {
                     return;
                 }
             }
-            int position_2_min = INT_MAX;
+            int position_2_min = std::numeric_limits<int>::max();
             for (size_t i = 0; i < current_node->num_edges_out; ++i) {
                 if (flat_node *potential_node = current_node->edges_out[i].edge_node;
                     position_2_min > potential_node->position_2 && !used_characters.test(potential_node->character)) {

@@ -17,7 +17,7 @@ namespace rflcs_graph {
 
     struct match_extension {
         int match_id;
-        int combined_upper_bound = INT_MAX;
+        int combined_upper_bound = std::numeric_limits<int>::max();
         std::vector<match *> succ_matches = std::vector<match *>();
         std::vector<match *> pred_matches = std::vector<match *>();
         std::vector<match *> dom_pred_matches = std::vector<match *>(); // incoming dominating edges from predecessors
@@ -32,7 +32,7 @@ namespace rflcs_graph {
 
     struct match {
         Character character = MAX_CHARACTER;
-        int upper_bound = INT_MAX; // including this character
+        int upper_bound = std::numeric_limits<int>::max(); // including this character
         std::vector<match *> dom_succ_matches = std::vector<match *>();
         Character_set heuristic_characters;
         match* heuristic_successor_match;

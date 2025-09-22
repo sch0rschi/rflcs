@@ -210,7 +210,7 @@ void remove_dominated(std::vector<rflcs_graph::match *> &matches) {
     });
     const auto matches_copy = matches;
     matches.clear();
-    int max_position_2 = INT_MAX;
+    int max_position_2 = std::numeric_limits<int>::max();
     for (auto match: matches_copy) {
         if (match->extension->position_2 < max_position_2) {
             matches.push_back(match);

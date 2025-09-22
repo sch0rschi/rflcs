@@ -39,7 +39,7 @@ std::unique_ptr<mdd> create_initial_mdd(const instance &instance, const bool for
         next_depth = current_depth + 1;
         match_to_node_map.clear();
         for (const auto pred_node: current_nodes) {
-            int min_position_2 = INT_MAX;
+            int min_position_2 = std::numeric_limits<int>::max();
             auto pred_node_match = static_cast<rflcs_graph::match*>(pred_node->associated_match);
             int min_positions_2_size = 0;
             static auto min_positions_2 = std::vector<int>(constants::alphabet_size);

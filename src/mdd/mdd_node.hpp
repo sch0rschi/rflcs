@@ -22,7 +22,7 @@ struct node {
     Character character;
     int position_1;
     int position_2;
-    int upper_bound_down = INT_MAX / 4; // not including match character
+    int upper_bound_down = std::numeric_limits<int>::max() / 4; // not including match character
     bool needs_update_from_pred = true;
     bool needs_update_from_succ = true;
     bool is_active = true;
