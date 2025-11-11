@@ -20,7 +20,7 @@
 #include "mdd/header/initial_mdd.hpp"
 #include "mdd/shared_object.hpp"
 #include "mdd/header/mdd_filter.hpp"
-#include "config.hpp"
+#include "constants.hpp"
 
 #include <iostream>
 #include <unistd.h>

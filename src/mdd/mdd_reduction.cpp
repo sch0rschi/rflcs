@@ -1,6 +1,7 @@
 #include "header/mdd_reduction.hpp"
 #include "mdd.hpp"
 #include "header/mdd_refinement.hpp"
+#include "../constants.hpp"
 
 #include <memory>
 #include <vector>

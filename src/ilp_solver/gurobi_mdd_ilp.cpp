@@ -5,6 +5,7 @@
 
 #include "gurobi_c++.h"
 #include "../config.hpp"
+#include "../constants.hpp"
 
 #include <absl/container/flat_hash_map.h>
 

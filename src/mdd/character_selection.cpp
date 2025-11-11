@@ -2,6 +2,7 @@
 #include "header/initial_mdd.hpp"
 #include "header/mdd_refinement.hpp"
 #include "header/mdd_filter.hpp"
+#include "../constants.hpp"
 #include <boost/timer/progress_display.hpp>
 #include <ranges>
 #include <algorithm>

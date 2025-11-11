@@ -1,4 +1,5 @@
 #include "config.hpp"
+#include "constants.hpp"
 #include "heuristic.hpp"
 #include "instance.hpp"
 #include "reduction_orchestration.hpp"
@@ -76,7 +77,8 @@ void setup(const instance &instance) {
 }
 
 void clear(const instance &instance) {
-    for (auto &[character, upper_bound, _dom, heuristic_characters, heuristic_previous, reversed, extension, is_active]: instance.graph->matches) {
+    for (auto &[character, upper_bound, _dom, heuristic_characters, heuristic_previous, reversed, extension, is_active]:
+         instance.graph->matches) {
         if (is_active) {
             heuristic_characters.reset();
             reversed->heuristic_characters.reset();
@@ -154,5 +156,8 @@ set_heuristic_solution(instance &instance, const rflcs_graph::match &match, cons
 
     if (is_building_from_back) {
         std::ranges::reverse(instance.solution);
+    }
+    for (int i = 0; i < HEURISTIC_SOLUTION_DECREMENTER && !instance.solution.empty(); ++i) {
+        instance.solution.pop_back();
     }
 }

@@ -1,4 +1,5 @@
 #include "input_processing.hpp"
+#include "constants.hpp"
 
 #include <fstream>
 
@@ -8,7 +9,7 @@ PROCESSING_STATUS_CODE process_command_line_arguments(const int argc, char **arg
     auto command_line_description = boost::program_options::options_description("Allowed options");
     command_line_description.add_options()
             ("help,h", "Show this help message")
-            ("input,i", boost::program_options::value<std::string>()->default_value("RFLCS_instances/type1/512_8reps.24"), "Input file path")
+            ("input,i", boost::program_options::value<std::string>()->default_value("RFLCS_instances/type1/128_8reps.24"), "Input file path")
             ("output,o", boost::program_options::value<std::string>(), "Output file path")
             ("reductiontimeout,r", boost::program_options::value<int>()->default_value(1800), "Reduction timeout [s]")
             ("solvertimeout,s", boost::program_options::value<int>()->default_value(1800), "Solver timeout [s]");

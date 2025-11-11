@@ -1,5 +1,6 @@
 #include "graph.hpp"
 #include "header/graph_creation.hpp"
+#include "../constants.hpp"
 
 #include <algorithm>
 #include <memory>

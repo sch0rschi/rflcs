@@ -5,6 +5,7 @@
 #include <absl/container/flat_hash_set.h>
 
 #include "edge_utils.hpp"
+#include "../constants.hpp"
 
 bool update_nodes_and_prune(shared_object *shared_object, mdd &mdd, mdd_node_source &mdd_node_source);
 

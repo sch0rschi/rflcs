@@ -5,6 +5,8 @@
 #include "reduction_orchestration.hpp"
 #include "result_writer.hpp"
 #include "input_processing.hpp"
+#include "config.hpp"
+#include "constants.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -124,12 +126,12 @@ void solve(instance &instance) {
 
     std::cout << "Solver is running." << std::endl;
 
-    if (instance.shared_object->is_mdd_reduction_complete) {
-        solve_enumeration(instance);
-        if (!instance.is_solving_forward) {
-            std::ranges::reverse(instance.solution);
-        }
-    }
+    //if (instance.shared_object->is_mdd_reduction_complete) {
+    //    solve_enumeration(instance);
+    //    if (!instance.is_solving_forward) {
+    //        std::ranges::reverse(instance.solution);
+    //    }
+    //}
 
 #ifdef ILP_FEATURE
     if constexpr (SOLVER == GUROBI_MDD) {
@@ -143,6 +145,8 @@ void solve(instance &instance) {
     if constexpr (SOLVER == GUROBI_GRAPH) {
         solve_gurobi_graph_ilp(instance);
     }
+#else
+    std::cout << "ILP Solver deactivated." << std::endl;
 #endif
 
     if (int status; WIFEXITED(status)) {

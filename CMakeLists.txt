@@ -6,7 +6,13 @@ set(CMAKE_CXX_STANDARD 23)
 # Build Options #
 #---------------#
 option(MDD_FREQUENT_SAVE_FEATURE "Enable frequent writebacks while in MDD phase (slow)" ON)
+if(MDD_FREQUENT_SAVE_FEATURE)
+    add_compile_definitions(MDD_FREQUENT_SAVE_FEATURE)
+endif()
 option(ILP_FEATURE "Enable ILP feature" ON)
+if(ILP_FEATURE)
+    add_compile_definitions(ILP_FEATURE)
+endif()
 set(ALPHABET_SIZES "" CACHE STRING "List of alphabet sizes to build executables for(e.g. 16;32;64)")
 
 #----------------#

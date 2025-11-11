@@ -4,6 +4,7 @@
 #include "mdd.hpp"
 #include "../instance.hpp"
 #include "../graph/graph.hpp"
+#include "../constants.hpp"
 
 #include <memory>
 #include <vector>

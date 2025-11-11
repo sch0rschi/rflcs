@@ -3,6 +3,7 @@
 
 #include "header/match_metrics.hpp"
 #include "graph.hpp"
+#include "../constants.hpp"
 
 #include <boost/dynamic_bitset.hpp>
 #include <climits>
