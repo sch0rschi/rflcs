@@ -126,12 +126,12 @@ void solve(instance &instance) {
 
     std::cout << "Solver is running." << std::endl;
 
-    //if (instance.shared_object->is_mdd_reduction_complete) {
-    //    solve_enumeration(instance);
-    //    if (!instance.is_solving_forward) {
-    //        std::ranges::reverse(instance.solution);
-    //    }
-    //}
+    if (instance.shared_object->is_mdd_reduction_complete) {
+        solve_enumeration(instance);
+        if (!instance.is_solving_forward) {
+            std::ranges::reverse(instance.solution);
+        }
+    }
 
 #ifdef ILP_FEATURE
     if constexpr (SOLVER == GUROBI_MDD) {
