@@ -9,10 +9,41 @@ option(MDD_FREQUENT_SAVE_FEATURE "Enable frequent writebacks while in MDD phase 
 if(MDD_FREQUENT_SAVE_FEATURE)
     add_compile_definitions(MDD_FREQUENT_SAVE_FEATURE)
 endif()
+
 option(ILP_FEATURE "Enable ILP feature" ON)
+
+#-----------------------#
+# Gurobi Detection      #
+#-----------------------#
 if(ILP_FEATURE)
-    add_compile_definitions(ILP_FEATURE)
+    if(NOT DEFINED ENV{GUROBI_HOME})
+        message(WARNING "GUROBI_HOME environment variable not set. ILP feature disabled.")
+        set(ILP_FEATURE OFF)
+    else()
+        add_compile_definitions(ILP_FEATURE)
+        set(GUROBI_INCLUDE_DIR "$ENV{GUROBI_HOME}/include")
+        set(GUROBI_LIB_DIR "$ENV{GUROBI_HOME}/lib")
+
+        message(STATUS "Using GUROBI_HOME = $ENV{GUROBI_HOME}")
+        message(STATUS "Expecting includes in ${GUROBI_INCLUDE_DIR}")
+
+        find_library(GUROBI_LIBRARY
+                NAMES gurobi gurobi120 gurobi110 gurobi100
+                HINTS "${GUROBI_LIB_DIR}"
+        )
+
+        find_library(GUROBI_CXX_LIBRARY
+                NAMES gurobi_c++ gurobi_c++.a libgurobi_c++.a
+                HINTS "${GUROBI_LIB_DIR}"
+        )
+
+        if(NOT GUROBI_LIBRARY OR NOT GUROBI_CXX_LIBRARY)
+            message(WARNING "Could not find Gurobi libraries in ${GUROBI_LIB_DIR}. ILP feature disabled.")
+            set(ILP_FEATURE OFF)
+        endif()
+    endif()
 endif()
+
 set(ALPHABET_SIZES "" CACHE STRING "List of alphabet sizes to build executables for(e.g. 16;32;64)")
 
 #----------------#
@@ -58,7 +89,6 @@ file(GLOB BOOST_PROGRAM_OPTIONS_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/program_options/src/*.cpp
 )
 add_library(boost_program_options STATIC ${BOOST_PROGRAM_OPTIONS_SRC})
-
 target_include_directories(boost_program_options PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/program_options/include
         ${CMAKE_CURRENT_SOURCE_DIR}/external/boost/assert/include
@@ -84,24 +114,6 @@ target_include_directories(boost_program_options PUBLIC
 )
 
 add_subdirectory(external/abseil)
-
-if (ILP_FEATURE)
-    if(DEFINED ENV{GUROBI_HOME})
-        set(GUROBI_INCLUDE_DIR $ENV{GUROBI_HOME}/include)
-
-        find_library(GUROBI_LIBRARY
-                NAMES gurobi gurobi100 gurobi110 gurobi120 gurobi130
-                HINTS $ENV{GUROBI_HOME}/lib
-        )
-        find_library(GUROBI_API
-                NAMES libgurobi_c++.a
-                HINTS $ENV{GUROBI_HOME}/lib
-        )
-    else()
-        set(ILP_FEATURE OFF)
-        message(WARNING "GUROBI_HOME environment variable is not set, ILP feature deactivated.")
-    endif()
-endif ()
 
 #--------------#
 # Source Files #
@@ -145,18 +157,19 @@ endif()
 # Target Configuration Function #
 #-------------------------------#
 function(configure_rflcs_target target_name)
-
-    target_include_directories(${target_name} PRIVATE ${GUROBI_INCLUDE_DIR})
-
-    target_link_libraries(${target_name}
+    target_link_libraries(${target_name} PRIVATE
             absl::flat_hash_map
             absl::flat_hash_set
             boost_dynamic_bitset
             boost_timer
             boost_program_options
-            ${GUROBI_LIBRARY}
-            ${GUROBI_API}
     )
+
+    if(ILP_FEATURE AND GUROBI_INCLUDE_DIR)
+        target_include_directories(${target_name} PRIVATE ${GUROBI_INCLUDE_DIR})
+        target_link_directories(${target_name} PRIVATE ${GUROBI_LIB_DIR})
+        target_link_libraries(${target_name} PRIVATE ${GUROBI_CXX_LIBRARY} ${GUROBI_LIBRARY})
+    endif()
 
     if(MDD_FREQUENT_SAVE_FEATURE)
         target_compile_definitions(${target_name} PRIVATE MDD_FREQUENT_SAVE_FEATURE)
@@ -170,11 +183,23 @@ if(ALPHABET_SIZES)
     foreach(CHARACTER_SET_SIZE IN LISTS ALPHABET_SIZES)
         set(target_name "rflcs_${CHARACTER_SET_SIZE}")
         add_executable(${target_name} ${SOURCE_FILES})
+
+        # Attach Gurobi includes to IDE/compiler
+        if(ILP_FEATURE AND GUROBI_INCLUDE_DIR)
+            target_include_directories(${target_name} PRIVATE ${GUROBI_INCLUDE_DIR})
+        endif()
+
         target_compile_definitions(${target_name} PRIVATE CHARACTER_SET_SIZE=${CHARACTER_SET_SIZE})
         configure_rflcs_target(${target_name})
     endforeach()
 else()
     add_executable(rflcs ${SOURCE_FILES})
+
+    # Attach Gurobi includes to IDE/compiler
+    if(ILP_FEATURE AND GUROBI_INCLUDE_DIR)
+        target_include_directories(rflcs PRIVATE ${GUROBI_INCLUDE_DIR})
+    endif()
+
     configure_rflcs_target(rflcs)
 endif()
 
@@ -191,7 +216,7 @@ if(ALPHABET_SIZES)
 else()
     message(STATUS "Alphabet size:         dynamic")
 endif()
-    message(STATUS "ILP feature:           ${ILP_FEATURE}")
+message(STATUS "ILP feature:           ${ILP_FEATURE}")
 if (ILP_FEATURE)
     message(STATUS "Gurobi include dir:    $ENV{GUROBI_HOME}/include")
 endif ()

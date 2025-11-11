@@ -4,7 +4,6 @@
 #include <cmath>
 
 #include "gurobi_c++.h"
-#include "../config.hpp"
 #include "../constants.hpp"
 
 #include <absl/container/flat_hash_map.h>
@@ -27,6 +26,12 @@ absl::flat_hash_map<rflcs_graph::match *, GRBVar> create_gurobi_variables(
     const absl::flat_hash_set<rflcs_graph::match *> &matches);
 
 void update_graph_by_mdd(const instance &instance, absl::flat_hash_set<rflcs_graph::match *> &matches);
+
+void set_solution_from_edges(instance &instance,
+                             const absl::flat_hash_map<std::pair<rflcs_graph::match *, rflcs_graph::match *>, GRBVar> &
+                             pairs,
+                             const rflcs_graph::match *sink,
+                             const rflcs_graph::match *root);
 
 void solve_gurobi_graph_ilp(instance &instance) {
     try {
@@ -117,7 +122,7 @@ void solve_gurobi_graph_ilp(instance &instance) {
         if (model.get(GRB_IntAttr_SolCount) > 0) {
             temporaries::lower_bound = static_cast<int>(round(model.get(GRB_DoubleAttr_ObjVal)));
             temporaries::upper_bound = temporaries::lower_bound;
-            // TODO: set solution
+            set_solution_from_edges(instance, gurobi_edges_map, sink, root);
         } else if (result_status == GRB_INFEASIBLE) {
             temporaries::upper_bound = temporaries::lower_bound;
         } else {
@@ -217,5 +222,37 @@ void remove_dominated(std::vector<rflcs_graph::match *> &matches) {
             matches.push_back(match);
             max_position_2 = match->extension->position_2;
         }
+    }
+}
+
+void set_solution_from_edges(instance &instance,
+                             const absl::flat_hash_map<
+                                 std::pair<rflcs_graph::match *, rflcs_graph::match *>,
+                                 GRBVar>
+                             &gurobi_edges_map,
+                             const rflcs_graph::match *sink,
+                             const rflcs_graph::match *root) {
+    auto matches = absl::flat_hash_set<rflcs_graph::match *>();
+    for (auto const &[from_to, variable]: gurobi_edges_map) {
+        if (static_cast<int>(round(variable.get(GRB_DoubleAttr_X))) == 1) {
+            if (const auto to = from_to.second; to != sink) {
+                matches.insert(to);
+            }
+            if (const auto from = from_to.first; from != root) {
+                matches.insert(from);
+            }
+        }
+    }
+    std::vector matches_in_solution(matches.begin(), matches.end());
+    std::ranges::sort(matches_in_solution, [](const rflcs_graph::match *m1, const rflcs_graph::match *m2) {
+        return m1->extension->position_1 < m2->extension->position_1;
+    });
+
+    instance.solution.clear();
+    for (const auto match_in_solution: matches_in_solution) {
+        instance.solution.push_back(match_in_solution->character);
+    }
+    if (!instance.is_solving_forward) {
+        std::ranges::reverse(instance.solution);
     }
 }

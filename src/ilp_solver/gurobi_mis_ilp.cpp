@@ -6,11 +6,10 @@
 #include <iostream>
 
 #include "gurobi_c++.h"
-#include "../config.hpp"
 #include "../constants.hpp"
 #include "absl/container/flat_hash_map.h"
 
-void set_solution_from_graph(
+void set_solution_from_edges(
     instance &instance,
     const std::set<rflcs_graph::match *> &matches,
     const absl::flat_hash_map<rflcs_graph::match *, GRBVar> &gurobi_variable_map);
@@ -100,7 +99,7 @@ void solve_gurobi_mis_ilp(instance &instance) {
         if (model.get(GRB_IntAttr_SolCount) > 0) {
             temporaries::lower_bound = static_cast<int>(round(model.get(GRB_DoubleAttr_ObjVal)));
             temporaries::upper_bound = temporaries::lower_bound;
-            set_solution_from_graph(instance, matches, gurobi_variable_map);
+            set_solution_from_edges(instance, matches, gurobi_variable_map);
         } else if (result_status == GRB_INFEASIBLE) {
             temporaries::upper_bound = temporaries::lower_bound;
         } else {
@@ -178,12 +177,12 @@ std::set<rflcs_graph::match *> get_active_matches(const instance &instance) {
     return matches;
 }
 
-void set_solution_from_graph(instance &instance,
+void set_solution_from_edges(instance &instance,
                              const std::set<rflcs_graph::match *> &matches,
                              const absl::flat_hash_map<rflcs_graph::match *, GRBVar> &gurobi_variable_map) {
     auto matches_in_solution = std::vector<rflcs_graph::match *>();
     std::ranges::copy_if(matches, std::back_inserter(matches_in_solution),
-                         [gurobi_variable_map](const rflcs_graph::match *match) {
+                         [&gurobi_variable_map](const rflcs_graph::match *match) {
                              return static_cast<int>(round(gurobi_variable_map.at(match).get(GRB_DoubleAttr_X))) ==
                                     1;
                          });
