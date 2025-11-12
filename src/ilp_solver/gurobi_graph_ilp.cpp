@@ -21,15 +21,11 @@ void remove_dominated(std::vector<rflcs_graph::match *> &matches);
 
 absl::flat_hash_set<rflcs_graph::match *> get_matches(const instance &instance);
 
-absl::flat_hash_map<rflcs_graph::match *, GRBVar> create_gurobi_variables(
-    GRBModel &model,
-    const absl::flat_hash_set<rflcs_graph::match *> &matches);
-
 void update_graph_by_mdd(const instance &instance, absl::flat_hash_set<rflcs_graph::match *> &matches);
 
 void set_solution_from_edges(instance &instance,
                              const absl::flat_hash_map<std::pair<rflcs_graph::match *, rflcs_graph::match *>, GRBVar> &
-                             pairs,
+                             gurobi_edges_map,
                              const rflcs_graph::match *sink,
                              const rflcs_graph::match *root);
 
@@ -54,10 +50,10 @@ void solve_gurobi_graph_ilp(instance &instance) {
                 root = match;
             }
         }
-        const auto sink = new rflcs_graph::match();
+        const auto sink = std::make_unique<rflcs_graph::match>();
 
         update_graph_by_mdd(instance, matches);
-        auto gurobi_edges_map = get_gurobi_edges_map(model, matches, sink);
+        auto gurobi_edges_map = get_gurobi_edges_map(model, matches, sink.get());
 
         auto objective = GRBLinExpr();
         auto incoming_edge_sum_for_character = std::vector<GRBLinExpr>(constants::alphabet_size);
@@ -67,10 +63,10 @@ void solve_gurobi_graph_ilp(instance &instance) {
         for (auto const &[from_to, gurobi_variable]: gurobi_edges_map) {
             auto from = from_to.first;
             auto to = from_to.second;
-            if (to != sink) {
+            if (to != sink.get()) {
                 objective += gurobi_variable;
             }
-            if (to == sink) {
+            if (to == sink.get()) {
                 incoming_edges_sum_sink += gurobi_variable;
             } else {
                 incoming_edge_sum_for_character.at(to->character) += gurobi_variable;
@@ -99,7 +95,7 @@ void solve_gurobi_graph_ilp(instance &instance) {
         for (auto const &[from_to, variable]: gurobi_edges_map) {
             auto from = from_to.first;
             auto to = from_to.second;
-            if (to != sink) {
+            if (to != sink.get()) {
                 incoming_edges_sum_for_match.at(to) += variable;
             }
             if (from != root) {
@@ -107,7 +103,7 @@ void solve_gurobi_graph_ilp(instance &instance) {
             }
         }
         for (auto match: matches) {
-            if (match != root && match != sink) {
+            if (match != root && match != sink.get()) {
                 model.addConstr(outgoing_edges_sum_for_match.at(match) <= incoming_edges_sum_for_match.at(match));
             }
         }
@@ -122,14 +118,12 @@ void solve_gurobi_graph_ilp(instance &instance) {
         if (model.get(GRB_IntAttr_SolCount) > 0) {
             temporaries::lower_bound = static_cast<int>(round(model.get(GRB_DoubleAttr_ObjVal)));
             temporaries::upper_bound = temporaries::lower_bound;
-            set_solution_from_edges(instance, gurobi_edges_map, sink, root);
+            set_solution_from_edges(instance, gurobi_edges_map, sink.get(), root);
         } else if (result_status == GRB_INFEASIBLE) {
             temporaries::upper_bound = temporaries::lower_bound;
         } else {
             temporaries::upper_bound = static_cast<int>(round(model.get(GRB_DoubleAttr_ObjBound)));
         }
-
-        delete sink;
     } catch (GRBException &e) {
         std::cout << "Error code = " << e.getErrorCode() << std::endl;
         std::cout << e.getMessage() << std::endl;
@@ -160,15 +154,6 @@ absl::flat_hash_map<std::pair<rflcs_graph::match *, rflcs_graph::match *>, GRBVa
         }
     }
     return gurobi_edges_map;
-}
-
-absl::flat_hash_map<rflcs_graph::match *, GRBVar> create_gurobi_variables(
-    GRBModel &model, const absl::flat_hash_set<rflcs_graph::match *> &matches) {
-    auto gurobi_variable_map = absl::flat_hash_map<rflcs_graph::match *, GRBVar>();
-    for (const auto &match: matches) {
-        gurobi_variable_map[match] = model.addVar(0.0, 1.0, 0, GRB_BINARY);
-    }
-    return gurobi_variable_map;
 }
 
 void update_graph_by_mdd(const instance &instance, absl::flat_hash_set<rflcs_graph::match *> &matches) {

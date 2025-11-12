@@ -150,6 +150,7 @@ if(ILP_FEATURE)
             src/ilp_solver/gurobi_mis_ilp.cpp
             src/ilp_solver/gurobi_mdd_ilp.cpp
             src/ilp_solver/gurobi_graph_ilp.cpp
+            src/ilp_solver/gurobi_mdd_edges_ilp.cpp
     )
 endif()
 

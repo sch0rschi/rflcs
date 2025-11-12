@@ -145,6 +145,9 @@ void solve(instance &instance) {
     if constexpr (SOLVER == GUROBI_GRAPH) {
         solve_gurobi_graph_ilp(instance);
     }
+    if constexpr (SOLVER == GUROBI_MDD_EDGES) {
+        solve_gurobi_mdd_edges_ilp(instance);
+    }
 #else
     std::cout << "ILP Solver deactivated." << std::endl;
 #endif
