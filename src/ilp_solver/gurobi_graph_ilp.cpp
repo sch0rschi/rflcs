@@ -21,7 +21,7 @@ void remove_dominated(std::vector<rflcs_graph::match *> &matches);
 
 absl::flat_hash_set<rflcs_graph::match *> get_matches(const instance &instance);
 
-void update_graph_by_mdd(const instance &instance, absl::flat_hash_set<rflcs_graph::match *> &matches);
+void update_graph_by_mdd(const instance &instance, const absl::flat_hash_set<rflcs_graph::match *> &matches);
 
 void set_solution_from_edges(instance &instance,
                              const absl::flat_hash_map<std::pair<rflcs_graph::match *, rflcs_graph::match *>, GRBVar> &
@@ -44,22 +44,19 @@ void solve_gurobi_graph_ilp(instance &instance) {
         auto model = GRBModel(env);
 
         auto matches = get_matches(instance);
-        rflcs_graph::match *root = nullptr;
-        for (auto match: matches) {
-            if (match->character >= constants::alphabet_size) {
-                root = match;
-            }
-        }
+        auto root = std::ranges::find_if(matches, [=](const rflcs_graph::match *match) {
+            return match->character >= constants::alphabet_size;
+        }).operator*();
+        assert(root != nullptr);
         const auto sink = std::make_unique<rflcs_graph::match>();
 
         update_graph_by_mdd(instance, matches);
         auto gurobi_edges_map = get_gurobi_edges_map(model, matches, sink.get());
 
         auto objective = GRBLinExpr();
-        auto incoming_edge_sum_for_character = std::vector<GRBLinExpr>(constants::alphabet_size);
-        auto outgoing_edge_sum_for_character = std::vector<GRBLinExpr>(constants::alphabet_size);
-        auto outgoing_edges_sum_root = GRBLinExpr();
-        auto incoming_edges_sum_sink = GRBLinExpr();
+        auto character_edge_sums = std::vector<GRBLinExpr>(constants::alphabet_size);
+        auto root_edges_sum = GRBLinExpr();
+        auto sink_edges_sum = GRBLinExpr();
         for (auto const &[from_to, gurobi_variable]: gurobi_edges_map) {
             auto from = from_to.first;
             auto to = from_to.second;
@@ -67,24 +64,21 @@ void solve_gurobi_graph_ilp(instance &instance) {
                 objective += gurobi_variable;
             }
             if (to == sink.get()) {
-                incoming_edges_sum_sink += gurobi_variable;
+                sink_edges_sum += gurobi_variable;
             } else {
-                incoming_edge_sum_for_character.at(to->character) += gurobi_variable;
+                character_edge_sums.at(to->character) += gurobi_variable;
             }
             if (from == root) {
-                outgoing_edges_sum_root += gurobi_variable;
+                root_edges_sum += gurobi_variable;
             } else {
-                outgoing_edge_sum_for_character.at(from->character) += gurobi_variable;
+                character_edge_sums.at(from->character) += gurobi_variable;
             }
         }
-        for (auto const &outgoing_edge_sum: outgoing_edge_sum_for_character) {
-            model.addConstr(outgoing_edge_sum <= 1);
+        for (auto const &character_edge_sum: character_edge_sums) {
+            model.addConstr(character_edge_sum <= 2);
         }
-        for (auto const &incoming_edge_sum: incoming_edge_sum_for_character) {
-            model.addConstr(incoming_edge_sum <= 1);
-        }
-        model.addConstr(outgoing_edges_sum_root == 1);
-        model.addConstr(incoming_edges_sum_sink == 1);
+        model.addConstr(root_edges_sum == 1);
+        model.addConstr(sink_edges_sum == 1);
 
         auto incoming_edges_sum_for_match = absl::flat_hash_map<rflcs_graph::match *, GRBLinExpr>();
         auto outgoing_edges_sum_for_match = absl::flat_hash_map<rflcs_graph::match *, GRBLinExpr>();
@@ -93,18 +87,16 @@ void solve_gurobi_graph_ilp(instance &instance) {
             outgoing_edges_sum_for_match[match] = GRBLinExpr();
         }
         for (auto const &[from_to, variable]: gurobi_edges_map) {
-            auto from = from_to.first;
-            auto to = from_to.second;
-            if (to != sink.get()) {
+            if (auto to = from_to.second; to != sink.get()) {
                 incoming_edges_sum_for_match.at(to) += variable;
             }
-            if (from != root) {
+            if (auto from = from_to.first; from != root) {
                 outgoing_edges_sum_for_match.at(from) += variable;
             }
         }
         for (auto match: matches) {
             if (match != root && match != sink.get()) {
-                model.addConstr(outgoing_edges_sum_for_match.at(match) <= incoming_edges_sum_for_match.at(match));
+                model.addConstr(outgoing_edges_sum_for_match.at(match) == incoming_edges_sum_for_match.at(match));
             }
         }
 
@@ -156,7 +148,7 @@ absl::flat_hash_map<std::pair<rflcs_graph::match *, rflcs_graph::match *>, GRBVa
     return gurobi_edges_map;
 }
 
-void update_graph_by_mdd(const instance &instance, absl::flat_hash_set<rflcs_graph::match *> &matches) {
+void update_graph_by_mdd(const instance &instance, const absl::flat_hash_set<rflcs_graph::match *> &matches) {
     for (const auto &match: matches) {
         match->dom_succ_matches.clear();
         match->extension->succ_matches.clear();
