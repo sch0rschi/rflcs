@@ -11,11 +11,11 @@
 #ifdef ILP_FEATURE
 #include "ilp_solver/ilp_solvers.hpp"
 #endif
+#include "absl/container/flat_hash_set.h"
 
 #include <iostream>
 #include <fstream>
 #include <chrono>
-#include <set>
 #include <unistd.h>
 #include <vector>
 #include <iomanip>
@@ -162,7 +162,7 @@ void solve(instance &instance) {
 }
 
 void check_solution(instance &instance) {
-    auto characters = std::set<int>();
+    auto characters = absl::flat_hash_set<int>();
     int position_1 = 0;
     int position_2 = 0;
     if (!instance.is_valid_solution) {

@@ -6,12 +6,12 @@
 #include "temporaries.hpp"
 #include "graph/graph.hpp"
 #include "boost/timer/progress_display.hpp"
+#include "absl/container/flat_hash_set.h"
 
 #include <cmath>
 #include <algorithm>
 #include <random>
 #include <ranges>
-#include <set>
 #include <vector>
 
 auto combine(instance &instance, std::vector<rflcs_graph::match> &matches, bool is_building_from_back) -> void;
@@ -132,7 +132,7 @@ void
 set_heuristic_solution(instance &instance, const rflcs_graph::match &match, const bool is_building_from_back) {
     instance.heuristic_solution_time = std::chrono::system_clock::now();
     instance.solution.clear();
-    auto characters = std::set<int>();
+    auto characters = absl::flat_hash_set<int>();
 
     const auto *actual_match = &match;
     while (actual_match != nullptr && actual_match->character < constants::alphabet_size) {
