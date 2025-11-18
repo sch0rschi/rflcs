@@ -1,17 +1,22 @@
 #include "input_processing.hpp"
 #include "constants.hpp"
+#include "config.hpp"
 #include "boost/program_options.hpp"
 
 #include <fstream>
+
 
 PROCESSING_STATUS_CODE process_command_line_arguments(const int argc, char **argv, instance &instance) {
     auto command_line_description = boost::program_options::options_description("Allowed options");
     command_line_description.add_options()
             ("help,h", "Show this help message")
-            ("input,i", boost::program_options::value<std::string>()->default_value("RFLCS_instances/type1/128_8reps.24"), "Input file path")
+            ("input,i", boost::program_options::value<std::string>()->default_value(std::string(DEFAULT_INPUT_FILE)),
+             "Input file path")
             ("output,o", boost::program_options::value<std::string>(), "Output file path")
-            ("reductiontimeout,r", boost::program_options::value<int>()->default_value(1800), "Reduction timeout [s]")
-            ("solvertimeout,s", boost::program_options::value<int>()->default_value(1800), "Solver timeout [s]");
+            ("reductiontimeout,r", boost::program_options::value<int>()->default_value(REDUCTION_TIMEOUT),
+             "Reduction timeout [s]")
+            ("solvertimeout,s", boost::program_options::value<int>()->default_value(SOLVER_TIMEOUT),
+             "Solver timeout [s]");
 
     boost::program_options::variables_map vm;
     boost::program_options::store(boost::program_options::parse_command_line(argc, argv, command_line_description), vm);
@@ -42,7 +47,6 @@ std::string &get_default_output_path(std::string path) {
 }
 
 PROCESSING_STATUS_CODE process_input(instance &instance) {
-
     std::ifstream input_file(instance.input_path);
 
     std::cout << "solving file: " << instance.input_path << std::endl;

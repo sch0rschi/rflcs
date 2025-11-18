@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string_view>
+
 enum Ilp_Solver {
     GUROBI_MIS,
     GUROBI_MDD,
@@ -9,3 +11,7 @@ enum Ilp_Solver {
 constexpr Ilp_Solver SOLVER = GUROBI_GRAPH;
 
 constexpr int HEURISTIC_SOLUTION_DECREMENTER = 0;
+
+constexpr int REDUCTION_TIMEOUT = 1800;
+constexpr int SOLVER_TIMEOUT = 1800;
+constexpr std::string_view DEFAULT_INPUT_FILE = "RFLCS_instances/type1/128_8reps.24";
