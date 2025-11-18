@@ -1,13 +1,12 @@
+#include "gurobi_c++.h"
+#include "../constants.hpp"
 #include "ilp_solvers.hpp"
+#include "absl/container/flat_hash_map.h"
 
 #include <ranges>
 #include <set>
 #include <cmath>
 #include <iostream>
-
-#include "gurobi_c++.h"
-#include "../constants.hpp"
-#include "absl/container/flat_hash_map.h"
 
 void set_solution_from_edges(
     instance &instance,

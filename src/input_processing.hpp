@@ -1,10 +1,10 @@
 #pragma once
 
-#include <iosfwd>
-#include <vector>
-
 #include "character.hpp"
 #include "instance.hpp"
+
+#include <iosfwd>
+#include <vector>
 
 enum PROCESSING_STATUS_CODE {
     SUCCESS,

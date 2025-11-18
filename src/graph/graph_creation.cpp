@@ -1,12 +1,12 @@
-#include "graph.hpp"
+#include "header/simple_upper_bounds.hpp"
 #include "header/graph_creation.hpp"
+#include "graph.hpp"
 #include "../constants.hpp"
 
 #include <algorithm>
 #include <memory>
 #include <ranges>
 
-#include "header/simple_upper_bounds.hpp"
 
 using namespace std;
 using namespace rflcs_graph;

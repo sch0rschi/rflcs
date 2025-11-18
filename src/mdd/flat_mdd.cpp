@@ -1,7 +1,8 @@
 #include "shared_object.hpp"
 #include "mdd.hpp"
+#include "absl/container/flat_hash_set.h"
+
 #include <map>
-#include <absl/container/flat_hash_set.h>
 
 size_t calculate_flat_array_size(const mdd& data) {
     size_t size = 0;

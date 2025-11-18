@@ -1,6 +1,7 @@
 #pragma once
 
 #include "mdd_node.hpp"
+
 #include <algorithm>
 
 struct mdd_node_source {

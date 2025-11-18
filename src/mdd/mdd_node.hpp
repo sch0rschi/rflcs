@@ -1,11 +1,10 @@
 #pragma once
 
 #include "../graph/graph.hpp"
+#include "../temporaries.hpp"
+#include "boost/dynamic_bitset.hpp"
 
 #include <sstream>
-
-#include "../temporaries.hpp"
-#include <boost/dynamic_bitset.hpp>
 
 struct node;
 

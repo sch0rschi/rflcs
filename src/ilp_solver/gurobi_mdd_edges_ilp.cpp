@@ -1,14 +1,11 @@
 #include "ilp_solvers.hpp"
+#include "gurobi_c++.h"
+#include "../constants.hpp"
+#include "absl/container/flat_hash_set.h"
 
 #include <ranges>
 #include <cmath>
 
-#include "gurobi_c++.h"
-#include "../constants.hpp"
-
-#include <absl/container/flat_hash_map.h>
-
-#include "absl/container/flat_hash_set.h"
 
 void set_solution_from_mdd_edges(instance &instance,
                                  const absl::flat_hash_map<std::pair<int, std::pair<node *, node *> >, GRBVar> &

@@ -1,8 +1,8 @@
 #include "result_writer.hpp"
+
 #include <iostream>
 #include <fstream>
 #include <filesystem>
-#include <string>
 
 double calculate_reduction(const instance &instance);
 

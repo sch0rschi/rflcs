@@ -1,3 +1,23 @@
+#include "instance.hpp"
+#include "graph/header/rf_subset_lcs_relaxation.hpp"
+#include "graph/header/simple_upper_bounds.hpp"
+#include "graph/header/match_deactivation.hpp"
+#include "graph/header/reduce_graph.hpp"
+#include "mdd/header/initial_mdd.hpp"
+#include "mdd/shared_object.hpp"
+#include "mdd/header/mdd_filter.hpp"
+#include "constants.hpp"
+#include "reduction_orchestration.hpp"
+#include "mdd/header/mdd_reduction.hpp"
+#include "absl/container/flat_hash_set.h"
+
+#include <sys/wait.h>
+#include <fstream>
+#include <iostream>
+#include <unistd.h>
+#include <csignal>
+#include <sys/time.h>
+#include <sys/resource.h>
 #include <ranges>
 #include <iomanip>
 #include <sys/mman.h>
@@ -6,32 +26,6 @@
 #elif defined(__APPLE__)
 #include <pthread.h>
 #endif
-#include <sys/wait.h>
-#include "reduction_orchestration.hpp"
-
-#include <fstream>
-
-#include "instance.hpp"
-#include "graph/header/rf_subset_lcs_relaxation.hpp"
-
-#include "graph/header/simple_upper_bounds.hpp"
-#include "graph/header/match_deactivation.hpp"
-#include "graph/header/reduce_graph.hpp"
-#include "mdd/header/initial_mdd.hpp"
-#include "mdd/shared_object.hpp"
-#include "mdd/header/mdd_filter.hpp"
-#include "constants.hpp"
-
-#include <iostream>
-#include <unistd.h>
-#include <csignal>
-#include <absl/container/flat_hash_set.h>
-#include <sys/time.h>
-
-#include <sys/types.h>
-#include <sys/resource.h>
-
-#include "mdd/header/mdd_reduction.hpp"
 
 void handle_threads_for_mdd_reduction(instance &instance);
 

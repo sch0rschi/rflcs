@@ -2,13 +2,12 @@
 #include "mdd.hpp"
 #include "header/mdd_refinement.hpp"
 #include "../constants.hpp"
-
-#include <memory>
-#include <vector>
-
 #include "header/character_selection.hpp"
 #include "header/mdd_filter.hpp"
 #include "header/initial_mdd.hpp"
+
+#include <memory>
+#include <vector>
 #include <iostream>
 #include <fstream>
 #include <ranges>

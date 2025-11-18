@@ -1,4 +1,5 @@
 #pragma once
+
 #include <vector>
 
 bool dominated_by_some_available_but_unused_character(

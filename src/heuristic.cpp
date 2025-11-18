@@ -4,10 +4,8 @@
 #include "instance.hpp"
 #include "reduction_orchestration.hpp"
 #include "temporaries.hpp"
-
-#include <boost/timer/progress_display.hpp>
-
 #include "graph/graph.hpp"
+#include "boost/timer/progress_display.hpp"
 
 #include <cmath>
 #include <algorithm>

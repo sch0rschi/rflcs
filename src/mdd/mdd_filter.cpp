@@ -1,11 +1,11 @@
 #include "header/mdd_filter.hpp"
 #include "header/domination_utils.hpp"
-#include <iomanip>
-#include <ranges>
-#include <absl/container/flat_hash_set.h>
-
 #include "edge_utils.hpp"
 #include "../constants.hpp"
+#include "absl/container/flat_hash_set.h"
+
+#include <iomanip>
+#include <ranges>
 
 bool update_nodes_and_prune(shared_object *shared_object, mdd &mdd, mdd_node_source &mdd_node_source);
 

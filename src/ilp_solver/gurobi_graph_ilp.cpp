@@ -1,14 +1,11 @@
 #include "ilp_solvers.hpp"
+#include "gurobi_c++.h"
+#include "../constants.hpp"
+#include "absl/container/flat_hash_set.h"
 
 #include <ranges>
 #include <cmath>
 
-#include "gurobi_c++.h"
-#include "../constants.hpp"
-
-#include <absl/container/flat_hash_map.h>
-
-#include "absl/container/flat_hash_set.h"
 
 absl::flat_hash_map<std::pair<rflcs_graph::match *, rflcs_graph::match *>, GRBVar> get_gurobi_edges_map(
     GRBModel &model,

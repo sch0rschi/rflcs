@@ -1,5 +1,4 @@
 #include "header/character_bound_utils.hpp"
-
 #include "../temporaries.hpp"
 
 bool are_enough_characters_available(const int lower_bound,

@@ -7,6 +7,10 @@
 #include "input_processing.hpp"
 #include "config.hpp"
 #include "constants.hpp"
+#include "solver/sequence_enumeration_solver.hpp"
+#ifdef ILP_FEATURE
+#include "ilp_solver/ilp_solvers.hpp"
+#endif
 
 #include <iostream>
 #include <fstream>
@@ -16,11 +20,6 @@
 #include <vector>
 #include <iomanip>
 #include <sys/resource.h>
-
-#include "solver/sequence_enumeration_solver.hpp"
-#ifdef ILP_FEATURE
-#include "ilp_solver/ilp_solvers.hpp"
-#endif
 
 
 void initialize_temporaries();

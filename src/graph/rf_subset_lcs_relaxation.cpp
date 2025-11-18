@@ -1,11 +1,10 @@
 #include "../instance.hpp"
 #include "header/rf_subset_lcs_relaxation.hpp"
-
 #include "header/match_metrics.hpp"
 #include "graph.hpp"
 #include "../constants.hpp"
+#include "boost/dynamic_bitset.hpp"
 
-#include <boost/dynamic_bitset.hpp>
 #include <climits>
 #include <cmath>
 #include <algorithm>

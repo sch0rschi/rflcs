@@ -1,9 +1,8 @@
 #include "input_processing.hpp"
 #include "constants.hpp"
+#include "boost/program_options.hpp"
 
 #include <fstream>
-
-#include <boost/program_options.hpp>
 
 PROCESSING_STATUS_CODE process_command_line_arguments(const int argc, char **argv, instance &instance) {
     auto command_line_description = boost::program_options::options_description("Allowed options");

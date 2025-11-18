@@ -5,11 +5,11 @@
 #include "../instance.hpp"
 #include "../graph/graph.hpp"
 #include "../constants.hpp"
+#include "absl/container/flat_hash_set.h"
+#include "absl/container/flat_hash_map.h"
 
 #include <memory>
 #include <vector>
-#include <absl/container/flat_hash_set.h>
-#include <absl/container/flat_hash_map.h>
 
 std::unique_ptr<mdd> create_initial_mdd(const instance &instance, const bool forward) {
     auto mdd = std::make_unique<struct mdd>();

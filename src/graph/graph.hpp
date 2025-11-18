@@ -1,10 +1,9 @@
 #pragma once
 
-#include <climits>
-#include <vector>
-
 #include "../character_set.hpp"
 #include "../character.hpp"
+
+#include <vector>
 
 #define MATCH_BINDINGS(P) \
 P##character, P##upper_bound, P##dom_succ_matches, \

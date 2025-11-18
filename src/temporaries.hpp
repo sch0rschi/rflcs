@@ -1,8 +1,8 @@
 #pragma once
 
-#include <vector>
-
 #include "character_set.hpp"
+
+#include <vector>
 
 struct temporaries {
     static Character_set temp_character_set_1;

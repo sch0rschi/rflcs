@@ -3,12 +3,12 @@
 #include "header/mdd_refinement.hpp"
 #include "header/mdd_filter.hpp"
 #include "../constants.hpp"
-#include <boost/timer/progress_display.hpp>
+#include "edge_utils.hpp"
+#include "boost/timer/progress_display.hpp"
+#include "absl/container/flat_hash_set.h"
+
 #include <ranges>
 #include <algorithm>
-#include <absl/container/flat_hash_set.h>
-
-#include "edge_utils.hpp"
 
 void chaining_numbers(const mdd &mdd);
 
@@ -107,7 +107,7 @@ double calculate_greedy_score(const mdd &mdd,
 }
 
 void chaining_numbers(const mdd &mdd) {
-    absl::flat_hash_map<node*, std::vector<int>> sequences_character_counter;
+    absl::flat_hash_map<node *, std::vector<int> > sequences_character_counter;
     for (const auto node: mdd.levels.back()->nodes) {
         sequences_character_counter[node] = std::vector<int>(constants::alphabet_size);
         std::ranges::fill(sequences_character_counter[node], 0);

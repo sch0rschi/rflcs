@@ -1,11 +1,9 @@
 #pragma once
-
 #include "mdd_node_source.hpp"
 #include "mdd_levels.hpp"
+#include "absl/container/flat_hash_map.h"
 
 #include <memory>
-
-#include "absl/container/flat_hash_map.h"
 
 struct mdd {
     levels_type levels;

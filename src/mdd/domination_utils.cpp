@@ -1,5 +1,6 @@
 #include "header/domination_utils.hpp"
 #include "../temporaries.hpp"
+
 #include <algorithm>
 #include <vector>
 

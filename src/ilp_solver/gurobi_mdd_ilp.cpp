@@ -1,12 +1,11 @@
 #include "ilp_solvers.hpp"
+#include "gurobi_c++.h"
+#include "../constants.hpp"
+#include "absl/container/flat_hash_map.h"
 
 #include <ranges>
 #include <cmath>
 
-#include "gurobi_c++.h"
-#include "../constants.hpp"
-
-#include <absl/container/flat_hash_map.h>
 
 void set_solution_from_ilp(instance &instance, absl::flat_hash_map<node*, GRBVar>& gurobi_variable_map);
 
