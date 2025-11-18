@@ -13,7 +13,6 @@
 #include <ranges>
 
 void make_only_one_best_solution_remaining(
-    const instance &instance,
     mdd_node_source &mdd_node_source,
     const mdd &mdd_reduction);
 
@@ -40,7 +39,7 @@ void add_counts(const mdd &mdd_reduction, std::vector<long> &time_series_node_co
     time_series_edge_count.push_back(edge_count);
 }
 
-void reduce_by_mdd(instance &instance) {
+void reduce_by_mdd(const instance &instance) {
     const auto mdd_node_source = std::make_unique<struct mdd_node_source>();
 
     auto mdd_reduction = mdd::copy_mdd(*instance.mdd, *mdd_node_source);
@@ -108,24 +107,19 @@ void reduce_by_mdd(instance &instance) {
 #endif
 
         if (temporaries::lower_bound >= instance.shared_object->upper_bound) {
-#ifndef MDD_FREQUENT_SAVE_FEATURE
-            filter_flat_mdd(instance, *mdd_reduction, false);
-#endif
-            break;
+            instance.shared_object->is_mdd_reduction_complete = true;
+            return;
         }
     }
     instance.shared_object->is_mdd_reduction_complete = true;
-#ifndef MDD_FREQUENT_SAVE_FEATURE
+    make_only_one_best_solution_remaining(*mdd_node_source, *mdd_reduction);
     filter_flat_mdd(instance, *mdd_reduction, false);
-#endif
-    make_only_one_best_solution_remaining(instance, *mdd_node_source, *mdd_reduction);
-    serialize_initial_mdd(*mdd_reduction, instance.shared_object);
 }
 
 void make_only_one_best_solution_remaining(
-    const instance &instance,
     mdd_node_source &mdd_node_source,
     const mdd &mdd_reduction) {
+    std::cout << "Forcing unique solution in mdd." << std::endl;
     for (auto const &level: mdd_reduction.levels) {
         for (const auto &node: level->nodes) {
             node->is_active = false;
@@ -152,5 +146,4 @@ void make_only_one_best_solution_remaining(
         }
         std::erase_if(level->nodes, [](auto *node) { return !node->is_active; });
     }
-    filter_flat_mdd(instance, mdd_reduction, true);
 }

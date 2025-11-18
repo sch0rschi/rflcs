@@ -117,7 +117,8 @@ void reduction(instance &instance) {
 
 void solve(instance &instance) {
     if (temporaries::lower_bound >= temporaries::upper_bound) {
-        instance.end = std::chrono::system_clock::now();
+        std::cout << "Bounds converged, stopping solver." << std::endl;
+        instance.end = instance.reduction_end;
         instance.active_matches = 0;
         instance.is_valid_solution = true;
         return;
@@ -133,22 +134,19 @@ void solve(instance &instance) {
     }
 
 #ifdef ILP_FEATURE
-    if constexpr (SOLVER == GUROBI_MDD) {
+     else if constexpr (SOLVER == GUROBI_MDD) {
         solve_gurobi_mdd_ilp(instance);
-    }
-
-    if constexpr (SOLVER == GUROBI_MIS) {
+    } else if constexpr (SOLVER == GUROBI_MIS) {
         solve_gurobi_mis_ilp(instance);
-    }
-
-    if constexpr (SOLVER == GUROBI_GRAPH) {
+    } else if constexpr (SOLVER == GUROBI_GRAPH) {
         solve_gurobi_graph_ilp(instance);
-    }
-    if constexpr (SOLVER == GUROBI_MDD_EDGES) {
+    } else if constexpr (SOLVER == GUROBI_MDD_EDGES) {
         solve_gurobi_mdd_edges_ilp(instance);
     }
 #else
-    std::cout << "ILP Solver deactivated." << std::endl;
+    else {
+        std::cout << "ILP Solver deactivated." << std::endl;
+    }
 #endif
 
     if (int status; WIFEXITED(status)) {
