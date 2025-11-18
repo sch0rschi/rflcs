@@ -63,10 +63,13 @@ int main(const int argc, char **argv) {
         reduction(instance);
         instance.reduction_end = std::chrono::system_clock::now();
         instance.reduction_upper_bound = temporaries::upper_bound;
-
-        solve(instance);
-        instance.end = std::chrono::system_clock::now();
+        if (temporaries::lower_bound >= temporaries::upper_bound) {
+            std::cout << "Bounds converged, skipping solver." << std::endl;
+        } else {
+            solve(instance);
+        }
         temporaries::upper_bound = std::max(temporaries::upper_bound, temporaries::lower_bound);
+        instance.end = std::chrono::system_clock::now();
         check_solution(instance);
 
         write_result_file(instance);
@@ -107,6 +110,7 @@ void print_heuristic_stats(const instance &instance) {
 void reduction(instance &instance) {
     if (temporaries::lower_bound >= temporaries::upper_bound) {
         temporaries::upper_bound = temporaries::lower_bound;
+        instance.is_valid_solution = true;
         instance.active_matches = 0;
         return;
     }
@@ -116,14 +120,6 @@ void reduction(instance &instance) {
 }
 
 void solve(instance &instance) {
-    if (temporaries::lower_bound >= temporaries::upper_bound) {
-        std::cout << "Bounds converged, stopping solver." << std::endl;
-        instance.end = instance.reduction_end;
-        instance.active_matches = 0;
-        instance.is_valid_solution = true;
-        return;
-    }
-
     std::cout << "Solver is running." << std::endl;
 
     if (instance.shared_object->is_mdd_reduction_complete) {
