@@ -65,7 +65,7 @@ protected:
     }
 };
 
-void solve_gurobi_mis_ilp(instance &instance) {
+void solve_gurobi_graph_match_mis_ilp(instance &instance) {
     try {
         auto env = GRBEnv(true);
 

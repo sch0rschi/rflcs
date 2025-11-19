@@ -3,9 +3,10 @@
 #include <string_view>
 
 enum Ilp_Solver {
-    GUROBI_MIS,
-    GUROBI_MDD,
-    GUROBI_GRAPH,
+    GUROBI_GRAPH_MATCH_MIS,
+    GUROBI_GRAPH_EDGES,
+    GUROBI_GRAPH_DOMINATING_MATCHES,
+    GUROBI_MDD_NODES,
     GUROBI_MDD_EDGES,
 };
 constexpr Ilp_Solver SOLVER = GUROBI_GRAPH;

@@ -9,7 +9,7 @@
 
 void set_solution_from_ilp(instance &instance, absl::flat_hash_map<node*, GRBVar>& gurobi_variable_map);
 
-void solve_gurobi_mdd_ilp(instance &instance) {
+void solve_gurobi_mdd_nodes_ilp(instance &instance) {
 
     try {
         auto env = GRBEnv(true);

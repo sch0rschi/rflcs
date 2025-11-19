@@ -130,14 +130,16 @@ void solve(instance &instance) {
     }
 
 #ifdef ILP_FEATURE
-     else if constexpr (SOLVER == GUROBI_MDD) {
-        solve_gurobi_mdd_ilp(instance);
-    } else if constexpr (SOLVER == GUROBI_MIS) {
-        solve_gurobi_mis_ilp(instance);
-    } else if constexpr (SOLVER == GUROBI_GRAPH) {
-        solve_gurobi_graph_ilp(instance);
+     else if constexpr (SOLVER == GUROBI_MDD_NODES) {
+        solve_gurobi_mdd_nodes_ilp(instance);
+    } else if constexpr (SOLVER == GUROBI_GRAPH_MATCH_MIS) {
+        solve_gurobi_graph_match_mis_ilp(instance);
+    } else if constexpr (SOLVER == GUROBI_GRAPH_EDGES) {
+        solve_gurobi_graph_edges_ilp(instance);
     } else if constexpr (SOLVER == GUROBI_MDD_EDGES) {
         solve_gurobi_mdd_edges_ilp(instance);
+    } else if constexpr (SOLVER == GUROBI_GRAPH_DOMINATING_MATCHES) {
+        solve_gurobi_graph_dominating_matches_ilp(instance);
     }
 #else
     else {

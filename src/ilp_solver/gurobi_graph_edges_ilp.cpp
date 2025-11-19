@@ -26,7 +26,7 @@ void set_solution_from_edges(instance &instance,
                              const rflcs_graph::match *sink,
                              const rflcs_graph::match *root);
 
-void solve_gurobi_graph_ilp(instance &instance) {
+void solve_gurobi_graph_edges_ilp(instance &instance) {
     try {
         auto env = GRBEnv(true);
 

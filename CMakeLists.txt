@@ -147,10 +147,12 @@ set(SOURCE_FILES
 
 if(ILP_FEATURE)
     list(APPEND SOURCE_FILES
-            src/ilp_solver/gurobi_mis_ilp.cpp
-            src/ilp_solver/gurobi_mdd_ilp.cpp
-            src/ilp_solver/gurobi_graph_ilp.cpp
+            src/ilp_solver/gurobi_graph_match_mis_ilp.cpp
+            src/ilp_solver/gurobi_graph_edges_ilp.cpp
+            src/ilp_solver/gurobi_graph_dominating_matches_ilp.cpp
+            src/ilp_solver/gurobi_mdd_nodes_ilp.cpp
             src/ilp_solver/gurobi_mdd_edges_ilp.cpp
+
     )
 endif()
 
