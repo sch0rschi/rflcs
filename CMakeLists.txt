@@ -2,6 +2,20 @@ cmake_minimum_required(VERSION 3.22.1)
 project(rflcs LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 
+#----------------#
+# Compiler Flags #
+#----------------#
+add_compile_options(
+        -O3
+        -march=native
+        -Wall -Wextra -Wpedantic
+        -Wno-unknown-pragmas
+        -Wno-c99-extensions
+        -Wno-flexible-array-extensions
+        -Wno-gcc-compat
+        -Wno-nullability-extension
+)
+
 #---------------#
 # Build Options #
 #---------------#
@@ -45,20 +59,6 @@ if(ILP_FEATURE)
 endif()
 
 set(ALPHABET_SIZES "" CACHE STRING "List of alphabet sizes to build executables for(e.g. 16;32;64)")
-
-#----------------#
-# Compiler Flags #
-#----------------#
-add_compile_options(
-        -O3
-        -march=native
-        -Wall -Wextra -Wpedantic
-        -Wno-unknown-pragmas
-        -Wno-c99-extensions
-        -Wno-flexible-array-extensions
-        -Wno-gcc-compat
-        -Wno-nullability-extension
-)
 
 #--------------------#
 # External Libraries #
@@ -142,7 +142,8 @@ set(SOURCE_FILES
         src/mdd/mdd_refinement.cpp
         src/solver/sequence_enumeration_solver.cpp
         src/input_processing.cpp
-        src/input_processing.hpp
+        src/mdd_graph_pruning.cpp
+        src/ilp_solver/match_utils.cpp
 )
 
 if(ILP_FEATURE)
@@ -196,7 +197,9 @@ if(ALPHABET_SIZES)
         configure_rflcs_target(${target_name})
     endforeach()
 else()
-    add_executable(rflcs ${SOURCE_FILES})
+    add_executable(rflcs ${SOURCE_FILES}
+            src/ilp_solver/match_utils.cpp
+            src/ilp_solver/match_utils.hpp)
 
     # Attach Gurobi includes to IDE/compiler
     if(ILP_FEATURE AND GUROBI_INCLUDE_DIR)

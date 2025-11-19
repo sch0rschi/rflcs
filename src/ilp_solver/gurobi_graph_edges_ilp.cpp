@@ -1,24 +1,19 @@
 #include "ilp_solvers.hpp"
 #include "gurobi_c++.h"
 #include "../constants.hpp"
+#include "../mdd_graph_pruning.hpp"
 #include "absl/container/flat_hash_set.h"
 
-#include <ranges>
 #include <cmath>
 
+#include "../graph/match_loop_utils.hpp"
 
 absl::flat_hash_map<std::pair<rflcs_graph::match *, rflcs_graph::match *>, GRBVar> get_gurobi_edges_map(
     GRBModel &model,
-    const absl::flat_hash_set<rflcs_graph::match *> &matches,
+    const std::vector<rflcs_graph::match *> &matches,
     rflcs_graph::match *sink);
 
-void remove_duplicates(std::vector<rflcs_graph::match *> &matches);
-
-void remove_dominated(std::vector<rflcs_graph::match *> &matches);
-
-absl::flat_hash_set<rflcs_graph::match *> get_matches(const instance &instance);
-
-void update_graph_by_mdd(const instance &instance, const absl::flat_hash_set<rflcs_graph::match *> &matches);
+std::vector<rflcs_graph::match *> get_active_matches(const instance &instance);
 
 void set_solution_from_edges(instance &instance,
                              const absl::flat_hash_map<std::pair<rflcs_graph::match *, rflcs_graph::match *>, GRBVar> &
@@ -39,22 +34,21 @@ void solve_gurobi_graph_edges_ilp(instance &instance) {
         env.set(GRB_IntParam_ScaleFlag, 3);
 
         auto model = GRBModel(env);
-
-        auto matches = get_matches(instance);
-        auto root = std::ranges::find_if(matches, [=](const rflcs_graph::match *match) {
-            return match->character >= constants::alphabet_size;
-        }).operator*();
-        assert(root != nullptr);
+        update_graph_by_mdd(instance);
+        auto matches = get_active_matches(instance);
+        auto root = matches.front();
+        std::cout << root << std::endl;
         const auto sink = std::make_unique<rflcs_graph::match>();
 
-        update_graph_by_mdd(instance, matches);
         auto gurobi_edges_map = get_gurobi_edges_map(model, matches, sink.get());
 
         auto objective = GRBLinExpr();
         auto character_edge_sums = std::vector<GRBLinExpr>(constants::alphabet_size);
         auto root_edges_sum = GRBLinExpr();
         auto sink_edges_sum = GRBLinExpr();
+
         for (auto const &[from_to, gurobi_variable]: gurobi_edges_map) {
+
             auto from = from_to.first;
             auto to = from_to.second;
             if (to != sink.get()) {
@@ -71,6 +65,7 @@ void solve_gurobi_graph_edges_ilp(instance &instance) {
                 character_edge_sums.at(from->character) += gurobi_variable;
             }
         }
+
         for (auto const &character_edge_sum: character_edge_sums) {
             model.addConstr(character_edge_sum <= 2);
         }
@@ -119,19 +114,9 @@ void solve_gurobi_graph_edges_ilp(instance &instance) {
     }
 }
 
-absl::flat_hash_set<rflcs_graph::match *> get_matches(const instance &instance) {
-    auto matches = absl::flat_hash_set<rflcs_graph::match *>();
-    for (const auto &level: instance.mdd->levels) {
-        for (const auto node: level->nodes) {
-            matches.insert(static_cast<rflcs_graph::match *>(node->associated_match));
-        }
-    }
-    return matches;
-}
-
 absl::flat_hash_map<std::pair<rflcs_graph::match *, rflcs_graph::match *>, GRBVar> get_gurobi_edges_map(
     GRBModel &model,
-    const absl::flat_hash_set<rflcs_graph::match *> &matches,
+    const std::vector<rflcs_graph::match *> &matches,
     rflcs_graph::match *sink) {
     auto gurobi_edges_map = absl::flat_hash_map<std::pair<rflcs_graph::match *, rflcs_graph::match *>, GRBVar>();
     for (auto match: matches) {
@@ -143,60 +128,6 @@ absl::flat_hash_map<std::pair<rflcs_graph::match *, rflcs_graph::match *>, GRBVa
         }
     }
     return gurobi_edges_map;
-}
-
-void update_graph_by_mdd(const instance &instance, const absl::flat_hash_set<rflcs_graph::match *> &matches) {
-    for (const auto &match: matches) {
-        match->dom_succ_matches.clear();
-        match->extension->succ_matches.clear();
-    }
-
-    for (const auto &level: instance.mdd->levels) {
-        for (const auto &node: level->nodes) {
-            const auto match = static_cast<rflcs_graph::match *>(node->associated_match);
-            for (const auto succ_node: node->edges_out) {
-                auto *succ_match = static_cast<rflcs_graph::match *>(succ_node->associated_match);
-                match->dom_succ_matches.push_back(succ_match);
-                match->extension->succ_matches.push_back(succ_match);
-            }
-        }
-    }
-
-    for (auto &match: matches) {
-        remove_duplicates(match->dom_succ_matches);
-        remove_dominated(match->dom_succ_matches);
-        remove_duplicates(match->extension->succ_matches);
-    }
-
-    for (auto &match: matches) {
-        for (const auto dom_succ_match: match->dom_succ_matches) {
-            dom_succ_match->extension->dom_pred_matches.push_back(match);
-        }
-        for (const auto succ_match: match->extension->succ_matches) {
-            succ_match->extension->pred_matches.push_back(match);
-        }
-    }
-}
-
-void remove_duplicates(std::vector<rflcs_graph::match *> &matches) {
-    std::ranges::sort(matches);
-    const auto [first, last] = std::ranges::unique(matches);
-    matches.erase(first, last);
-}
-
-void remove_dominated(std::vector<rflcs_graph::match *> &matches) {
-    std::ranges::sort(matches, [](const rflcs_graph::match *m1, const rflcs_graph::match *m2) {
-        return m1->extension->position_1 < m2->extension->position_1;
-    });
-    const auto matches_copy = matches;
-    matches.clear();
-    int max_position_2 = std::numeric_limits<int>::max();
-    for (auto match: matches_copy) {
-        if (match->extension->position_2 < max_position_2) {
-            matches.push_back(match);
-            max_position_2 = match->extension->position_2;
-        }
-    }
 }
 
 void set_solution_from_edges(instance &instance,
