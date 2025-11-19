@@ -72,10 +72,17 @@ void solve_gurobi_graph_match_mis_ilp(instance &instance) {
         env.set(GRB_DoubleParam_TimeLimit, constants::solver_timeout);
         env.set(GRB_IntParam_LogToConsole, 1);
         env.set(GRB_IntParam_Threads, 1);
-        env.set(GRB_IntParam_MIPFocus, GRB_MIPFOCUS_BESTBOUND); // focus on upper bound
-        env.set(GRB_IntParam_Presolve, GRB_PRESOLVE_AGGRESSIVE); // Aggressive presolve
-        env.set(GRB_IntParam_ScaleFlag, 3);
         env.set(GRB_IntParam_LazyConstraints, 1);
+        env.set(GRB_DoubleParam_Heuristics, 0);
+        env.set(GRB_IntParam_MIPFocus, GRB_MIPFOCUS_BESTBOUND); // focus on upper bound
+        env.set(GRB_IntParam_OBBT, 3); // max
+        env.set(GRB_IntParam_Cuts, 2);
+        env.set(GRB_IntParam_DegenMoves, 0);
+        env.set(GRB_IntParam_CutPasses, 5);
+        env.set(GRB_IntParam_NormAdjust, 3);
+        env.set(GRB_IntParam_GomoryPasses, 0);
+        env.set(GRB_IntParam_FlowCoverCuts, 1);
+        env.set(GRB_IntParam_Presolve, GRB_PRESOLVE_AGGRESSIVE); // Aggressive presolve
 
         auto model = GRBModel(env);
         update_graph_by_mdd(instance);
@@ -93,6 +100,7 @@ void solve_gurobi_graph_match_mis_ilp(instance &instance) {
         set_objective_function(model, active_matches, gurobi_variable_map);
         set_common_sub_sequence_constraint(model, active_matches, gurobi_variable_map);
         set_repetition_free_constraint(model, active_matches, gurobi_variable_map);
+
         model.optimize();
 
         const auto result_status = model.get(GRB_IntAttr_Status);
