@@ -30,8 +30,13 @@ void solve_gurobi_graph_edges_ilp(instance &instance) {
         env.set(GRB_IntParam_LogToConsole, 1);
         env.set(GRB_IntParam_Threads, 1);
         env.set(GRB_IntParam_MIPFocus, GRB_MIPFOCUS_BESTBOUND); // focus on upper bound
+        env.set(GRB_IntParam_Method, GRB_METHOD_BARRIER);
+        env.set(GRB_IntParam_Cuts, 0); // disable
+        env.set(GRB_DoubleParam_Heuristics, 0);
+        env.set(GRB_IntParam_OBBT, 3); // max
+        env.set(GRB_IntParam_DegenMoves, 8);
+        env.set(GRB_IntParam_Disconnected, 0);
         env.set(GRB_IntParam_Presolve, GRB_PRESOLVE_AGGRESSIVE); // Aggressive presolve
-        env.set(GRB_IntParam_ScaleFlag, 3);
 
         auto model = GRBModel(env);
         update_graph_by_mdd(instance);
