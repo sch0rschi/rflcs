@@ -1,6 +1,7 @@
 #include "ilp_solvers.hpp"
 #include "match_utils.hpp"
 #include "../mdd_graph_pruning.hpp"
+#include "../constants.hpp"
 
 #include <gurobi_c++.h>
 
@@ -12,7 +13,10 @@ void solve_gurobi_graph_dominating_matches_ilp(instance &instance) {
         env.set(GRB_DoubleParam_TimeLimit, constants::solver_timeout);
         env.set(GRB_IntParam_LogToConsole, 1);
         env.set(GRB_IntParam_Threads, 1);
-        env.set(GRB_IntParam_MIPFocus, GRB_MIPFOCUS_BESTBOUND); // focus on upper bound
+        env.set(GRB_IntParam_MIPFocus, GRB_MIPFOCUS_OPTIMALITY); // focus on upper bound
+        env.set(GRB_IntParam_Cuts, 2);
+        env.set(GRB_IntParam_OBBT, 3);
+        env.set(GRB_DoubleParam_Heuristics, 0);
         env.set(GRB_IntParam_Presolve, GRB_PRESOLVE_AGGRESSIVE); // Aggressive presolve
 
         auto model = GRBModel(env);
