@@ -37,12 +37,20 @@ void solve_gurobi_mdd_edges_ilp(instance &instance) {
         auto env = GRBEnv(true);
 
         env.start();
+        env.set(GRB_DoubleParam_TuneTimeLimit, 99999);
+
         env.set(GRB_DoubleParam_TimeLimit, constants::solver_timeout);
         env.set(GRB_IntParam_LogToConsole, 1);
         env.set(GRB_IntParam_Threads, 1);
         env.set(GRB_IntParam_MIPFocus, GRB_MIPFOCUS_BESTBOUND); // focus on upper bound
-        env.set(GRB_IntParam_Presolve, GRB_PRESOLVE_AUTO); // Aggressive presolve
-        env.set(GRB_IntParam_ScaleFlag, 3);
+        env.set(GRB_IntParam_OBBT, 3);
+        env.set(GRB_DoubleParam_Heuristics, 0);
+        //env.set(GRB_IntParam_Presolve, GRB_PRESOLVE_AGGRESSIVE);
+        //env.set(GRB_IntParam_Cuts, 2);
+        //env.set(GRB_IntParam_CutPasses, 1);
+        //env.set(GRB_IntParam_PrePasses, 2);
+        //env.set(GRB_IntParam_GomoryPasses, 0);
+        //env.set(GRB_IntParam_Method, 2);
 
         auto model = GRBModel(env);
 
@@ -63,6 +71,7 @@ void solve_gurobi_mdd_edges_ilp(instance &instance) {
         model.setObjective(objective, GRB_MAXIMIZE);
         model.addConstr(objective, GRB_GREATER_EQUAL, temporaries::lower_bound + 1);
 
+        //model.tune();
         model.optimize();
 
         const auto result_status = model.get(GRB_IntAttr_Status);
