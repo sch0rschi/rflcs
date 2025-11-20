@@ -20,7 +20,14 @@ void solve_gurobi_mdd_nodes_ilp(instance &instance) {
         env.set(GRB_IntParam_Threads, 1);
         env.set(GRB_IntParam_MIPFocus, GRB_MIPFOCUS_BESTBOUND); // focus on upper bound
         env.set(GRB_IntParam_Presolve, GRB_PRESOLVE_AGGRESSIVE); // Aggressive presolve
-        env.set(GRB_IntParam_ScaleFlag, 3);
+        env.set(GRB_IntParam_OBBT, 3);
+        env.set(GRB_DoubleParam_Heuristics, 0);
+        env.set(GRB_IntParam_Aggregate, 0);
+        env.set(GRB_IntParam_GomoryPasses, 0);
+        env.set(GRB_IntParam_DegenMoves, 7);
+        env.set(GRB_IntParam_Cuts, 0);
+        env.set(GRB_IntParam_Method, 2);
+        env.set(GRB_IntParam_PrePasses, 3);
 
         auto model = GRBModel(env);
 
@@ -60,6 +67,7 @@ void solve_gurobi_mdd_nodes_ilp(instance &instance) {
         }
         model.addConstr(objective, GRB_GREATER_EQUAL, temporaries::lower_bound + 1);
         model.setObjective(objective, GRB_MAXIMIZE);
+
         model.optimize();
 
         const auto result_status = model.get(GRB_IntAttr_Status);
