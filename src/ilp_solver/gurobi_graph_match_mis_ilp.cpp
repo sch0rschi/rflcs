@@ -29,41 +29,6 @@ void set_common_sub_sequence_constraint(GRBModel &model,
                                         const std::vector<rflcs_graph::match *> &matches,
                                         const absl::flat_hash_map<rflcs_graph::match *, GRBVar> &gurobi_variable_map);
 
-class SubsequenceLazyCallback final : public GRBCallback {
-    const absl::flat_hash_map<rflcs_graph::match *, GRBVar> &gurobi_variable_map;
-
-public:
-    SubsequenceLazyCallback(
-        const absl::flat_hash_map<rflcs_graph::match *, GRBVar> &gurobi_variable_map) : gurobi_variable_map(gurobi_variable_map) {
-    }
-
-protected:
-    void callback() override {
-        try {
-            if (where == GRB_CB_MIPSOL) {
-                auto solution_matches = std::vector<rflcs_graph::match *>();
-                for (auto &[match, variable]: gurobi_variable_map) {
-                    if ( getSolution(variable) > 0.5) {
-                        solution_matches.emplace_back(match);
-                    }
-                }
-
-                for (auto solution_match_1: solution_matches) {
-                    for (auto solution_match_2: solution_matches) {
-                        if (solution_match_1->extension->position_1 < solution_match_2->extension->position_1 &&
-                            solution_match_1->extension->position_2 > solution_match_2->extension->position_2) {
-                            GRBLinExpr expr = gurobi_variable_map.at(solution_match_1) + gurobi_variable_map.at(solution_match_2);
-                            addLazy(expr <= 1.0);
-                        }
-                    }
-                }
-            }
-        } catch (GRBException &e) {
-            std::cerr << "Lazy callback error: " << e.getMessage() << std::endl;
-        }
-    }
-};
-
 void solve_gurobi_graph_match_mis_ilp(instance &instance) {
     try {
         auto env = GRBEnv(true);
@@ -72,7 +37,6 @@ void solve_gurobi_graph_match_mis_ilp(instance &instance) {
         env.set(GRB_DoubleParam_TimeLimit, constants::solver_timeout);
         env.set(GRB_IntParam_LogToConsole, 1);
         env.set(GRB_IntParam_Threads, 1);
-        env.set(GRB_IntParam_LazyConstraints, 1);
         env.set(GRB_DoubleParam_Heuristics, 0);
         env.set(GRB_IntParam_MIPFocus, GRB_MIPFOCUS_BESTBOUND); // focus on upper bound
         env.set(GRB_IntParam_OBBT, 3); // max
@@ -91,8 +55,6 @@ void solve_gurobi_graph_match_mis_ilp(instance &instance) {
 
         auto gurobi_variable_map = absl::flat_hash_map<rflcs_graph::match *, GRBVar>();
 
-        SubsequenceLazyCallback cb(gurobi_variable_map);
-        model.setCallback(&cb);
         for (const auto match: active_matches) {
             gurobi_variable_map[match] = model.addVar(0.0, 1.0, 0.0, GRB_BINARY);
         }
@@ -125,17 +87,24 @@ void set_common_sub_sequence_constraint(
     const std::vector<rflcs_graph::match *> &matches,
     const absl::flat_hash_map<rflcs_graph::match *, GRBVar> &gurobi_variable_map) {
     for (const auto match1: matches) {
+        auto distant_crossing_matches = GRBLinExpr();
         for (const auto match2: matches) {
-            if (std::abs(match1->upper_bound - match2->upper_bound) < temporaries::upper_bound - temporaries::lower_bound
-                && std::abs(match1->reversed->upper_bound - match2->reversed->upper_bound) < temporaries::upper_bound - temporaries::lower_bound
-                && match1->extension->position_1 < match2->extension->position_1
+            if (match1->extension->position_1 < match2->extension->position_1
                 && match1->extension->position_2 > match2->extension->position_2) {
-                auto conflict = GRBLinExpr();
-                conflict += gurobi_variable_map.at(match1);
-                conflict += gurobi_variable_map.at(match2);
-                model.addConstr(conflict, GRB_LESS_EQUAL, 1.0);
+                if (std::abs(match1->upper_bound - match2->upper_bound) < temporaries::upper_bound - temporaries::lower_bound
+                    && std::abs(match1->reversed->upper_bound - match2->reversed->upper_bound) <
+                    temporaries::upper_bound - temporaries::lower_bound) {
+                    auto conflict = GRBLinExpr();
+                    conflict += gurobi_variable_map.at(match1);
+                    conflict += gurobi_variable_map.at(match2);
+                    model.addConstr(conflict, GRB_LESS_EQUAL, 1.0);
+                } else {
+                    distant_crossing_matches += gurobi_variable_map.at(match2);
+                }
             }
         }
+        model.addGenConstrIndicator(gurobi_variable_map.at(match1), 1,
+            distant_crossing_matches, GRB_EQUAL, 0);
     }
 }
 
@@ -176,8 +145,8 @@ get_character_matches_map(const std::vector<rflcs_graph::match *> &matches) {
 }
 
 void set_solution_from_matches(instance &instance,
-                             const std::vector<rflcs_graph::match *> &matches,
-                             const absl::flat_hash_map<rflcs_graph::match *, GRBVar> &gurobi_variable_map) {
+                               const std::vector<rflcs_graph::match *> &matches,
+                               const absl::flat_hash_map<rflcs_graph::match *, GRBVar> &gurobi_variable_map) {
     auto matches_in_solution = std::vector<rflcs_graph::match *>();
     std::ranges::copy_if(matches, std::back_inserter(matches_in_solution),
                          [&gurobi_variable_map](const rflcs_graph::match *match) {
