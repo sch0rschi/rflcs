@@ -58,18 +58,26 @@ void reduce_by_mdd(const instance &instance) {
     std::cout << "First character selection started." << std::endl;
     auto characters_ordered_by_importance = std::vector<Character>(constants::alphabet_size);
     std::iota(characters_ordered_by_importance.begin(), characters_ordered_by_importance.end(), 0);
-    boost::timer::progress_display progress(constants::alphabet_size);
-    update_characters_ordered_by_importance_mdd(characters_ordered_by_importance,
-                                                instance,
-                                                *refining_mdd,
-                                                *mdd_node_source,
-                                                &progress);
 
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
-    if (instance.shared_object->refinement_round > 3 && instance.shared_object->refinement_round % 2 == 0) {
+    if (instance.shared_object->refinement_round <= 3) {
+        boost::timer::progress_display progress(constants::alphabet_size);
+        update_characters_ordered_by_importance_mdd(characters_ordered_by_importance,
+                                                    instance,
+                                                    *refining_mdd,
+                                                    *mdd_node_source,
+                                                    &progress);
+    } else if (instance.shared_object->refinement_round % 3 == 1) {
         std::cout << "Applying Shuffle strategy." << std::endl;
+        static std::random_device rd;
+        static std::mt19937 gen(rd());
         std::ranges::shuffle(characters_ordered_by_importance, gen);
+    } else if (instance.shared_object->refinement_round % 3 == 2) {
+        std::cout << "Applying Long chain strategy." << std::endl;
+        std::ranges::sort(
+            characters_ordered_by_importance,
+            std::greater{},
+            [](const Character c) { return temporaries::chaining_numbers[c]; }
+        );
     }
 
     std::cout << "First character selection done." << std::endl;
