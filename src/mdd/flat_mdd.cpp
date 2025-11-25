@@ -4,7 +4,7 @@
 
 #include <map>
 
-size_t calculate_flat_array_size(const mdd& data) {
+size_t calculate_shared_object_size(const mdd& data) {
     size_t size = 0;
     size += sizeof(shared_object);
     for (const auto& level : data.levels) {

@@ -26,7 +26,8 @@ bool is_perfect_square(const int n) {
     return sqrt_n * sqrt_n == n;
 }
 
-void add_counts(const mdd &mdd_reduction, std::vector<long> &time_series_node_count, std::vector<long> &time_series_edge_count) {
+void add_counts(const mdd &mdd_reduction, std::vector<long> &time_series_node_count,
+                std::vector<long> &time_series_edge_count) {
     auto node_count = 0L;
     auto edge_count = 0L;
     for (const auto &level: mdd_reduction.levels) {
@@ -42,10 +43,10 @@ void add_counts(const mdd &mdd_reduction, std::vector<long> &time_series_node_co
 void reduce_by_mdd(const instance &instance) {
     const auto mdd_node_source = std::make_unique<struct mdd_node_source>();
 
-    auto mdd_reduction = mdd::copy_mdd(*instance.mdd, *mdd_node_source);
-    prune_by_flat_mdd(instance.shared_object, *mdd_reduction, *mdd_node_source);
-    filter_mdd(instance, *mdd_reduction, *mdd_node_source);
-    auto mdd_character_selection = mdd::copy_mdd(*mdd_reduction, *mdd_node_source);
+    auto refining_mdd = mdd::copy_mdd(*instance.mdd, *mdd_node_source);
+    prune_by_flat_mdd(instance.shared_object, *refining_mdd, *mdd_node_source);
+    filter_mdd(instance, *refining_mdd, *mdd_node_source);
+    auto compact_mdd = mdd::copy_mdd(*refining_mdd, *mdd_node_source);
 
     if (temporaries::lower_bound >= temporaries::upper_bound) {
         instance.shared_object->is_mdd_reduction_complete = true;
@@ -60,7 +61,7 @@ void reduce_by_mdd(const instance &instance) {
     boost::timer::progress_display progress(constants::alphabet_size);
     update_characters_ordered_by_importance_mdd(characters_ordered_by_importance,
                                                 instance,
-                                                *mdd_reduction,
+                                                *refining_mdd,
                                                 *mdd_node_source,
                                                 &progress);
     std::cout << "First character selection done." << std::endl;
@@ -72,38 +73,39 @@ void reduce_by_mdd(const instance &instance) {
     for (int refinement_character_index: std::views::iota(0, constants::alphabet_size)) {
         if (is_power_of_2(refinement_character_index)) {
 #ifndef MDD_FREQUENT_SAVE_FEATURE
-            filter_flat_mdd(instance, *mdd_reduction, true);
+            filter_flat_mdd(instance, *refining_mdd, true);
 #endif
             auto range = characters_ordered_by_importance
-            | std::views::drop(refinement_character_index)
-            | std::views::take(2 * refinement_character_index);
+                         | std::views::drop(refinement_character_index)
+                         | std::views::take(2 * refinement_character_index);
             auto sub_characters = std::vector(range.begin(), range.end());
 
-            prune_by_flat_mdd(instance.shared_object, *mdd_character_selection, *mdd_node_source);
+            prune_by_flat_mdd(instance.shared_object, *compact_mdd, *mdd_node_source);
+            serialize_initial_mdd(*compact_mdd, instance.shared_object);
             update_characters_ordered_by_importance_mdd(sub_characters,
                                                         instance,
-                                                        *mdd_character_selection,
+                                                        *compact_mdd,
                                                         *mdd_node_source,
                                                         nullptr);
-            std::ranges::copy(sub_characters,characters_ordered_by_importance.begin() + refinement_character_index);
+            std::ranges::copy(sub_characters, characters_ordered_by_importance.begin() + refinement_character_index);
         }
 
         auto split_character = characters_ordered_by_importance[refinement_character_index];
-        refine_mdd(*mdd_reduction, split_character, *mdd_node_source);
-        filter_mdd(instance, *mdd_reduction, *mdd_node_source);
+        refine_mdd(*refining_mdd, split_character, *mdd_node_source);
+        filter_mdd(instance, *refining_mdd, *mdd_node_source);
         instance.shared_object->number_of_refined_characters++;
         instance.shared_object->upper_bound =
-                std::min(instance.shared_object->upper_bound, mdd_reduction->levels.back()->depth);
+                std::min(instance.shared_object->upper_bound, refining_mdd->levels.back()->depth);
         instance.shared_object->upper_bound =
                 std::max(instance.shared_object->upper_bound, temporaries::lower_bound);
-        if (!mdd_reduction->levels.empty()) {
+        if (!refining_mdd->levels.empty()) {
             instance.shared_object->upper_bound =
                     std::max(instance.shared_object->upper_bound,
-                             mdd_reduction->levels.back()->nodes.front()->upper_bound_down);
+                             refining_mdd->levels.back()->nodes.front()->upper_bound_down);
         }
 
 #ifdef MDD_FREQUENT_SAVE_FEATURE
-        filter_flat_mdd(instance, *mdd_reduction, true);
+        filter_flat_mdd(instance, *refining_mdd, true);
 #endif
 
         if (temporaries::lower_bound >= instance.shared_object->upper_bound) {
@@ -112,8 +114,8 @@ void reduce_by_mdd(const instance &instance) {
         }
     }
     instance.shared_object->is_mdd_reduction_complete = true;
-    make_only_one_best_solution_remaining(*mdd_node_source, *mdd_reduction);
-    filter_flat_mdd(instance, *mdd_reduction, false);
+    make_only_one_best_solution_remaining(*mdd_node_source, *refining_mdd);
+    filter_flat_mdd(instance, *refining_mdd, false);
 }
 
 void make_only_one_best_solution_remaining(

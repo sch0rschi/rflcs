@@ -13,6 +13,6 @@ constexpr Ilp_Solver SOLVER = GUROBI_GRAPH_EDGES;
 
 constexpr int HEURISTIC_SOLUTION_DECREMENTER = 0;
 
-constexpr int REDUCTION_TIMEOUT = 1800;
+constexpr int REDUCTION_TIMEOUT = 7200;
 constexpr int SOLVER_TIMEOUT = 1800;
-constexpr std::string_view DEFAULT_INPUT_FILE = "RFLCS_instances/type1/128_8reps.24";
+constexpr std::string_view DEFAULT_INPUT_FILE = "../RFLCS_instances/generated_instances/640_80.2";

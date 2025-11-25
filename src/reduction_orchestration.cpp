@@ -99,10 +99,10 @@ void reduce_graph_pre_solver_by_mdd(instance &instance) {
             << std::boolalpha << instance.is_solving_forward << "." << std::endl;
     instance.mdd = instance.is_solving_forward ? std::move(forward_mdd) : std::move(backward_mdd);
 
-    const auto flat_mdd_size = calculate_flat_array_size(*instance.mdd);
+    const auto shared_object_size = calculate_shared_object_size(*instance.mdd);
 
     instance.shared_object = static_cast<shared_object *>(mmap(
-        nullptr, flat_mdd_size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0));
+        nullptr, shared_object_size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0));
 
     instance.shared_object->is_mdd_reduction_complete = false;
     instance.shared_object->upper_bound = temporaries::upper_bound;

@@ -5,7 +5,7 @@
 struct instance;
 struct shared_object;
 
-size_t calculate_flat_array_size(const mdd& data);
+size_t calculate_shared_object_size(const mdd& data);
 
 void serialize_initial_mdd(const mdd& mdd, shared_object* shared_object);
 
