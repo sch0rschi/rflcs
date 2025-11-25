@@ -64,6 +64,14 @@ void reduce_by_mdd(const instance &instance) {
                                                 *refining_mdd,
                                                 *mdd_node_source,
                                                 &progress);
+
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    if (instance.shared_object->refinement_round > 3 && instance.shared_object->refinement_round % 2 == 0) {
+        std::cout << "Applying Shuffle strategy." << std::endl;
+        std::ranges::shuffle(characters_ordered_by_importance, gen);
+    }
+
     std::cout << "First character selection done." << std::endl;
     std::ranges::for_each(std::ranges::take_view(characters_ordered_by_importance, 20),
                           [](const int num) { std::cout << num << ", "; });
